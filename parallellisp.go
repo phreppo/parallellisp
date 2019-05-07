@@ -10,19 +10,17 @@ import (
 
 func main() {
 	m := NewMemory()
+	ans := make(chan Cell)
 
-	m.MakeIntChan <- 3
-	i := <-m.TakeIntChan
+	i := MakeInt(3, m, ans)
 	fmt.Println(i)
 
-	m.MakeConsChan <- CellPair{i, i}
-	c := <-m.TakeConsChan
+	c := MakeCons(i, i, m, ans)
 	fmt.Println(c)
 
 	for i := 0; i < 10; i++ {
-		go makAndPrintCell(i, m)
+		go makeAndPrintCell(i, m)
 	}
-
 	time.Sleep(time.Duration(10) * time.Second)
 
 	// switch c := intcell.(type) {
@@ -31,12 +29,16 @@ func main() {
 	// }
 }
 
-func makAndPrintCell(i int, m *Memory) {
-	m.MakeIntChan <- i
+func makeAndPrintCell(i int, m *Memory) {
+	ans := make(chan Cell)
+
+	m.MakeInt <- IntRequest{i, ans}
+
 	r := rand.Intn(1000)
 	time.Sleep(time.Duration(r) * time.Millisecond)
-	intcell := <-m.TakeIntChan
+	intCell := <-ans
+
 	fmt.Print(i)
 	fmt.Print(" > ")
-	fmt.Println(intcell)
+	fmt.Println(intCell)
 }

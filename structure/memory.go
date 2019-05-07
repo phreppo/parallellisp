@@ -1,41 +1,55 @@
 package structure
 
-type CellPair struct {
-	Left  Cell
-	Right Cell
+type IntRequest struct {
+	Val        int
+	AnswerChan chan<- Cell
+}
+
+type ConsRequest struct {
+	Car        Cell
+	Cdr        Cell
+	AnswerChan chan<- Cell
 }
 
 type Memory struct {
-	MakeIntChan chan int
-	TakeIntChan chan Cell
-
-	MakeConsChan chan CellPair
-	TakeConsChan chan Cell
+	MakeInt  chan IntRequest
+	MakeCons chan ConsRequest
 }
 
 func NewMemory() *Memory {
 	m := Memory{
-		make(chan int),
-		make(chan Cell),
-		make(chan CellPair),
-		make(chan Cell),
+		make(chan IntRequest),
+		make(chan ConsRequest),
 	}
 
 	go func() {
 		for {
 			select {
-			case x := <-m.MakeIntChan:
+			case request := <-m.MakeInt:
 				newInt := new(IntCell)
-				newInt.Val = x
-				m.TakeIntChan <- newInt
-			case pair := <-m.MakeConsChan:
+				newInt.Val = request.Val
+				request.AnswerChan <- newInt
+
+			case request := <-m.MakeCons:
 				newCons := new(ConsCell)
-				newCons.Car = pair.Left
-				newCons.Cdr = pair.Right
-				m.TakeConsChan <- newCons
+				newCons.Car = request.Car
+				newCons.Cdr = request.Cdr
+				request.AnswerChan <- newCons
 			}
 		}
 	}()
 
 	return &m
+}
+
+func MakeInt(i int, m *Memory, ans chan Cell) Cell {
+	m.MakeInt <- IntRequest{i, ans}
+	intCell := <-ans
+	return intCell
+}
+
+func MakeCons(car Cell, cdr Cell, m *Memory, ans chan Cell) Cell {
+	m.MakeCons <- ConsRequest{car, cdr, ans}
+	consCell := <-ans
+	return consCell
 }

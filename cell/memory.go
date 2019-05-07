@@ -57,6 +57,9 @@ type Memory struct {
 
 	MakeCons    chan ConsRequest
 	consFactory *consCellSupplier
+
+	BuiltinLambdas [3]BuiltinLambdaCell
+	BuiltinMacros  [3]BuiltinMacroCell
 }
 
 func NewMemory() *Memory {
@@ -194,14 +197,22 @@ func newSymbolCellSupplier() *symbolCellSupplier {
 	go func() {
 		for {
 			request := <-supplier.makeSymbol
-			if supplier.tapePointer >= symbolTapeSize {
-				supplier.tape = new([symbolTapeSize]SymbolCell)
-				supplier.tapePointer = 0
+			if builtinLambdaCell, ok := BuiltinLambdas[request.Sym]; ok {
+				request.AnswerChan <- &builtinLambdaCell
+			} else if builtinMacroCell, ok := BuiltinMacros[request.Sym]; ok {
+				request.AnswerChan <- &builtinMacroCell
+			} else if request.Sym == "t" {
+				request.AnswerChan <- &TrueSymbol
+			} else {
+				if supplier.tapePointer >= symbolTapeSize {
+					supplier.tape = new([symbolTapeSize]SymbolCell)
+					supplier.tapePointer = 0
+				}
+				newSymbol := &(supplier.tape[supplier.tapePointer])
+				newSymbol.Sym = request.Sym
+				supplier.tapePointer++
+				request.AnswerChan <- newSymbol
 			}
-			newSymbol := &(supplier.tape[supplier.tapePointer])
-			newSymbol.Sym = request.Sym
-			supplier.tapePointer++
-			request.AnswerChan <- newSymbol
 		}
 	}()
 

@@ -58,6 +58,40 @@ func (s SymbolCell) String() string {
 }
 
 /*******************************************************************************
+ Builtin lambda cell
+*******************************************************************************/
+
+type BuiltinLambdaCell struct {
+	Sym    string
+	Lambda func()
+}
+
+func (l BuiltinLambdaCell) IsAtom() bool {
+	return true
+}
+
+func (l BuiltinLambdaCell) String() string {
+	return l.Sym
+}
+
+/*******************************************************************************
+ Builtin macro cell
+*******************************************************************************/
+
+type BuiltinMacroCell struct {
+	Sym   string
+	Macro func()
+}
+
+func (l BuiltinMacroCell) IsAtom() bool {
+	return true
+}
+
+func (l BuiltinMacroCell) String() string {
+	return l.Sym
+}
+
+/*******************************************************************************
  Cons cell
 *******************************************************************************/
 

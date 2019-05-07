@@ -12,8 +12,15 @@ func main() {
 	m := NewMemory()
 	ans := make(chan Cell)
 
-	i := MakeInt(3, m, ans)
-	fmt.Println(i)
+	i1 := MakeInt(3, m, ans)
+	fmt.Println(i1)
+
+	i2 := MakeInt(3, m, ans)
+	fmt.Println(i2)
+
+	if i1 == i2 {
+		fmt.Println("uguali numeri")
+	}
 
 	s := MakeString("ciao", m, ans)
 	fmt.Println(s)
@@ -21,13 +28,28 @@ func main() {
 	sym := MakeSymbol("car", m, ans)
 	fmt.Println(sym)
 
-	c := MakeCons(i, i, m, ans)
-	fmt.Println(c)
+	sym1 := MakeSymbol("t", m, ans)
+	fmt.Println(sym1)
 
-	for i := 0; i < 10; i++ {
-		go makeAndPrintCell(i, m)
+	if sym == sym1 {
+		fmt.Println("we")
 	}
-	time.Sleep(time.Duration(10) * time.Second)
+
+	// switch address := i.(type) {
+	// case *IntCell:
+	// 	fmt.Println(address)
+	// default:
+	// 	fmt.Println("boh")
+
+	// }
+
+	// c := MakeCons(i, i, m, ans)
+	// fmt.Println(c)
+
+	// for i := 0; i < 10; i++ {
+	// 	go makeAndPrintCell(i, m)
+	// }
+	// time.Sleep(time.Duration(10) * time.Second)
 
 	// switch c := intcell.(type) {
 	// case *IntCell:

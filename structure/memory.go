@@ -26,22 +26,17 @@ type ConsRequest struct {
 type Memory struct {
 	MakeInt    chan IntRequest
 	intFactory *intCellSupplier
-	MakeCons   chan ConsRequest
 
-	intTape        [100]IntCell
-	intTapePointer int
-
-	consTape        [100]ConsCell
-	consTapePointer int
+	MakeCons    chan ConsRequest
+	consFactory *consCellSupplier
 }
 
 func NewMemory() *Memory {
 	m := Memory{
-		MakeInt:         make(chan IntRequest),
-		intFactory:      newIntCellSupplier(),
-		MakeCons:        make(chan ConsRequest),
-		intTapePointer:  1,
-		consTapePointer: 1,
+		MakeInt:     make(chan IntRequest),
+		intFactory:  newIntCellSupplier(),
+		MakeCons:    make(chan ConsRequest),
+		consFactory: newConsCellSupplier(),
 	}
 
 	go func() {
@@ -64,11 +59,7 @@ func (m *Memory) supplyInt(request IntRequest) {
 }
 
 func (m *Memory) supplyCons(request ConsRequest) {
-	newCons := &(m.consTape[m.consTapePointer])
-	newCons.Car = request.Car
-	newCons.Cdr = request.Cdr
-	m.consTapePointer++
-	request.AnswerChan <- newCons
+	m.consFactory.makeCons <- request
 }
 
 const intTapeSize = 100
@@ -97,6 +88,39 @@ func newIntCellSupplier() *intCellSupplier {
 			newInt.Val = request.Val
 			supplier.tapePointer++
 			request.AnswerChan <- newInt
+		}
+	}()
+
+	return &supplier
+}
+
+const consTapeSize = 100
+
+type consCellSupplier struct {
+	makeCons    chan ConsRequest
+	tape        *[consTapeSize]ConsCell
+	tapePointer int
+}
+
+func newConsCellSupplier() *consCellSupplier {
+	supplier := consCellSupplier{
+		makeCons:    make(chan ConsRequest),
+		tape:        new([consTapeSize]ConsCell),
+		tapePointer: 0,
+	}
+
+	go func() {
+		for {
+			request := <-supplier.makeCons
+			if supplier.tapePointer >= consTapeSize {
+				supplier.tape = new([consTapeSize]ConsCell)
+				supplier.tapePointer = 0
+			}
+			newCons := &(supplier.tape[supplier.tapePointer])
+			newCons.Car = request.Car
+			newCons.Cdr = request.Cdr
+			supplier.tapePointer++
+			request.AnswerChan <- newCons
 		}
 	}()
 

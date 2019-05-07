@@ -7,6 +7,7 @@ import (
 
 type Cell interface {
 	IsAtom() bool
+	IsBuiltinLambda() (func(), bool)
 }
 
 /*******************************************************************************
@@ -25,6 +26,10 @@ func (i IntCell) String() string {
 	return strconv.Itoa(i.Val)
 }
 
+func (i IntCell) IsBuiltinLambda() (func(), bool) {
+	return nil, false
+}
+
 /*******************************************************************************
  String cell
 *******************************************************************************/
@@ -41,6 +46,10 @@ func (s StringCell) String() string {
 	return ("\"" + s.Str + "\"")
 }
 
+func (s StringCell) IsBuiltinLambda() (func(), bool) {
+	return nil, false
+}
+
 /*******************************************************************************
  Symbol cell
 *******************************************************************************/
@@ -55,6 +64,10 @@ func (s SymbolCell) IsAtom() bool {
 
 func (s SymbolCell) String() string {
 	return s.Sym
+}
+
+func (s SymbolCell) IsBuiltinLambda() (func(), bool) {
+	return nil, false
 }
 
 /*******************************************************************************
@@ -74,6 +87,10 @@ func (l BuiltinLambdaCell) String() string {
 	return l.Sym
 }
 
+func (l BuiltinLambdaCell) IsBuiltinLambda() (func(), bool) {
+	return l.Lambda, true
+}
+
 /*******************************************************************************
  Builtin macro cell
 *******************************************************************************/
@@ -83,12 +100,16 @@ type BuiltinMacroCell struct {
 	Macro func()
 }
 
-func (l BuiltinMacroCell) IsAtom() bool {
+func (m BuiltinMacroCell) IsAtom() bool {
 	return true
 }
 
-func (l BuiltinMacroCell) String() string {
-	return l.Sym
+func (m BuiltinMacroCell) String() string {
+	return m.Sym
+}
+
+func (m BuiltinMacroCell) IsBuiltinLambda() (func(), bool) {
+	return nil, false
 }
 
 /*******************************************************************************
@@ -108,4 +129,8 @@ func (c ConsCell) String() string {
 	left := fmt.Sprintf("%v", c.Car)
 	right := fmt.Sprintf("%v", c.Cdr)
 	return "(" + left + " . " + right + ")"
+}
+
+func (c ConsCell) IsBuiltinLambda() (func(), bool) {
+	return nil, false
 }

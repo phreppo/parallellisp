@@ -1,9 +1,11 @@
 package cell
 
+import "fmt"
+
 var BuiltinLambdas = map[string]BuiltinLambdaCell{
 	"car": BuiltinLambdaCell{
 		Sym:    "car",
-		Lambda: func() {}},
+		Lambda: func() { fmt.Println("sono car!") }},
 	"cdr": BuiltinLambdaCell{
 		Sym:    "cdr",
 		Lambda: func() {}},

@@ -35,6 +35,10 @@ func main() {
 		fmt.Println("we")
 	}
 
+	if f, ok := sym.IsBuiltinLambda(); ok {
+		f()
+	}
+
 	// switch address := i.(type) {
 	// case *IntCell:
 	// 	fmt.Println(address)

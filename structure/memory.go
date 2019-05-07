@@ -38,7 +38,7 @@ type Memory struct {
 func NewMemory() *Memory {
 	m := Memory{
 		MakeInt:         make(chan IntRequest),
-		intFactory:      new(),
+		intFactory:      newIntCellSupplier(),
 		MakeCons:        make(chan ConsRequest),
 		intTapePointer:  1,
 		consTapePointer: 1,
@@ -75,19 +75,24 @@ const INT_TAPE_SIZE = 100
 
 type intCellSupplier struct {
 	makeInt     chan IntRequest
-	tape        [INT_TAPE_SIZE]IntCell
+	tape        *[INT_TAPE_SIZE]IntCell
 	tapePointer int
 }
 
-func new() *intCellSupplier {
+func newIntCellSupplier() *intCellSupplier {
 	supplier := intCellSupplier{
 		makeInt:     make(chan IntRequest),
-		tapePointer: 1,
+		tape:        new([INT_TAPE_SIZE]IntCell),
+		tapePointer: 0,
 	}
 
 	go func() {
 		for {
 			request := <-supplier.makeInt
+			if supplier.tapePointer >= INT_TAPE_SIZE {
+				supplier.tape = new([INT_TAPE_SIZE]IntCell)
+				supplier.tapePointer = 0
+			}
 			newInt := &(supplier.tape[supplier.tapePointer])
 			newInt.Val = request.Val
 			supplier.tapePointer++

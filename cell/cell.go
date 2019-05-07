@@ -1,4 +1,4 @@
-package structure
+package cell
 
 import (
 	"fmt"
@@ -38,7 +38,7 @@ func (s StringCell) IsAtom() bool {
 }
 
 func (s StringCell) String() string {
-	return s.Str
+	return ("\"" + s.Str + "\"")
 }
 
 /*******************************************************************************

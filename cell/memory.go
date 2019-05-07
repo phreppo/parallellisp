@@ -1,9 +1,15 @@
-package structure
+package cell
 
 func MakeInt(i int, m *Memory, ans chan Cell) Cell {
 	m.MakeInt <- IntRequest{i, ans}
 	intCell := <-ans
 	return intCell
+}
+
+func MakeString(s string, m *Memory, ans chan Cell) Cell {
+	m.MakeString <- StringRequest{s, ans}
+	stringCell := <-ans
+	return stringCell
 }
 
 func MakeCons(car Cell, cdr Cell, m *Memory, ans chan Cell) Cell {
@@ -17,6 +23,11 @@ type IntRequest struct {
 	AnswerChan chan<- Cell
 }
 
+type StringRequest struct {
+	Str        string
+	AnswerChan chan<- Cell
+}
+
 type ConsRequest struct {
 	Car        Cell
 	Cdr        Cell
@@ -27,16 +38,21 @@ type Memory struct {
 	MakeInt    chan IntRequest
 	intFactory *intCellSupplier
 
+	MakeString    chan StringRequest
+	stringFactory *stringCellSupplier
+
 	MakeCons    chan ConsRequest
 	consFactory *consCellSupplier
 }
 
 func NewMemory() *Memory {
 	m := Memory{
-		MakeInt:     make(chan IntRequest),
-		intFactory:  newIntCellSupplier(),
-		MakeCons:    make(chan ConsRequest),
-		consFactory: newConsCellSupplier(),
+		MakeInt:       make(chan IntRequest),
+		intFactory:    newIntCellSupplier(),
+		MakeString:    make(chan StringRequest),
+		stringFactory: newStringCellSupplier(),
+		MakeCons:      make(chan ConsRequest),
+		consFactory:   newConsCellSupplier(),
 	}
 
 	go func() {
@@ -44,6 +60,9 @@ func NewMemory() *Memory {
 			select {
 			case request := <-m.MakeInt:
 				m.supplyInt(request)
+
+			case request := <-m.MakeString:
+				m.supplyString(request)
 
 			case request := <-m.MakeCons:
 				m.supplyCons(request)
@@ -58,9 +77,17 @@ func (m *Memory) supplyInt(request IntRequest) {
 	m.intFactory.makeInt <- request
 }
 
+func (m *Memory) supplyString(request StringRequest) {
+	m.stringFactory.makeString <- request
+}
+
 func (m *Memory) supplyCons(request ConsRequest) {
 	m.consFactory.makeCons <- request
 }
+
+/*******************************************************************************
+ Factories
+*******************************************************************************/
 
 const intTapeSize = 100
 
@@ -88,6 +115,38 @@ func newIntCellSupplier() *intCellSupplier {
 			newInt.Val = request.Val
 			supplier.tapePointer++
 			request.AnswerChan <- newInt
+		}
+	}()
+
+	return &supplier
+}
+
+const stringTapeSize = 100
+
+type stringCellSupplier struct {
+	makeString  chan StringRequest
+	tape        *[stringTapeSize]StringCell
+	tapePointer int
+}
+
+func newStringCellSupplier() *stringCellSupplier {
+	supplier := stringCellSupplier{
+		makeString:  make(chan StringRequest),
+		tape:        new([stringTapeSize]StringCell),
+		tapePointer: 0,
+	}
+
+	go func() {
+		for {
+			request := <-supplier.makeString
+			if supplier.tapePointer >= stringTapeSize {
+				supplier.tape = new([stringTapeSize]StringCell)
+				supplier.tapePointer = 0
+			}
+			newString := &(supplier.tape[supplier.tapePointer])
+			newString.Str = request.Str
+			supplier.tapePointer++
+			request.AnswerChan <- newString
 		}
 	}()
 

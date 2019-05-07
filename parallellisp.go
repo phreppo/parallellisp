@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"time"
 
-	. "github.com/parof/parallellisp/structure"
+	. "github.com/parof/parallellisp/cell"
 )
 
 func main() {
@@ -14,6 +14,9 @@ func main() {
 
 	i := MakeInt(3, m, ans)
 	fmt.Println(i)
+
+	s := MakeString("ciao", m, ans)
+	fmt.Println(s)
 
 	c := MakeCons(i, i, m, ans)
 	fmt.Println(c)

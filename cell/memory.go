@@ -12,6 +12,12 @@ func MakeString(s string, m *Memory, ans chan Cell) Cell {
 	return stringCell
 }
 
+func MakeSymbol(s string, m *Memory, ans chan Cell) Cell {
+	m.MakeSymbol <- SymbolRequest{s, ans}
+	symbolCell := <-ans
+	return symbolCell
+}
+
 func MakeCons(car Cell, cdr Cell, m *Memory, ans chan Cell) Cell {
 	m.MakeCons <- ConsRequest{car, cdr, ans}
 	consCell := <-ans
@@ -28,6 +34,11 @@ type StringRequest struct {
 	AnswerChan chan<- Cell
 }
 
+type SymbolRequest struct {
+	Sym        string
+	AnswerChan chan<- Cell
+}
+
 type ConsRequest struct {
 	Car        Cell
 	Cdr        Cell
@@ -41,6 +52,9 @@ type Memory struct {
 	MakeString    chan StringRequest
 	stringFactory *stringCellSupplier
 
+	MakeSymbol    chan SymbolRequest
+	symbolFactory *symbolCellSupplier
+
 	MakeCons    chan ConsRequest
 	consFactory *consCellSupplier
 }
@@ -51,6 +65,8 @@ func NewMemory() *Memory {
 		intFactory:    newIntCellSupplier(),
 		MakeString:    make(chan StringRequest),
 		stringFactory: newStringCellSupplier(),
+		MakeSymbol:    make(chan SymbolRequest),
+		symbolFactory: newSymbolCellSupplier(),
 		MakeCons:      make(chan ConsRequest),
 		consFactory:   newConsCellSupplier(),
 	}
@@ -63,6 +79,9 @@ func NewMemory() *Memory {
 
 			case request := <-m.MakeString:
 				m.supplyString(request)
+
+			case request := <-m.MakeSymbol:
+				m.supplySymbol(request)
 
 			case request := <-m.MakeCons:
 				m.supplyCons(request)
@@ -79,6 +98,10 @@ func (m *Memory) supplyInt(request IntRequest) {
 
 func (m *Memory) supplyString(request StringRequest) {
 	m.stringFactory.makeString <- request
+}
+
+func (m *Memory) supplySymbol(request SymbolRequest) {
+	m.symbolFactory.makeSymbol <- request
 }
 
 func (m *Memory) supplyCons(request ConsRequest) {
@@ -147,6 +170,38 @@ func newStringCellSupplier() *stringCellSupplier {
 			newString.Str = request.Str
 			supplier.tapePointer++
 			request.AnswerChan <- newString
+		}
+	}()
+
+	return &supplier
+}
+
+const symbolTapeSize = 100
+
+type symbolCellSupplier struct {
+	makeSymbol  chan SymbolRequest
+	tape        *[symbolTapeSize]SymbolCell
+	tapePointer int
+}
+
+func newSymbolCellSupplier() *symbolCellSupplier {
+	supplier := symbolCellSupplier{
+		makeSymbol:  make(chan SymbolRequest),
+		tape:        new([symbolTapeSize]SymbolCell),
+		tapePointer: 0,
+	}
+
+	go func() {
+		for {
+			request := <-supplier.makeSymbol
+			if supplier.tapePointer >= symbolTapeSize {
+				supplier.tape = new([symbolTapeSize]SymbolCell)
+				supplier.tapePointer = 0
+			}
+			newSymbol := &(supplier.tape[supplier.tapePointer])
+			newSymbol.Sym = request.Sym
+			supplier.tapePointer++
+			request.AnswerChan <- newSymbol
 		}
 	}()
 

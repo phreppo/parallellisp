@@ -18,6 +18,9 @@ func main() {
 	s := MakeString("ciao", m, ans)
 	fmt.Println(s)
 
+	sym := MakeSymbol("car", m, ans)
+	fmt.Println(sym)
+
 	c := MakeCons(i, i, m, ans)
 	fmt.Println(c)
 

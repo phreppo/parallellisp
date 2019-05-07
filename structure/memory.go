@@ -71,26 +71,26 @@ func (m *Memory) supplyCons(request ConsRequest) {
 	request.AnswerChan <- newCons
 }
 
-const INT_TAPE_SIZE = 100
+const intTapeSize = 100
 
 type intCellSupplier struct {
 	makeInt     chan IntRequest
-	tape        *[INT_TAPE_SIZE]IntCell
+	tape        *[intTapeSize]IntCell
 	tapePointer int
 }
 
 func newIntCellSupplier() *intCellSupplier {
 	supplier := intCellSupplier{
 		makeInt:     make(chan IntRequest),
-		tape:        new([INT_TAPE_SIZE]IntCell),
+		tape:        new([intTapeSize]IntCell),
 		tapePointer: 0,
 	}
 
 	go func() {
 		for {
 			request := <-supplier.makeInt
-			if supplier.tapePointer >= INT_TAPE_SIZE {
-				supplier.tape = new([INT_TAPE_SIZE]IntCell)
+			if supplier.tapePointer >= intTapeSize {
+				supplier.tape = new([intTapeSize]IntCell)
 				supplier.tapePointer = 0
 			}
 			newInt := &(supplier.tape[supplier.tapePointer])

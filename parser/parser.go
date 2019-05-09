@@ -25,6 +25,29 @@ func Parse(source string) (Cell, bool, string) {
 	return nil, false, ""
 }
 
-func nextToken(source string) token {
-	return token{}
+func NextToken(source string) (token, string) {
+	if source == "" {
+		return token{typ: tokNone}, source
+	}
+	nextChar, index := firstChar(source)
+	switch nextChar {
+	case '(':
+		return token{typ: tokOpen}, source[index+1:]
+	case ')':
+		return token{typ: tokClose}, source[index+1:]
+	case '.':
+		return token{typ: tokDot}, source[index+1:]
+	case '\'':
+		return token{typ: tokQuote}, source[index+1:]
+	}
+	return token{typ: tokNone}, source
+}
+
+func firstChar(str string) (byte, int) {
+	for i := 0; i < len(str); i++ {
+		if str[i] != ' ' {
+			return str[i], i
+		}
+	}
+	return 0, -1
 }

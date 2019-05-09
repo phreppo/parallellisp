@@ -6,38 +6,43 @@ import (
 	"time"
 
 	. "github.com/parof/parallellisp/cell"
+	. "github.com/parof/parallellisp/parser"
 )
 
 func main() {
-	m := NewMemory()
-	ans := make(chan Cell)
+	cell, rest := NextToken("() ciao   ")
+	fmt.Println(cell)
+	fmt.Println(rest)
 
-	i1 := MakeInt(3, m, ans)
-	fmt.Println(i1)
+	// m := NewMemory()
+	// ans := make(chan Cell)
 
-	i2 := MakeInt(3, m, ans)
-	fmt.Println(i2)
+	// i1 := MakeInt(3, m, ans)
+	// fmt.Println(i1)
 
-	if i1 == i2 {
-		fmt.Println("uguali numeri")
-	}
+	// i2 := MakeInt(3, m, ans)
+	// fmt.Println(i2)
 
-	s := MakeString("ciao", m, ans)
-	fmt.Println(s)
+	// if i1 == i2 {
+	// 	fmt.Println("uguali numeri")
+	// }
 
-	sym := MakeSymbol("car", m, ans)
-	fmt.Println(sym)
+	// s := MakeString("ciao", m, ans)
+	// fmt.Println(s)
 
-	sym1 := MakeSymbol("t", m, ans)
-	fmt.Println(sym1)
+	// sym := MakeSymbol("car", m, ans)
+	// fmt.Println(sym)
 
-	if sym == sym1 {
-		fmt.Println("we")
-	}
+	// sym1 := MakeSymbol("t", m, ans)
+	// fmt.Println(sym1)
 
-	if f, ok := sym.IsBuiltinLambda(); ok {
-		f()
-	}
+	// if sym == sym1 {
+	// 	fmt.Println("we")
+	// }
+
+	// if f, ok := sym.IsBuiltinLambda(); ok {
+	// 	f()
+	// }
 
 	// switch address := i.(type) {
 	// case *IntCell:

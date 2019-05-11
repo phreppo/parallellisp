@@ -10,9 +10,8 @@ import (
 )
 
 func main() {
-	cell, rest := NextToken("() ciao   ")
-	fmt.Println(cell)
-	fmt.Println(rest)
+	tokens := Tokenize(" -33 +   \"ciao\" \"come -33 stai?\" io bene")
+	fmt.Println(tokens)
 
 	// m := NewMemory()
 	// ans := make(chan Cell)

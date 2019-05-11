@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -25,6 +24,7 @@ type token struct {
 	val int
 }
 
+// Tokenize produces an array fo tokens
 func Tokenize(source string) []token {
 	tok, rest := nextToken(source)
 	var result []token
@@ -53,13 +53,8 @@ func nextToken(source string) (token, string) {
 		return token{typ: tokQuote}, source[index+1:]
 	} else if nextChar == '"' {
 		rest := source[index+1:]
-		if stringContainsDoubleQuotes(rest) {
-			stringResult, rest := readUntilDoubleQuote(rest)
-			return token{typ: tokStr, str: stringResult}, rest
-		} else {
-			// opened string without closing
-			fmt.Println("shit")
-		}
+		stringResult, rest := readUntilDoubleQuote(rest)
+		return token{typ: tokStr, str: stringResult}, rest
 	} else {
 		firstWord, newIndex := firstWordOrNumber(source)
 		if num, err := strconv.Atoi(firstWord); err == nil {
@@ -97,7 +92,7 @@ func firstWordOrNumber(str string) (string, int) {
 }
 
 func readUntilDoubleQuote(str string) (string, string) {
-	// TODO
+	// reads until the first double quote in the string and resturns the rest of the string
 	result := ""
 	for i, r := range str {
 		if r == '"' {

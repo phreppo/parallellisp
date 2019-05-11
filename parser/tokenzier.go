@@ -24,19 +24,42 @@ type token struct {
 	val int
 }
 
-// Tokenize produces an array fo tokens
-func Tokenize(source string) []token {
-	tok, rest := nextToken(source)
+func (t token) String() string {
+	switch t.typ {
+	case tokNone:
+		return "NONE"
+	case tokOpen:
+		return "("
+	case tokClose:
+		return ")"
+	case tokDot:
+		return "."
+	case tokQuote:
+		return "'"
+	case tokSym:
+		return t.str
+	case tokNum:
+		return strconv.Itoa(t.val)
+	case tokStr:
+		return "\"" + t.str + "\""
+	default:
+		return ""
+	}
+}
+
+// tokenize produces an array fo tokens
+func tokenize(source string) []token {
+	tok, rest := readOneToken(source)
 	var result []token
 	for (tok.typ) != tokNone {
 		result = append(result, tok)
-		tok, rest = nextToken(rest)
+		tok, rest = readOneToken(rest)
 	}
 	return result
 }
 
 // returns the token and the remaining string
-func nextToken(source string) (token, string) {
+func readOneToken(source string) (token, string) {
 	if source == "" {
 		return token{typ: tokNone}, source
 	}
@@ -56,12 +79,12 @@ func nextToken(source string) (token, string) {
 		stringResult, rest := readUntilDoubleQuote(rest)
 		return token{typ: tokStr, str: stringResult}, rest
 	} else {
-		firstWord, newIndex := firstWordOrNumber(source)
+		firstWord, rest := firstWordOrNumber(source)
 		if num, err := strconv.Atoi(firstWord); err == nil {
 			// it's a num
-			return token{typ: tokNum, val: num}, source[newIndex+1:]
+			return token{typ: tokNum, val: num}, rest
 		}
-		return token{typ: tokSym, str: firstWord}, source[newIndex+1:]
+		return token{typ: tokSym, str: firstWord}, rest
 	}
 	return token{typ: tokNone}, source
 }
@@ -77,18 +100,18 @@ func firstChar(str string) (byte, int) {
 	return 0, -1
 }
 
-// resturns the first word or number in the string and the index in which it ends
-func firstWordOrNumber(str string) (string, int) {
+// resturns the first word or number in the string and the rest of the string
+func firstWordOrNumber(str string) (string, string) {
 	_, wordBeginningIndex := firstChar(str)
 	stringWithoutBlanks := str[wordBeginningIndex:]
 	result := ""
 	for i, r := range stringWithoutBlanks {
 		if r == ' ' || r == '.' || r == '(' || r == ')' || r == '\'' {
-			return result, i - 1 + wordBeginningIndex
+			return result, stringWithoutBlanks[i:]
 		}
 		result += string(r)
 	}
-	return result, len(str) - 1
+	return result, ""
 }
 
 func readUntilDoubleQuote(str string) (string, string) {

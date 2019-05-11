@@ -10,8 +10,13 @@ import (
 )
 
 func main() {
-	tokens := Tokenize(" -33 +   \"ciao\" \"come -33 stai?\" io bene")
-	fmt.Println(tokens)
+	source := ""
+	m := NewMemory()
+	sexpr, _, _ := Parse(source, m)
+	fmt.Println(sexpr)
+
+	// tokens := Tokenize(" -33 +   \"ciao\" \"come -33 stai?\" io bene")
+	// fmt.Println(tokens)
 
 	// m := NewMemory()
 	// ans := make(chan Cell)

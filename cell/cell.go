@@ -128,6 +128,7 @@ func (c ConsCell) IsAtom() bool {
 func (c ConsCell) String() string {
 	left := fmt.Sprintf("%v", c.Car)
 	right := fmt.Sprintf("%v", c.Cdr)
+
 	return "(" + left + " . " + right + ")"
 }
 

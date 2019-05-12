@@ -59,6 +59,9 @@ func buildCons(tokens []token, m *Memory, ansChan chan Cell) (Cell, bool, string
 	}
 	top := MakeCons(left, nil, m, ansChan)
 	actCons := top
+	if readNextToken(tokens).typ == tokClose {
+		return top, false, ""
+	}
 	for {
 		actualToken := readNextToken(tokens)
 		if actualToken.typ == tokDot {
@@ -80,18 +83,6 @@ func buildCons(tokens []token, m *Memory, ansChan chan Cell) (Cell, bool, string
 			}
 			return top, false, ""
 		} else {
-			// TODO SEI QUI
-			// not last element
-			// right, rightError, errorText := ricParse(tokens, m)
-			// if rightError {
-			// 	return nil, true, errorText
-			// } else {
-			// 	closePar := extractNextToken(tokens)
-			// 	if closePar.typ != tokClose {
-			// 		return nil, true, ("parenthesis not closed near" + fmt.Sprintf("%v", right))
-			// 	}
-			// 	top = MakeCons(left, right, m, ansChan)
-			// 	return top, false, ""
 			right, rightError, errorText := ricParse(tokens, m)
 			if rightError {
 				return nil, true, errorText
@@ -111,11 +102,13 @@ func buildCons(tokens []token, m *Memory, ansChan chan Cell) (Cell, bool, string
 			}
 
 			maybeClosePar := readNextToken(tokens)
+			fmt.Println(actCons)
 
 			if maybeClosePar.typ == tokClose {
+				extractNextToken(tokens)
 				return top, false, ""
 			}
 		}
 	}
-	return left, false, ""
+	return top, false, ""
 }

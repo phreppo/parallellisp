@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	source := " (1  2 3 4 ciao . 1)  "
+	source := " (car (1 2) 2 3)  "
 	m := NewMemory()
 	sexpr, _, _ := Parse(source, m)
 	fmt.Println(sexpr)

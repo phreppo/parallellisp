@@ -126,10 +126,24 @@ func (c ConsCell) IsAtom() bool {
 }
 
 func (c ConsCell) String() string {
-	left := fmt.Sprintf("%v", c.Car)
-	right := fmt.Sprintf("%v", c.Cdr)
+	// left := fmt.Sprintf("%v", c.Car)
+	// right := fmt.Sprintf("%v", c.Cdr)
+	// return "(" + left + " . " + right + ")"
 
-	return "(" + left + " . " + right + ")"
+	left := fmt.Sprintf("%v", c.Car)
+	rest := ""
+	act := c.Cdr
+	for act != nil {
+		switch cell := act.(type) {
+		case *ConsCell:
+			rest += fmt.Sprintf(" %v", cell.Car)
+			act = cell.Cdr
+		default:
+			rest += fmt.Sprintf(". %v", act)
+			act = nil
+		}
+	}
+	return "(" + left + rest + ")"
 }
 
 func (c ConsCell) IsBuiltinLambda() (func(), bool) {

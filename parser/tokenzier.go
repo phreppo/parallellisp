@@ -114,8 +114,8 @@ func firstWordOrNumber(str string) (string, string) {
 	return result, ""
 }
 
+// reads until the first double quote in the string and resturns the rest of the string
 func readUntilDoubleQuote(str string) (string, string) {
-	// reads until the first double quote in the string and resturns the rest of the string
 	result := ""
 	for i, r := range str {
 		if r == '"' {

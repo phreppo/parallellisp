@@ -93,7 +93,7 @@ func readOneToken(source string) (token, string) {
 // returns -1 if the string has no first char
 func firstChar(str string) (byte, int) {
 	for i := 0; i < len(str); i++ {
-		if str[i] != ' ' {
+		if str[i] != ' ' && str[i] != '\n' {
 			return str[i], i
 		}
 	}
@@ -106,7 +106,7 @@ func firstWordOrNumber(str string) (string, string) {
 	stringWithoutBlanks := str[wordBeginningIndex:]
 	result := ""
 	for i, r := range stringWithoutBlanks {
-		if r == ' ' || r == '.' || r == '(' || r == ')' || r == '\'' {
+		if r == '\n' || r == ' ' || r == '.' || r == '(' || r == ')' || r == '\'' {
 			return result, stringWithoutBlanks[i:]
 		}
 		result += string(r)

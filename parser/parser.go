@@ -9,7 +9,7 @@ import (
 // Parse returns the result, if there were errors parsing and eventually one error message
 func Parse(source string, m *Memory) (Cell, bool, string) {
 	tokens := tokenize(source)
-	if len(tokens) == 1 && tokens[1].typ == tokNone {
+	if len(tokens) == 1 && tokens[0].typ == tokNone {
 		return nil, true, "empty source"
 	}
 	return ricParse(tokens, m)
@@ -102,7 +102,6 @@ func buildCons(tokens []token, m *Memory, ansChan chan Cell) (Cell, bool, string
 			}
 
 			maybeClosePar := readNextToken(tokens)
-			fmt.Println(actCons)
 
 			if maybeClosePar.typ == tokClose {
 				extractNextToken(tokens)

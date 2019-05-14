@@ -105,6 +105,9 @@ func (m BuiltinMacroCell) IsAtom() bool {
 }
 
 func (m BuiltinMacroCell) String() string {
+	if m.Sym == "quote" {
+		return "'"
+	}
 	return m.Sym
 }
 
@@ -143,7 +146,11 @@ func (c ConsCell) String() string {
 			act = nil
 		}
 	}
-	return "(" + left + rest + ")"
+	if left == "'" {
+		return "'" + rest[1:]
+	} else {
+		return "(" + left + rest + ")"
+	}
 }
 
 func (c ConsCell) IsBuiltinLambda() (func(), bool) {

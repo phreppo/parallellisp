@@ -31,6 +31,15 @@ func ricParse(tokens []token, m *Memory) (Cell, bool, string) {
 	case tokSym:
 		newSym := MakeSymbol(actualToken.str, m, ansChan)
 		return newSym, false, ""
+	case tokQuote:
+		quoteSym := MakeSymbol("quote", m, ansChan)
+		quotedSexpression, err, errorText := ricParse(tokens, m)
+		if err {
+			return nil, true, errorText
+		}
+		firstConsArg := MakeCons(quotedSexpression, nil, m, ansChan)
+		topCons := MakeCons(quoteSym, firstConsArg, m, ansChan)
+		return topCons, false, ""
 	case tokOpen:
 		return buildCons(tokens, m, ansChan)
 	default:

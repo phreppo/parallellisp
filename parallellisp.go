@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	source := "   (cdr\n \"sono pazzo\") "
+	source := "   (cdr\n '( 1 nil)) "
 	m := NewMemory()
 	sexpr, _, _ := Parse(source, m)
 	fmt.Println(sexpr)

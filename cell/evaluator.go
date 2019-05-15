@@ -55,11 +55,11 @@ func startEvalService() chan *EvalRequest {
 func server(service <-chan *EvalRequest) {
 	for {
 		req := <-service
-		go serve(req)
+		go eval(req)
 	}
 }
 
-func serve(req *EvalRequest) {
+func eval(req *EvalRequest) {
 	replyChan := req.ReplyChan
 	toEval := req.Cell
 	env := req.Env
@@ -78,11 +78,70 @@ func serve(req *EvalRequest) {
 		case *BuiltinMacroCell:
 			replyChan <- car.Macro(c.Cdr, env)
 		default:
-			err := newEvalError("[eval] Cons cell eval not supported yet")
-			replyChan <- newEvalResult(nil, err)
+			argsResult := evlis(c.Cdr)
+			if argsResult.Err != nil {
+				replyChan <- newEvalResult(nil, argsResult.Err)
+			} else {
+				replyChan <- newEvalResult(argsResult.Cell, nil)
+			}
 		}
 	default:
 		error := newEvalError("[eval] Unknown cell type: " + fmt.Sprintf("%v", toEval))
 		replyChan <- newEvalResult(nil, error)
 	}
+}
+
+func evlis(args Cell) *EvalResult {
+	unvaluedArgs := extractArgs(args)
+
+	if len(*unvaluedArgs) == 0 {
+		return newEvalResult(nil, nil)
+	}
+
+	var replyChans []chan *EvalResult
+	n := len(*unvaluedArgs)
+	for i := 0; i < n; i++ {
+		newChan := make(chan *EvalResult)
+		replyChans = append(replyChans, newChan)
+		go eval(NewEvalRequest((*unvaluedArgs)[i], EmptyEnv(), newChan))
+	}
+
+	var top Cell
+	var actCons Cell
+	for i := 0; i < n; i++ {
+		evaluedArg := <-replyChans[i]
+		if evaluedArg.Err != nil {
+			return newEvalResult(nil, evaluedArg.Err)
+		}
+		if top == nil {
+			top = MakeCons(evaluedArg.Cell, nil)
+			actCons = top
+		} else {
+			tmp := MakeCons(evaluedArg.Cell, nil)
+			switch actConsCasted := actCons.(type) {
+			case *ConsCell:
+				actConsCasted.Cdr = tmp
+				actCons = actConsCasted.Cdr
+			}
+		}
+	}
+
+	return newEvalResult(top, nil)
+}
+
+func extractArgs(args Cell) *[]Cell {
+
+	act := args
+	var argsArray = new([]Cell)
+	if args == nil {
+		return argsArray
+	}
+	for act != nil {
+		switch actCons := act.(type) {
+		case *ConsCell:
+			*argsArray = append(*argsArray, actCons.Car)
+			act = actCons.Cdr
+		}
+	}
+	return argsArray
 }

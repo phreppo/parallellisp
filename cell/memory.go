@@ -193,14 +193,8 @@ func newSymbolCellSupplier() *symbolCellSupplier {
 	go func() {
 		for {
 			request := <-supplier.makeSymbol
-			if request.Sym == "nil" {
-				request.AnswerChan <- nil
-			} else if builtinLambdaCell, ok := BuiltinLambdas[request.Sym]; ok {
-				request.AnswerChan <- &builtinLambdaCell
-			} else if builtinMacroCell, ok := BuiltinMacros[request.Sym]; ok {
-				request.AnswerChan <- &builtinMacroCell
-			} else if request.Sym == "t" {
-				request.AnswerChan <- &TrueSymbol
+			if isBuiltin, builtinSymbol := Lisp.IsBuiltinSymbol(request.Sym); isBuiltin {
+				request.AnswerChan <- builtinSymbol
 			} else {
 				if supplier.tapePointer >= symbolTapeSize {
 					supplier.tape = new([symbolTapeSize]SymbolCell)

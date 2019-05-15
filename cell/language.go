@@ -6,21 +6,16 @@ import "fmt"
 var Lisp = newLanguage()
 
 type language struct {
-	builtinLambdas map[string]BuiltinLambdaCell
-	builtinMacros  map[string]BuiltinMacroCell
-	trueSymbol     SymbolCell
-}
-
-func newLanguage() *language {
-	lisp := language{
-		builtinLambdas: BuiltinLambdas,
-		builtinMacros:  BuiltinMacros,
-		trueSymbol:     TrueSymbol,
-	}
-	return &lisp
+	builtinLambdas        map[string]BuiltinLambdaCell
+	builtinMacros         map[string]BuiltinMacroCell
+	builtinSpecialSymbols map[string]SymbolCell
+	trueSymbol            SymbolCell
 }
 
 func (lang *language) IsBuiltinSymbol(s string) (bool, Cell) {
+	if s == "NIL" || s == "nil" {
+		return true, nil
+	}
 	isBuiltinLambda, builtinLambda := lang.IsBuiltinLambdaSymbol(s)
 	if isBuiltinLambda {
 		return true, builtinLambda
@@ -29,8 +24,9 @@ func (lang *language) IsBuiltinSymbol(s string) (bool, Cell) {
 	if isBuiltinMacro {
 		return true, builtinMacro
 	}
-	if s == "T" || s == "t" {
-		return true, &(lang.trueSymbol)
+	isBuiltinSpecialSymbol, builtinSpecialSymbol := lang.IsBuiltinSpecialSymbol(s)
+	if isBuiltinSpecialSymbol {
+		return true, builtinSpecialSymbol
 	}
 	return false, nil
 }
@@ -49,36 +45,54 @@ func (lang *language) IsBuiltinMacroSymbol(s string) (bool, Cell) {
 	return isBuiltinMacro, &builtinMacro
 }
 
-var BuiltinLambdas = map[string]BuiltinLambdaCell{
-	"car": BuiltinLambdaCell{
-		Sym:    "car",
-		Lambda: func() { fmt.Println("sono car!") }},
-	"cdr": BuiltinLambdaCell{
-		Sym:    "cdr",
-		Lambda: func() {}},
-	"cons": BuiltinLambdaCell{
-		Sym:    "cons",
-		Lambda: func() {}},
-	"eq": BuiltinLambdaCell{
-		Sym:    "eq",
-		Lambda: func() {}},
-	"atom": BuiltinLambdaCell{
-		Sym:    "atom",
-		Lambda: func() {}},
-	"lambda": BuiltinLambdaCell{
-		Sym:    "lambda",
-		Lambda: func() {}},
-
-	// "label",
+// IsBuiltinSpecialSymbol returns the pointer to the concrete cell and if the symbol is a special symbol(eg: t).
+// This is because in this manner one has not to perform two searches
+func (lang *language) IsBuiltinSpecialSymbol(s string) (bool, Cell) {
+	builtinSpecialSymbol, isBuiltinSpecialSymbol := (*lang).builtinSpecialSymbols[s]
+	return isBuiltinSpecialSymbol, &builtinSpecialSymbol
 }
 
-var BuiltinMacros = map[string]BuiltinMacroCell{
-	"quote": BuiltinMacroCell{
-		Sym:   "quote",
-		Macro: func() {}},
-	"cond": BuiltinMacroCell{
-		Sym:   "cond",
-		Macro: func() {}},
-}
+func newLanguage() *language {
+	lisp := language{
+		builtinLambdas: map[string]BuiltinLambdaCell{
+			"car": BuiltinLambdaCell{
+				Sym:    "car",
+				Lambda: func() { fmt.Println("sono car!") }},
+			"cdr": BuiltinLambdaCell{
+				Sym:    "cdr",
+				Lambda: func() {}},
+			"cons": BuiltinLambdaCell{
+				Sym:    "cons",
+				Lambda: func() {}},
+			"eq": BuiltinLambdaCell{
+				Sym:    "eq",
+				Lambda: func() {}},
+			"atom": BuiltinLambdaCell{
+				Sym:    "atom",
+				Lambda: func() {}},
+			"lambda": BuiltinLambdaCell{
+				Sym:    "lambda",
+				Lambda: func() {}},
 
-var TrueSymbol = SymbolCell{Sym: "t"}
+			// "label",
+		},
+
+		builtinMacros: map[string]BuiltinMacroCell{
+			"quote": BuiltinMacroCell{
+				Sym:   "quote",
+				Macro: func() {}},
+			"cond": BuiltinMacroCell{
+				Sym:   "cond",
+				Macro: func() {}},
+		},
+
+		builtinSpecialSymbols: map[string]SymbolCell{
+			"t": SymbolCell{
+				Sym: "t",
+			},
+		},
+
+		trueSymbol: SymbolCell{Sym: "t"},
+	}
+	return &lisp
+}

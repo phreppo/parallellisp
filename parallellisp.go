@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	source := "   (cdr\n  )"
+	source := "   t"
 	sexpr, _, _ := Parse(source)
 	fmt.Println(sexpr)
 

@@ -19,8 +19,6 @@ func ricParse(tokens []token) (Cell, error) {
 	actualToken := extractNextToken(tokens)
 
 	switch actualToken.typ {
-	// case tokNone:
-	// break
 	case tokNum:
 		newInt := MakeInt(actualToken.val)
 		return newInt, nil
@@ -31,14 +29,7 @@ func ricParse(tokens []token) (Cell, error) {
 		newSym := MakeSymbol(actualToken.str)
 		return newSym, nil
 	case tokQuote:
-		quoteSym := MakeSymbol("quote")
-		quotedSexpression, err := ricParse(tokens)
-		if err != nil {
-			return nil, err
-		}
-		firstConsArg := MakeCons(quotedSexpression, nil)
-		topCons := MakeCons(quoteSym, firstConsArg)
-		return topCons, nil
+		return buildQuote(tokens)
 	case tokOpen:
 		return buildCons(tokens)
 	default:
@@ -57,6 +48,17 @@ func extractNextToken(tokens []token) token {
 
 func readNextToken(tokens []token) token {
 	return tokens[0]
+}
+
+func buildQuote(tokens []token) (Cell, error) {
+	quoteSym := MakeSymbol("quote")
+	quotedSexpression, err := ricParse(tokens)
+	if err != nil {
+		return nil, err
+	}
+	firstConsArg := MakeCons(quotedSexpression, nil)
+	topCons := MakeCons(quoteSym, firstConsArg)
+	return topCons, nil
 }
 
 func buildCons(tokens []token) (Cell, error) {

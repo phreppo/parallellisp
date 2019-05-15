@@ -3,6 +3,7 @@ package cell
 // Mem is the global memory
 var Mem = newMemory()
 
+// MakeInt supplies a Int Cell. Blocking: use only in sequential code
 func MakeInt(i int) Cell {
 	ans := make(chan Cell)
 	Mem.MakeInt <- IntRequest{i, ans}
@@ -10,6 +11,7 @@ func MakeInt(i int) Cell {
 	return intCell
 }
 
+// MakeString supplies a String Cell. Blocking: use only in sequential code
 func MakeString(s string) Cell {
 	ans := make(chan Cell)
 	Mem.MakeString <- StringRequest{s, ans}
@@ -17,6 +19,7 @@ func MakeString(s string) Cell {
 	return stringCell
 }
 
+// MakeSymbol supplies a Symbol Cell. Blocking: use only in sequential code
 func MakeSymbol(s string) Cell {
 	ans := make(chan Cell)
 	Mem.MakeSymbol <- SymbolRequest{s, ans}
@@ -24,6 +27,7 @@ func MakeSymbol(s string) Cell {
 	return symbolCell
 }
 
+// MakeCons supplies a Cons Cell. Blocking: use only in sequential code
 func MakeCons(car Cell, cdr Cell) Cell {
 	ans := make(chan Cell)
 	Mem.MakeCons <- ConsRequest{car, cdr, ans}
@@ -31,28 +35,32 @@ func MakeCons(car Cell, cdr Cell) Cell {
 	return consCell
 }
 
+// IntRequest allows to build Int Cell Requests for a memory
 type IntRequest struct {
 	Val        int
 	AnswerChan chan<- Cell
 }
 
+// StringRequest allows to build String Cell Requests for a memory
 type StringRequest struct {
 	Str        string
 	AnswerChan chan<- Cell
 }
 
+// SymbolRequest allows to build Symbol Cell Requests for a memory
 type SymbolRequest struct {
 	Sym        string
 	AnswerChan chan<- Cell
 }
 
+// ConsRequest allows to build Cons Cell Requests for a memory
 type ConsRequest struct {
 	Car        Cell
 	Cdr        Cell
 	AnswerChan chan<- Cell
 }
 
-type Memory struct {
+type memory struct {
 	MakeInt    chan IntRequest
 	intFactory *intCellSupplier
 
@@ -66,8 +74,8 @@ type Memory struct {
 	consFactory *consCellSupplier
 }
 
-func newMemory() *Memory {
-	m := Memory{
+func newMemory() *memory {
+	m := memory{
 		MakeInt:       make(chan IntRequest),
 		intFactory:    newIntCellSupplier(),
 		MakeString:    make(chan StringRequest),

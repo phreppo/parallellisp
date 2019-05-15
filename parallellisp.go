@@ -14,6 +14,8 @@ func main() {
 	sexpr, _, _ := Parse(source)
 	fmt.Println(sexpr)
 
+	Mem.MakeInt <- IntRequest{Val: 11, AnswerChan: make(chan Cell)}
+
 	// tokens := Tokenize(" -33 +   \"ciao\" \"come -33 stai?\" io bene")
 	// fmt.Println(tokens)
 
@@ -69,10 +71,10 @@ func main() {
 	// }
 }
 
-func makeAndPrintCell(i int, m *Memory) {
+func makeAndPrintCell(i int) {
 	ans := make(chan Cell)
 
-	m.MakeInt <- IntRequest{i, ans}
+	Mem.MakeInt <- IntRequest{i, ans}
 
 	r := rand.Intn(1000)
 	time.Sleep(time.Duration(r) * time.Millisecond)

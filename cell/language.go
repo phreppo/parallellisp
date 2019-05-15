@@ -72,7 +72,7 @@ func newLanguage() *language {
 				Lambda: unimplementedLambda},
 			"atom": BuiltinLambdaCell{
 				Sym:    "atom",
-				Lambda: unimplementedLambda},
+				Lambda: atomLambda},
 			"lambda": BuiltinLambdaCell{
 				Sym:    "lambda",
 				Lambda: unimplementedLambda},
@@ -167,7 +167,20 @@ func consLambda(args Cell, env *EnvironmentEntry) *EvalResult {
 	default:
 		return newEvalResult(nil, newEvalError("[cons] not enough arguments"))
 	}
-	return nil
+}
+
+func atomLambda(args Cell, env *EnvironmentEntry) *EvalResult {
+	switch firstCons := args.(type) {
+	case *ConsCell:
+		switch firstCons.Car.(type) {
+		case *ConsCell:
+			return newEvalResult(nil, nil)
+		default:
+			return newEvalResult(MakeSymbol("t"), nil)
+		}
+	default:
+		return newEvalResult(nil, newEvalError("[atom] not enough arguments"))
+	}
 }
 
 func unimplementedMacro(c Cell, env *EnvironmentEntry) *EvalResult {

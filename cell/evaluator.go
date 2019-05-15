@@ -141,6 +141,8 @@ func extractArgs(args Cell) *[]Cell {
 		case *ConsCell:
 			*argsArray = append(*argsArray, actCons.Car)
 			act = actCons.Cdr
+		default:
+			panic("wrong argument format")
 		}
 	}
 	return argsArray

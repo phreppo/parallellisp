@@ -6,6 +6,8 @@ import (
 	. "github.com/parof/parallellisp/cell"
 )
 
+var EvalService = startEvalService()
+
 type EvalError struct {
 	Err string
 }
@@ -44,7 +46,7 @@ func (e EvalError) Error() string {
 	return e.Err
 }
 
-func StartEvaluator() chan *EvalRequest {
+func startEvalService() chan *EvalRequest {
 	service := make(chan *EvalRequest)
 	go server(service)
 	return service

@@ -14,7 +14,6 @@ import (
 )
 
 func repl() {
-	evalService := StartEvaluator()
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print(aurora.BrightBlue("-> "))
@@ -23,14 +22,14 @@ func repl() {
 		if err != nil {
 			fmt.Println("  ", aurora.Red(err))
 		} else {
-			evalAndPrint(sexpr, evalService)
+			evalAndPrint(sexpr)
 		}
 	}
 }
 
-func evalAndPrint(sexpr Cell, evalService chan *EvalRequest) {
+func evalAndPrint(sexpr Cell) {
 	ansChan := make(chan *EvalResult)
-	evalService <- NewEvalRequest(sexpr, ansChan)
+	EvalService <- NewEvalRequest(sexpr, ansChan)
 	result := <-ansChan
 	if result.Err != nil {
 		fmt.Println("  ", aurora.Red(result.Err))
@@ -88,7 +87,7 @@ func main() {
 	// fmt.Println(c)
 
 	for i := 0; i < 10; i++ {
-		go evalCellInRandomTime(i, StartEvaluator())
+		go evalCellInRandomTime(i)
 	}
 	time.Sleep(time.Duration(10) * time.Second)
 
@@ -98,7 +97,7 @@ func main() {
 	// }
 }
 
-func evalCellInRandomTime(i int, evalService chan *EvalRequest) {
+func evalCellInRandomTime(i int) {
 	ans := make(chan Cell)
 
 	Mem.MakeInt <- IntRequest{i, ans}
@@ -106,7 +105,7 @@ func evalCellInRandomTime(i int, evalService chan *EvalRequest) {
 	intCell := <-ans
 
 	ansChan := make(chan *EvalResult)
-	evalService <- NewEvalRequest(intCell, ansChan)
+	EvalService <- NewEvalRequest(intCell, ansChan)
 
 	r := rand.Intn(1000)
 	time.Sleep(time.Duration(r) * time.Millisecond)

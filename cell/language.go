@@ -60,22 +60,22 @@ func newLanguage() *language {
 		builtinLambdas: map[string]BuiltinLambdaCell{
 			"car": BuiltinLambdaCell{
 				Sym:    "car",
-				Lambda: func() { fmt.Println("sono car!") }},
+				Lambda: carLambda},
 			"cdr": BuiltinLambdaCell{
 				Sym:    "cdr",
-				Lambda: func() {}},
+				Lambda: cdrLambda},
 			"cons": BuiltinLambdaCell{
 				Sym:    "cons",
-				Lambda: func() {}},
+				Lambda: consLambda},
 			"eq": BuiltinLambdaCell{
 				Sym:    "eq",
-				Lambda: func() {}},
+				Lambda: unimplementedLambda},
 			"atom": BuiltinLambdaCell{
 				Sym:    "atom",
-				Lambda: func() {}},
+				Lambda: unimplementedLambda},
 			"lambda": BuiltinLambdaCell{
 				Sym:    "lambda",
-				Lambda: func() {}},
+				Lambda: unimplementedLambda},
 
 			// "label",
 		},
@@ -126,6 +126,54 @@ func timeMacro(args Cell, env *EnvironmentEntry) *EvalResult {
 	return newEvalResult(nil, nil)
 }
 
+func carLambda(args Cell, env *EnvironmentEntry) *EvalResult {
+	switch topCons := args.(type) {
+	case *ConsCell:
+		switch cons := topCons.Car.(type) {
+		case *ConsCell:
+			return newEvalResult(cons.Car, nil)
+		default:
+			return newEvalResult(nil, newEvalError("[car] car applied to atom"))
+		}
+	default:
+		return newEvalResult(nil, newEvalError("[car] not enough arguments"))
+	}
+}
+
+func cdrLambda(args Cell, env *EnvironmentEntry) *EvalResult {
+	switch topCons := args.(type) {
+	case *ConsCell:
+		switch cons := topCons.Car.(type) {
+		case *ConsCell:
+			return newEvalResult(cons.Cdr, nil)
+		default:
+			return newEvalResult(nil, newEvalError("[cdr] cdr applied to atom"))
+		}
+	default:
+		return newEvalResult(nil, newEvalError("[cdr] not enough arguments"))
+	}
+}
+
+func consLambda(args Cell, env *EnvironmentEntry) *EvalResult {
+	// switch firstCons := args.(type) {
+	// case *ConsCell:
+	// 	switch cons := firstCons.Cdr.(type) {
+	// 	case *ConsCell:
+	// 		result := MakeCons(firstCons.Car, cons.Car)
+	// 		return newEvalResult(result, nil)
+	// 	default:
+	// 		return newEvalResult(nil, newEvalError("[cons] not enough arguments"))
+	// 	}
+	// default:
+	// 	return newEvalResult(nil, newEvalError("[cons] not enough arguments"))
+	// }
+	return nil
+}
+
 func unimplementedMacro(c Cell, env *EnvironmentEntry) *EvalResult {
 	panic("unimplemented macro")
+}
+
+func unimplementedLambda(c Cell, env *EnvironmentEntry) *EvalResult {
+	panic("unimplemented lambda")
 }

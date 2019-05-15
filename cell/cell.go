@@ -7,7 +7,6 @@ import (
 
 type Cell interface {
 	IsAtom() bool
-	IsBuiltinLambda() (func(), bool)
 }
 
 /*******************************************************************************
@@ -26,10 +25,6 @@ func (i IntCell) String() string {
 	return strconv.Itoa(i.Val)
 }
 
-func (i IntCell) IsBuiltinLambda() (func(), bool) {
-	return nil, false
-}
-
 /*******************************************************************************
  String cell
 *******************************************************************************/
@@ -44,10 +39,6 @@ func (s StringCell) IsAtom() bool {
 
 func (s StringCell) String() string {
 	return ("\"" + s.Str + "\"")
-}
-
-func (s StringCell) IsBuiltinLambda() (func(), bool) {
-	return nil, false
 }
 
 /*******************************************************************************
@@ -66,17 +57,13 @@ func (s SymbolCell) String() string {
 	return s.Sym
 }
 
-func (s SymbolCell) IsBuiltinLambda() (func(), bool) {
-	return nil, false
-}
-
 /*******************************************************************************
  Builtin lambda cell
 *******************************************************************************/
 
 type BuiltinLambdaCell struct {
 	Sym    string
-	Lambda func()
+	Lambda func(Cell, *EnvironmentEntry) *EvalResult
 }
 
 func (l BuiltinLambdaCell) IsAtom() bool {
@@ -85,10 +72,6 @@ func (l BuiltinLambdaCell) IsAtom() bool {
 
 func (l BuiltinLambdaCell) String() string {
 	return l.Sym
-}
-
-func (l BuiltinLambdaCell) IsBuiltinLambda() (func(), bool) {
-	return l.Lambda, true
 }
 
 /*******************************************************************************
@@ -109,10 +92,6 @@ func (m BuiltinMacroCell) String() string {
 		return "'"
 	}
 	return m.Sym
-}
-
-func (m BuiltinMacroCell) IsBuiltinLambda() (func(), bool) {
-	return nil, false
 }
 
 /*******************************************************************************
@@ -151,8 +130,4 @@ func (c ConsCell) String() string {
 	} else {
 		return "(" + left + rest + ")"
 	}
-}
-
-func (c ConsCell) IsBuiltinLambda() (func(), bool) {
-	return nil, false
 }

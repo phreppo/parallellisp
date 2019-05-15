@@ -82,7 +82,7 @@ func eval(req *EvalRequest) {
 			if argsResult.Err != nil {
 				replyChan <- newEvalResult(nil, argsResult.Err)
 			} else {
-				replyChan <- newEvalResult(argsResult.Cell, nil)
+				replyChan <- apply(car, argsResult.Cell, env)
 			}
 		}
 	default:
@@ -144,4 +144,14 @@ func extractArgs(args Cell) *[]Cell {
 		}
 	}
 	return argsArray
+}
+
+func apply(function Cell, args Cell, env *EnvironmentEntry) *EvalResult {
+	switch functionCasted := function.(type) {
+	case *BuiltinLambdaCell:
+		return functionCasted.Lambda(args, env)
+	default:
+		return newEvalResult(nil, newEvalError("[apply] partial implementation"))
+	}
+	return nil
 }

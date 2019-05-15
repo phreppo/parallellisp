@@ -3,25 +3,29 @@ package cell
 // Mem is the global memory
 var Mem = NewMemory()
 
-func MakeInt(i int, ans chan Cell) Cell {
+func MakeInt(i int) Cell {
+	ans := make(chan Cell)
 	Mem.MakeInt <- IntRequest{i, ans}
 	intCell := <-ans
 	return intCell
 }
 
-func MakeString(s string, ans chan Cell) Cell {
+func MakeString(s string) Cell {
+	ans := make(chan Cell)
 	Mem.MakeString <- StringRequest{s, ans}
 	stringCell := <-ans
 	return stringCell
 }
 
-func MakeSymbol(s string, ans chan Cell) Cell {
+func MakeSymbol(s string) Cell {
+	ans := make(chan Cell)
 	Mem.MakeSymbol <- SymbolRequest{s, ans}
 	symbolCell := <-ans
 	return symbolCell
 }
 
-func MakeCons(car Cell, cdr Cell, ans chan Cell) Cell {
+func MakeCons(car Cell, cdr Cell) Cell {
+	ans := make(chan Cell)
 	Mem.MakeCons <- ConsRequest{car, cdr, ans}
 	consCell := <-ans
 	return consCell

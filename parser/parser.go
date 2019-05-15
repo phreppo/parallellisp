@@ -17,31 +17,30 @@ func Parse(source string) (Cell, bool, string) {
 
 func ricParse(tokens []token) (Cell, bool, string) {
 	actualToken := extractNextToken(tokens)
-	ansChan := make(chan Cell)
 
 	switch actualToken.typ {
 	case tokNone:
 		break
 	case tokNum:
-		newInt := MakeInt(actualToken.val, ansChan)
+		newInt := MakeInt(actualToken.val)
 		return newInt, false, ""
 	case tokStr:
-		newStr := MakeString(actualToken.str, ansChan)
+		newStr := MakeString(actualToken.str)
 		return newStr, false, ""
 	case tokSym:
-		newSym := MakeSymbol(actualToken.str, ansChan)
+		newSym := MakeSymbol(actualToken.str)
 		return newSym, false, ""
 	case tokQuote:
-		quoteSym := MakeSymbol("quote", ansChan)
+		quoteSym := MakeSymbol("quote")
 		quotedSexpression, err, errorText := ricParse(tokens)
 		if err {
 			return nil, true, errorText
 		}
-		firstConsArg := MakeCons(quotedSexpression, nil, ansChan)
-		topCons := MakeCons(quoteSym, firstConsArg, ansChan)
+		firstConsArg := MakeCons(quotedSexpression, nil)
+		topCons := MakeCons(quoteSym, firstConsArg)
 		return topCons, false, ""
 	case tokOpen:
-		return buildCons(tokens, ansChan)
+		return buildCons(tokens)
 	default:
 		return nil, true, ("parse error near token " + fmt.Sprintf("%v", actualToken))
 	}
@@ -61,12 +60,12 @@ func readNextToken(tokens []token) token {
 	return tokens[0]
 }
 
-func buildCons(tokens []token, ansChan chan Cell) (Cell, bool, string) {
+func buildCons(tokens []token) (Cell, bool, string) {
 	left, errorLeft, errorText := ricParse(tokens)
 	if errorLeft {
 		return nil, true, errorText
 	}
-	top := MakeCons(left, nil, ansChan)
+	top := MakeCons(left, nil)
 	actCons := top
 	if readNextToken(tokens).typ == tokClose {
 		return top, false, ""
@@ -96,7 +95,7 @@ func buildCons(tokens []token, ansChan chan Cell) (Cell, bool, string) {
 			if rightError {
 				return nil, true, errorText
 			}
-			tmp := MakeCons(right, nil, ansChan)
+			tmp := MakeCons(right, nil)
 			if top == actCons {
 				// must init the top
 				switch cons := top.(type) {

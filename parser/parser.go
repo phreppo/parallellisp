@@ -75,6 +75,13 @@ func buildQuote(tokens []token) (Cell, error) {
 }
 
 func buildCons(tokens []token) (Cell, error) {
+	nextToken, err := readNextToken(tokens)
+	if err != nil {
+		return nil, err
+	}
+	if nextToken.typ == tokClose {
+		return nil, nil
+	}
 	left, err := ricParse(tokens)
 	if err != nil {
 		return nil, err
@@ -82,7 +89,7 @@ func buildCons(tokens []token) (Cell, error) {
 	top := MakeCons(left, nil)
 	actCons := top
 
-	nextToken, err := readNextToken(tokens)
+	nextToken, err = readNextToken(tokens)
 	if err != nil {
 		return nil, err
 	}

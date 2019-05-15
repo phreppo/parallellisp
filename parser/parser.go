@@ -7,44 +7,43 @@ import (
 )
 
 // Parse returns the result, if there were errors parsing and eventually one error message
-func Parse(source string) (Cell, bool, string) {
+func Parse(source string) (Cell, error) {
 	tokens := tokenize(source)
 	if len(tokens) == 1 && tokens[0].typ == tokNone {
-		return nil, true, "empty source"
+		return nil, ParseError{"empty source"}
 	}
 	return ricParse(tokens)
 }
 
-func ricParse(tokens []token) (Cell, bool, string) {
+func ricParse(tokens []token) (Cell, error) {
 	actualToken := extractNextToken(tokens)
 
 	switch actualToken.typ {
-	case tokNone:
-		break
+	// case tokNone:
+	// break
 	case tokNum:
 		newInt := MakeInt(actualToken.val)
-		return newInt, false, ""
+		return newInt, nil
 	case tokStr:
 		newStr := MakeString(actualToken.str)
-		return newStr, false, ""
+		return newStr, nil
 	case tokSym:
 		newSym := MakeSymbol(actualToken.str)
-		return newSym, false, ""
+		return newSym, nil
 	case tokQuote:
 		quoteSym := MakeSymbol("quote")
-		quotedSexpression, err, errorText := ricParse(tokens)
-		if err {
-			return nil, true, errorText
+		quotedSexpression, err := ricParse(tokens)
+		if err != nil {
+			return nil, err
 		}
 		firstConsArg := MakeCons(quotedSexpression, nil)
 		topCons := MakeCons(quoteSym, firstConsArg)
-		return topCons, false, ""
+		return topCons, nil
 	case tokOpen:
 		return buildCons(tokens)
 	default:
-		return nil, true, ("parse error near token " + fmt.Sprintf("%v", actualToken))
+		return nil, ParseError{"parse error near token " + fmt.Sprintf("%v", actualToken)}
 	}
-	return nil, true, ""
 }
 
 func extractNextToken(tokens []token) token {
@@ -60,40 +59,40 @@ func readNextToken(tokens []token) token {
 	return tokens[0]
 }
 
-func buildCons(tokens []token) (Cell, bool, string) {
-	left, errorLeft, errorText := ricParse(tokens)
-	if errorLeft {
-		return nil, true, errorText
+func buildCons(tokens []token) (Cell, error) {
+	left, err := ricParse(tokens)
+	if err != nil {
+		return nil, err
 	}
 	top := MakeCons(left, nil)
 	actCons := top
 	if readNextToken(tokens).typ == tokClose {
-		return top, false, ""
+		return top, nil
 	}
 	for {
 		actualToken := readNextToken(tokens)
 		if actualToken.typ == tokDot {
 			extractNextToken(tokens) // extract the dot
 			// last element
-			right, rightError, errorText := ricParse(tokens)
+			right, err := ricParse(tokens)
 
-			if rightError {
-				return nil, true, errorText
+			if err != nil {
+				return nil, err
 			}
 			closePar := extractNextToken(tokens)
 
 			if closePar.typ != tokClose {
-				return nil, true, ("parenthesis not closed near " + fmt.Sprintf("%v", right))
+				return nil, ParseError{"parenthesis not closed near " + fmt.Sprintf("%v", right)}
 			}
 			switch cons := actCons.(type) {
 			case *ConsCell:
 				(*cons).Cdr = right
 			}
-			return top, false, ""
+			return top, nil
 		} else {
-			right, rightError, errorText := ricParse(tokens)
-			if rightError {
-				return nil, true, errorText
+			right, err := ricParse(tokens)
+			if err != nil {
+				return nil, err
 			}
 			tmp := MakeCons(right, nil)
 			if top == actCons {
@@ -113,9 +112,17 @@ func buildCons(tokens []token) (Cell, bool, string) {
 
 			if maybeClosePar.typ == tokClose {
 				extractNextToken(tokens)
-				return top, false, ""
+				return top, nil
 			}
 		}
 	}
-	return top, false, ""
+	return top, nil
+}
+
+type ParseError struct {
+	err string
+}
+
+func (e ParseError) Error() string {
+	return e.err
 }

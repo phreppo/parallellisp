@@ -17,9 +17,9 @@ func repl() {
 	for {
 		print("-> ")
 		source, _ := reader.ReadString('\n')
-		sexpr, err, errMessage := Parse(source)
-		if err {
-			fmt.Println(aurora.Red(errMessage))
+		sexpr, err := Parse(source)
+		if err != nil {
+			fmt.Println(aurora.Red(err))
 		} else {
 			fmt.Println("  ", sexpr)
 		}
@@ -29,11 +29,6 @@ func repl() {
 
 func main() {
 	repl()
-	source := "   t"
-	sexpr, _, _ := Parse(source)
-	fmt.Println(sexpr)
-
-	Mem.MakeInt <- IntRequest{Val: 11, AnswerChan: make(chan Cell)}
 
 	// tokens := Tokenize(" -33 +   \"ciao\" \"come -33 stai?\" io bene")
 	// fmt.Println(tokens)

@@ -83,7 +83,7 @@ func buildCons(tokens []token) (Cell, bool, string) {
 			closePar := extractNextToken(tokens)
 
 			if closePar.typ != tokClose {
-				return nil, true, ("parenthesis not closed near" + fmt.Sprintf("%v", right))
+				return nil, true, ("parenthesis not closed near " + fmt.Sprintf("%v", right))
 			}
 			switch cons := actCons.(type) {
 			case *ConsCell:

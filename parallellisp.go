@@ -1,15 +1,34 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
+	"os"
 	"time"
 
+	"github.com/logrusorgru/aurora"
 	. "github.com/parof/parallellisp/cell"
 	. "github.com/parof/parallellisp/parser"
 )
 
+func repl() {
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		print("-> ")
+		source, _ := reader.ReadString('\n')
+		sexpr, err, errMessage := Parse(source)
+		if err {
+			fmt.Println(aurora.Red(errMessage))
+		} else {
+			fmt.Println("  ", sexpr)
+		}
+
+	}
+}
+
 func main() {
+	repl()
 	source := "   t"
 	sexpr, _, _ := Parse(source)
 	fmt.Println(sexpr)

@@ -142,7 +142,7 @@ func (c ConsCell) String() string {
 			rest += fmt.Sprintf(" %v", cell.Car)
 			act = cell.Cdr
 		default:
-			rest += fmt.Sprintf(". %v", act)
+			rest += fmt.Sprintf(" . %v", act)
 			act = nil
 		}
 	}

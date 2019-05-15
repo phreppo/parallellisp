@@ -10,9 +10,8 @@ import (
 )
 
 func main() {
-	source := "   (cdr\n '( 1 nil)) "
-	m := NewMemory()
-	sexpr, _, _ := Parse(source, m)
+	source := "   (cdr\n  )"
+	sexpr, _, _ := Parse(source)
 	fmt.Println(sexpr)
 
 	// tokens := Tokenize(" -33 +   \"ciao\" \"come -33 stai?\" io bene")

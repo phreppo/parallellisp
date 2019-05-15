@@ -147,7 +147,7 @@ func (c ConsCell) String() string {
 		}
 	}
 	if left == "'" {
-		return "'" + rest[1:]
+		return "'" + rest[1:] // skip first char
 	} else {
 		return "(" + left + rest + ")"
 	}

@@ -1,25 +1,28 @@
 package cell
 
-func MakeInt(i int, m *Memory, ans chan Cell) Cell {
-	m.MakeInt <- IntRequest{i, ans}
+// Mem is the global memory
+var Mem = NewMemory()
+
+func MakeInt(i int, ans chan Cell) Cell {
+	Mem.MakeInt <- IntRequest{i, ans}
 	intCell := <-ans
 	return intCell
 }
 
-func MakeString(s string, m *Memory, ans chan Cell) Cell {
-	m.MakeString <- StringRequest{s, ans}
+func MakeString(s string, ans chan Cell) Cell {
+	Mem.MakeString <- StringRequest{s, ans}
 	stringCell := <-ans
 	return stringCell
 }
 
-func MakeSymbol(s string, m *Memory, ans chan Cell) Cell {
-	m.MakeSymbol <- SymbolRequest{s, ans}
+func MakeSymbol(s string, ans chan Cell) Cell {
+	Mem.MakeSymbol <- SymbolRequest{s, ans}
 	symbolCell := <-ans
 	return symbolCell
 }
 
-func MakeCons(car Cell, cdr Cell, m *Memory, ans chan Cell) Cell {
-	m.MakeCons <- ConsRequest{car, cdr, ans}
+func MakeCons(car Cell, cdr Cell, ans chan Cell) Cell {
+	Mem.MakeCons <- ConsRequest{car, cdr, ans}
 	consCell := <-ans
 	return consCell
 }
@@ -78,16 +81,16 @@ func NewMemory() *Memory {
 		for {
 			select {
 			case request := <-m.MakeInt:
-				m.supplyInt(request)
+				m.intFactory.makeInt <- request
 
 			case request := <-m.MakeString:
-				m.supplyString(request)
+				m.stringFactory.makeString <- request
 
 			case request := <-m.MakeSymbol:
-				m.supplySymbol(request)
+				m.symbolFactory.makeSymbol <- request
 
 			case request := <-m.MakeCons:
-				m.supplyCons(request)
+				m.consFactory.makeCons <- request
 			}
 		}
 	}()
@@ -95,27 +98,11 @@ func NewMemory() *Memory {
 	return &m
 }
 
-func (m *Memory) supplyInt(request IntRequest) {
-	m.intFactory.makeInt <- request
-}
-
-func (m *Memory) supplyString(request StringRequest) {
-	m.stringFactory.makeString <- request
-}
-
-func (m *Memory) supplySymbol(request SymbolRequest) {
-	m.symbolFactory.makeSymbol <- request
-}
-
-func (m *Memory) supplyCons(request ConsRequest) {
-	m.consFactory.makeCons <- request
-}
-
 /*******************************************************************************
  Factories
 *******************************************************************************/
 
-const intTapeSize = 100
+const intTapeSize = 10000
 
 type intCellSupplier struct {
 	makeInt     chan IntRequest
@@ -147,7 +134,7 @@ func newIntCellSupplier() *intCellSupplier {
 	return &supplier
 }
 
-const stringTapeSize = 100
+const stringTapeSize = 10000
 
 type stringCellSupplier struct {
 	makeString  chan StringRequest
@@ -179,7 +166,7 @@ func newStringCellSupplier() *stringCellSupplier {
 	return &supplier
 }
 
-const symbolTapeSize = 100
+const symbolTapeSize = 10000
 
 type symbolCellSupplier struct {
 	makeSymbol  chan SymbolRequest
@@ -221,7 +208,7 @@ func newSymbolCellSupplier() *symbolCellSupplier {
 	return &supplier
 }
 
-const consTapeSize = 100
+const consTapeSize = 10000
 
 type consCellSupplier struct {
 	makeCons    chan ConsRequest

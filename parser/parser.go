@@ -7,15 +7,15 @@ import (
 )
 
 // Parse returns the result, if there were errors parsing and eventually one error message
-func Parse(source string, m *Memory) (Cell, bool, string) {
+func Parse(source string) (Cell, bool, string) {
 	tokens := tokenize(source)
 	if len(tokens) == 1 && tokens[0].typ == tokNone {
 		return nil, true, "empty source"
 	}
-	return ricParse(tokens, m)
+	return ricParse(tokens)
 }
 
-func ricParse(tokens []token, m *Memory) (Cell, bool, string) {
+func ricParse(tokens []token) (Cell, bool, string) {
 	actualToken := extractNextToken(tokens)
 	ansChan := make(chan Cell)
 
@@ -23,25 +23,25 @@ func ricParse(tokens []token, m *Memory) (Cell, bool, string) {
 	case tokNone:
 		break
 	case tokNum:
-		newInt := MakeInt(actualToken.val, m, ansChan)
+		newInt := MakeInt(actualToken.val, ansChan)
 		return newInt, false, ""
 	case tokStr:
-		newStr := MakeString(actualToken.str, m, ansChan)
+		newStr := MakeString(actualToken.str, ansChan)
 		return newStr, false, ""
 	case tokSym:
-		newSym := MakeSymbol(actualToken.str, m, ansChan)
+		newSym := MakeSymbol(actualToken.str, ansChan)
 		return newSym, false, ""
 	case tokQuote:
-		quoteSym := MakeSymbol("quote", m, ansChan)
-		quotedSexpression, err, errorText := ricParse(tokens, m)
+		quoteSym := MakeSymbol("quote", ansChan)
+		quotedSexpression, err, errorText := ricParse(tokens)
 		if err {
 			return nil, true, errorText
 		}
-		firstConsArg := MakeCons(quotedSexpression, nil, m, ansChan)
-		topCons := MakeCons(quoteSym, firstConsArg, m, ansChan)
+		firstConsArg := MakeCons(quotedSexpression, nil, ansChan)
+		topCons := MakeCons(quoteSym, firstConsArg, ansChan)
 		return topCons, false, ""
 	case tokOpen:
-		return buildCons(tokens, m, ansChan)
+		return buildCons(tokens, ansChan)
 	default:
 		return nil, true, ("parse error near token " + fmt.Sprintf("%v", actualToken))
 	}
@@ -61,12 +61,12 @@ func readNextToken(tokens []token) token {
 	return tokens[0]
 }
 
-func buildCons(tokens []token, m *Memory, ansChan chan Cell) (Cell, bool, string) {
-	left, errorLeft, errorText := ricParse(tokens, m)
+func buildCons(tokens []token, ansChan chan Cell) (Cell, bool, string) {
+	left, errorLeft, errorText := ricParse(tokens)
 	if errorLeft {
 		return nil, true, errorText
 	}
-	top := MakeCons(left, nil, m, ansChan)
+	top := MakeCons(left, nil, ansChan)
 	actCons := top
 	if readNextToken(tokens).typ == tokClose {
 		return top, false, ""
@@ -76,7 +76,7 @@ func buildCons(tokens []token, m *Memory, ansChan chan Cell) (Cell, bool, string
 		if actualToken.typ == tokDot {
 			extractNextToken(tokens) // extract the dot
 			// last element
-			right, rightError, errorText := ricParse(tokens, m)
+			right, rightError, errorText := ricParse(tokens)
 
 			if rightError {
 				return nil, true, errorText
@@ -92,11 +92,11 @@ func buildCons(tokens []token, m *Memory, ansChan chan Cell) (Cell, bool, string
 			}
 			return top, false, ""
 		} else {
-			right, rightError, errorText := ricParse(tokens, m)
+			right, rightError, errorText := ricParse(tokens)
 			if rightError {
 				return nil, true, errorText
 			}
-			tmp := MakeCons(right, nil, m, ansChan)
+			tmp := MakeCons(right, nil, ansChan)
 			if top == actCons {
 				// must init the top
 				switch cons := top.(type) {

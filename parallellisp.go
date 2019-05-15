@@ -15,7 +15,7 @@ import (
 func repl() {
 	reader := bufio.NewReader(os.Stdin)
 	for {
-		print("-> ")
+		fmt.Print(aurora.BrightBlue("-> "))
 		source, _ := reader.ReadString('\n')
 		sexpr, err := Parse(source)
 		if err != nil {

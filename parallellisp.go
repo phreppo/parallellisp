@@ -9,11 +9,14 @@ import (
 
 	"github.com/logrusorgru/aurora"
 	. "github.com/parof/parallellisp/cell"
+	. "github.com/parof/parallellisp/eval"
 	. "github.com/parof/parallellisp/parser"
 )
 
 func repl() {
+	evalService := StartEvaluator()
 	reader := bufio.NewReader(os.Stdin)
+	ansChan := make(chan *EvalResult)
 	for {
 		fmt.Print(aurora.BrightBlue("-> "))
 		source, _ := reader.ReadString('\n')
@@ -21,7 +24,14 @@ func repl() {
 		if err != nil {
 			fmt.Println(aurora.Red(err))
 		} else {
-			fmt.Println("  ", sexpr)
+			// fmt.Println("  ", sexpr)
+			evalService <- &EvalRequest{Cell: sexpr, ReplyChan: ansChan}
+			result := <-ansChan
+			if result.Err != nil {
+				fmt.Println(aurora.Red(result.Err))
+			} else {
+				fmt.Println("  ", result.Cell)
+			}
 		}
 
 	}

@@ -16,7 +16,6 @@ import (
 func repl() {
 	evalService := StartEvaluator()
 	reader := bufio.NewReader(os.Stdin)
-	ansChan := make(chan *EvalResult)
 	for {
 		fmt.Print(aurora.BrightBlue("-> "))
 		source, _ := reader.ReadString('\n')
@@ -24,8 +23,8 @@ func repl() {
 		if err != nil {
 			fmt.Println(aurora.Red(err))
 		} else {
-			// fmt.Println("  ", sexpr)
-			evalService <- &EvalRequest{Cell: sexpr, ReplyChan: ansChan}
+			ansChan := make(chan *EvalResult)
+			evalService <- NewEvalRequest(sexpr, ansChan)
 			result := <-ansChan
 			if result.Err != nil {
 				fmt.Println(aurora.Red(result.Err))

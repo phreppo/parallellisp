@@ -1,9 +1,19 @@
 package eval
 
-import . "github.com/parof/parallellisp/cell"
+import (
+	"fmt"
+
+	. "github.com/parof/parallellisp/cell"
+)
 
 type EvalError struct {
 	Err string
+}
+
+func newEvalError(e string) *EvalError {
+	r := new(EvalError)
+	r.Err = e
+	return r
 }
 
 type EvalResult struct {
@@ -11,12 +21,26 @@ type EvalResult struct {
 	Err  error
 }
 
+func newEvalResult(c Cell, e error) *EvalResult {
+	r := new(EvalResult)
+	r.Cell = c
+	r.Err = e
+	return r
+}
+
 type EvalRequest struct {
 	Cell      Cell
 	ReplyChan chan *EvalResult
 }
 
-func (e *EvalError) Error() string {
+func NewEvalRequest(c Cell, replChan chan *EvalResult) *EvalRequest {
+	r := new(EvalRequest)
+	r.Cell = c
+	r.ReplyChan = replChan
+	return r
+}
+
+func (e EvalError) Error() string {
 	return e.Err
 }
 
@@ -35,5 +59,19 @@ func server(service <-chan *EvalRequest) {
 
 func serve(req *EvalRequest) {
 	ansChan := req.ReplyChan
-	ansChan <- &EvalResult{nil, nil}
+	toEval := req.Cell
+	if toEval == nil {
+		ansChan <- &EvalResult{nil, nil}
+	}
+	switch c := toEval.(type) {
+	case *IntCell:
+		ansChan <- newEvalResult(c, nil)
+	case *StringCell:
+		ansChan <- newEvalResult(c, nil)
+	case *SymbolCell:
+		ansChan <- newEvalResult(c, nil)
+	default:
+		error := newEvalError("unknown cell type: " + fmt.Sprintf("%v", toEval))
+		ansChan <- newEvalResult(nil, error)
+	}
 }

@@ -6,8 +6,11 @@ import (
 	. "github.com/parof/parallellisp/cell"
 )
 
+var tokensIndex = 0
+
 // Parse returns the result, if there were errors parsing and eventually one error message
 func Parse(source string) (Cell, error) {
+	tokensIndex = 0
 	tokens := tokenize(source)
 	if len(tokens) == 1 && tokens[0].typ == tokNone {
 		return nil, ParseError{"empty source"}
@@ -16,7 +19,10 @@ func Parse(source string) (Cell, error) {
 }
 
 func ricParse(tokens []token) (Cell, error) {
-	actualToken := extractNextToken(tokens)
+	actualToken, err := extractNextToken(tokens)
+	if err != nil {
+		return nil, err
+	}
 
 	switch actualToken.typ {
 	case tokNum:
@@ -37,17 +43,24 @@ func ricParse(tokens []token) (Cell, error) {
 	}
 }
 
-func extractNextToken(tokens []token) token {
-	if len(tokens) == 0 {
-		return token{typ: tokNone}
+func extractNextToken(tokens []token) (token, error) {
+	if !enoughTokens(tokens) {
+		return token{typ: tokNone}, ParseError{"tokens ended"}
 	}
-	tok := tokens[0]
-	tokens = append(tokens[:0], tokens[1:]...)
-	return tok
+	tok := tokens[tokensIndex]
+	tokensIndex++
+	return tok, nil
 }
 
-func readNextToken(tokens []token) token {
-	return tokens[0]
+func readNextToken(tokens []token) (token, error) {
+	if !enoughTokens(tokens) {
+		return token{typ: tokNone}, ParseError{"parenthesis not closed"}
+	}
+	return tokens[tokensIndex], nil
+}
+
+func enoughTokens(tokens []token) bool {
+	return tokensIndex < len(tokens)
 }
 
 func buildQuote(tokens []token) (Cell, error) {
@@ -68,11 +81,20 @@ func buildCons(tokens []token) (Cell, error) {
 	}
 	top := MakeCons(left, nil)
 	actCons := top
-	if readNextToken(tokens).typ == tokClose {
+
+	nextToken, err := readNextToken(tokens)
+	if err != nil {
+		return nil, err
+	}
+	if nextToken.typ == tokClose {
 		return top, nil
 	}
+
 	for {
-		actualToken := readNextToken(tokens)
+		actualToken, err := readNextToken(tokens)
+		if err != nil {
+			return nil, err
+		}
 		if actualToken.typ == tokDot {
 			extractNextToken(tokens) // extract the dot
 			// last element
@@ -81,7 +103,10 @@ func buildCons(tokens []token) (Cell, error) {
 			if err != nil {
 				return nil, err
 			}
-			closePar := extractNextToken(tokens)
+			closePar, err := extractNextToken(tokens)
+			if err != nil {
+				return nil, err
+			}
 
 			if closePar.typ != tokClose {
 				return nil, ParseError{"parenthesis not closed near " + fmt.Sprintf("%v", right)}
@@ -110,7 +135,10 @@ func buildCons(tokens []token) (Cell, error) {
 				actCons = (*cons).Cdr
 			}
 
-			maybeClosePar := readNextToken(tokens)
+			maybeClosePar, err := readNextToken(tokens)
+			if err != nil {
+				return nil, err
+			}
 
 			if maybeClosePar.typ == tokClose {
 				extractNextToken(tokens)

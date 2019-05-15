@@ -155,18 +155,18 @@ func cdrLambda(args Cell, env *EnvironmentEntry) *EvalResult {
 }
 
 func consLambda(args Cell, env *EnvironmentEntry) *EvalResult {
-	// switch firstCons := args.(type) {
-	// case *ConsCell:
-	// 	switch cons := firstCons.Cdr.(type) {
-	// 	case *ConsCell:
-	// 		result := MakeCons(firstCons.Car, cons.Car)
-	// 		return newEvalResult(result, nil)
-	// 	default:
-	// 		return newEvalResult(nil, newEvalError("[cons] not enough arguments"))
-	// 	}
-	// default:
-	// 	return newEvalResult(nil, newEvalError("[cons] not enough arguments"))
-	// }
+	switch firstCons := args.(type) {
+	case *ConsCell:
+		switch cons := firstCons.Cdr.(type) {
+		case *ConsCell:
+			result := MakeCons(firstCons.Car, cons.Car)
+			return newEvalResult(result, nil)
+		default:
+			return newEvalResult(nil, newEvalError("[cons] not enough arguments"))
+		}
+	default:
+		return newEvalResult(nil, newEvalError("[cons] not enough arguments"))
+	}
 	return nil
 }
 

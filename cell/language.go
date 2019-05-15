@@ -1,6 +1,9 @@
 package cell
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 // Lisp is the global variable for the language
 var Lisp = newLanguage()
@@ -80,10 +83,13 @@ func newLanguage() *language {
 		builtinMacros: map[string]BuiltinMacroCell{
 			"quote": BuiltinMacroCell{
 				Sym:   "quote",
-				Macro: func() {}},
+				Macro: quoteMacro},
+			"time": BuiltinMacroCell{
+				Sym:   "time",
+				Macro: timeMacro},
 			"cond": BuiltinMacroCell{
 				Sym:   "cond",
-				Macro: func() {}},
+				Macro: unimplementedMacro},
 		},
 
 		builtinSpecialSymbols: map[string]SymbolCell{
@@ -95,4 +101,31 @@ func newLanguage() *language {
 		trueSymbol: SymbolCell{Sym: "t"},
 	}
 	return &lisp
+}
+
+func quoteMacro(args Cell, env *EnvironmentEntry) *EvalResult {
+	switch cons := args.(type) {
+	case *ConsCell:
+		return newEvalResult(cons.Car, nil)
+	default:
+		return newEvalResult(nil, newEvalError("[quote] Can't quote"+fmt.Sprint(cons)))
+	}
+}
+
+func timeMacro(args Cell, env *EnvironmentEntry) *EvalResult {
+	now := time.Now()
+	start := now.UnixNano()
+
+	time.Sleep(time.Duration(100) * time.Millisecond)
+
+	now = time.Now()
+	afterEvalTime := now.UnixNano()
+	elapsedMillis := (afterEvalTime - start) / 1000000
+	fmt.Println("time:", elapsedMillis, "ms")
+
+	return newEvalResult(nil, nil)
+}
+
+func unimplementedMacro(c Cell, env *EnvironmentEntry) *EvalResult {
+	panic("unimplemented macro")
 }

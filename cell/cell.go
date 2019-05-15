@@ -97,7 +97,7 @@ func (l BuiltinLambdaCell) IsBuiltinLambda() (func(), bool) {
 
 type BuiltinMacroCell struct {
 	Sym   string
-	Macro func()
+	Macro func(Cell, *EnvironmentEntry) *EvalResult
 }
 
 func (m BuiltinMacroCell) IsAtom() bool {

@@ -9,7 +9,6 @@ import (
 
 	"github.com/logrusorgru/aurora"
 	. "github.com/parof/parallellisp/cell"
-	. "github.com/parof/parallellisp/eval"
 	. "github.com/parof/parallellisp/parser"
 )
 
@@ -29,7 +28,7 @@ func repl() {
 
 func evalAndPrint(sexpr Cell) {
 	ansChan := make(chan *EvalResult)
-	EvalService <- NewEvalRequest(sexpr, ansChan)
+	EvalService <- NewEvalRequest(sexpr, EmptyEnv(), ansChan)
 	result := <-ansChan
 	if result.Err != nil {
 		fmt.Println("  ", aurora.Red(result.Err))
@@ -105,7 +104,7 @@ func evalCellInRandomTime(i int) {
 	intCell := <-ans
 
 	ansChan := make(chan *EvalResult)
-	EvalService <- NewEvalRequest(intCell, ansChan)
+	EvalService <- NewEvalRequest(intCell, EmptyEnv(), ansChan)
 
 	r := rand.Intn(1000)
 	time.Sleep(time.Duration(r) * time.Millisecond)

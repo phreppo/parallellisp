@@ -1,9 +1,7 @@
-package eval
+package cell
 
 import (
 	"fmt"
-
-	. "github.com/parof/parallellisp/cell"
 )
 
 var EvalService = startEvalService()
@@ -32,12 +30,14 @@ func newEvalResult(c Cell, e error) *EvalResult {
 
 type EvalRequest struct {
 	Cell      Cell
+	Env       *EnvironmentEntry
 	ReplyChan chan *EvalResult
 }
 
-func NewEvalRequest(c Cell, replChan chan *EvalResult) *EvalRequest {
+func NewEvalRequest(c Cell, env *EnvironmentEntry, replChan chan *EvalResult) *EvalRequest {
 	r := new(EvalRequest)
 	r.Cell = c
+	r.Env = env
 	r.ReplyChan = replChan
 	return r
 }
@@ -62,6 +62,7 @@ func server(service <-chan *EvalRequest) {
 func serve(req *EvalRequest) {
 	replyChan := req.ReplyChan
 	toEval := req.Cell
+	env := req.Env
 	if toEval == nil {
 		replyChan <- newEvalResult(nil, nil)
 	}
@@ -72,6 +73,14 @@ func serve(req *EvalRequest) {
 		replyChan <- newEvalResult(c, nil)
 	case *SymbolCell:
 		replyChan <- newEvalResult(c, nil)
+	case *ConsCell:
+		switch car := c.Car.(type) {
+		case *BuiltinMacroCell:
+			replyChan <- car.Macro(c.Cdr, env)
+		default:
+			err := newEvalError("[eval] Cons cell eval not supported yet")
+			replyChan <- newEvalResult(nil, err)
+		}
 	default:
 		error := newEvalError("[eval] Unknown cell type: " + fmt.Sprintf("%v", toEval))
 		replyChan <- newEvalResult(nil, error)

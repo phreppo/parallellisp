@@ -86,7 +86,7 @@ func newMemory() *memory {
 		MakeString:    make(chan StringRequest),
 		stringFactory: newStringCellSupplier(),
 		MakeSymbol:    make(chan SymbolRequest),
-		symbolFactory: nil,
+		symbolFactory: nil, // caution: to avoid init cycle must be nil!
 		MakeCons:      make(chan ConsRequest),
 		consFactory:   newConsCellSupplier(),
 	}

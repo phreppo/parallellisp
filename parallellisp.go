@@ -21,22 +21,26 @@ func repl() {
 		source, _ := reader.ReadString('\n')
 		sexpr, err := Parse(source)
 		if err != nil {
-			fmt.Println(aurora.Red(err))
+			fmt.Println("  ", aurora.Red(err))
 		} else {
-			ansChan := make(chan *EvalResult)
-			evalService <- NewEvalRequest(sexpr, ansChan)
-			result := <-ansChan
-			if result.Err != nil {
-				fmt.Println(aurora.Red(result.Err))
-			} else {
-				fmt.Println("  ", result.Cell)
-			}
+			evalAndPrint(sexpr, evalService)
 		}
+	}
+}
 
+func evalAndPrint(sexpr Cell, evalService chan *EvalRequest) {
+	ansChan := make(chan *EvalResult)
+	evalService <- NewEvalRequest(sexpr, ansChan)
+	result := <-ansChan
+	if result.Err != nil {
+		fmt.Println("  ", aurora.Red(result.Err))
+	} else {
+		fmt.Println("  ", result.Cell)
 	}
 }
 
 func main() {
+
 	repl()
 
 	// tokens := Tokenize(" -33 +   \"ciao\" \"come -33 stai?\" io bene")
@@ -83,10 +87,10 @@ func main() {
 	// c := MakeCons(i, i, m, ans)
 	// fmt.Println(c)
 
-	// for i := 0; i < 10; i++ {
-	// 	go makeAndPrintCell(i, m)
-	// }
-	// time.Sleep(time.Duration(10) * time.Second)
+	for i := 0; i < 10; i++ {
+		go evalCellInRandomTime(i, StartEvaluator())
+	}
+	time.Sleep(time.Duration(10) * time.Second)
 
 	// switch c := intcell.(type) {
 	// case *IntCell:
@@ -94,16 +98,25 @@ func main() {
 	// }
 }
 
-func makeAndPrintCell(i int) {
+func evalCellInRandomTime(i int, evalService chan *EvalRequest) {
 	ans := make(chan Cell)
 
 	Mem.MakeInt <- IntRequest{i, ans}
 
-	r := rand.Intn(1000)
-	time.Sleep(time.Duration(r) * time.Millisecond)
 	intCell := <-ans
 
-	fmt.Print(i)
-	fmt.Print(" > ")
-	fmt.Println(intCell)
+	ansChan := make(chan *EvalResult)
+	evalService <- NewEvalRequest(intCell, ansChan)
+
+	r := rand.Intn(1000)
+	time.Sleep(time.Duration(r) * time.Millisecond)
+
+	result := <-ansChan
+	if result.Err != nil {
+		fmt.Println(aurora.Red(result.Err))
+	} else {
+		fmt.Print(i)
+		fmt.Print(" -> ")
+		fmt.Println(result.Cell)
+	}
 }

@@ -58,20 +58,20 @@ func server(service <-chan *EvalRequest) {
 }
 
 func serve(req *EvalRequest) {
-	ansChan := req.ReplyChan
+	replyChan := req.ReplyChan
 	toEval := req.Cell
 	if toEval == nil {
-		ansChan <- &EvalResult{nil, nil}
+		replyChan <- newEvalResult(nil, nil)
 	}
 	switch c := toEval.(type) {
 	case *IntCell:
-		ansChan <- newEvalResult(c, nil)
+		replyChan <- newEvalResult(c, nil)
 	case *StringCell:
-		ansChan <- newEvalResult(c, nil)
+		replyChan <- newEvalResult(c, nil)
 	case *SymbolCell:
-		ansChan <- newEvalResult(c, nil)
+		replyChan <- newEvalResult(c, nil)
 	default:
-		error := newEvalError("unknown cell type: " + fmt.Sprintf("%v", toEval))
-		ansChan <- newEvalResult(nil, error)
+		error := newEvalError("[eval] Unknown cell type: " + fmt.Sprintf("%v", toEval))
+		replyChan <- newEvalResult(nil, error)
 	}
 }

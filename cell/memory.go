@@ -1,7 +1,7 @@
 package cell
 
 // Mem is the global memory
-var Mem = NewMemory()
+var Mem = newMemory()
 
 func MakeInt(i int) Cell {
 	ans := make(chan Cell)
@@ -64,12 +64,9 @@ type Memory struct {
 
 	MakeCons    chan ConsRequest
 	consFactory *consCellSupplier
-
-	BuiltinLambdas [3]BuiltinLambdaCell
-	BuiltinMacros  [3]BuiltinMacroCell
 }
 
-func NewMemory() *Memory {
+func newMemory() *Memory {
 	m := Memory{
 		MakeInt:       make(chan IntRequest),
 		intFactory:    newIntCellSupplier(),

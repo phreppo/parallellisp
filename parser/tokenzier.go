@@ -86,7 +86,6 @@ func readOneToken(source string) (token, string) {
 		}
 		return token{typ: tokSym, str: firstWord}, rest
 	}
-	return token{typ: tokNone}, source
 }
 
 // returns the char and the position in the string of the char

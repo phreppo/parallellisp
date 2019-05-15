@@ -1,4 +1,1 @@
-[ora] ho un problema che inizializza in modo circolare da memoria fino allem lambde, molto male
-[ora] probabilmente dovro mettere nello stack e non nello heap tutti i tipi di risposte
-[ora] come risolvere: il linguaggio non deve essere un oggetto ma un insieme di funzioni
 [alla fine] implementare nell interfaccia di cell una versione unsafe di car e cdr che panichino se fa una merda il resto

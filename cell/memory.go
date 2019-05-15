@@ -1,7 +1,12 @@
 package cell
 
 // Mem is the global memory
-var Mem = newMemory()
+var Mem *memory
+
+func InitMemory() {
+	Mem = newMemory()
+	Mem.symbolFactory = newSymbolCellSupplier()
+}
 
 // MakeInt supplies a Int Cell. Blocking: use only in sequential code
 func MakeInt(i int) Cell {
@@ -81,7 +86,7 @@ func newMemory() *memory {
 		MakeString:    make(chan StringRequest),
 		stringFactory: newStringCellSupplier(),
 		MakeSymbol:    make(chan SymbolRequest),
-		symbolFactory: newSymbolCellSupplier(),
+		symbolFactory: nil,
 		MakeCons:      make(chan ConsRequest),
 		consFactory:   newConsCellSupplier(),
 	}

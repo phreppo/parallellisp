@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/logrusorgru/aurora"
@@ -37,6 +38,7 @@ func evalAndPrint(sexpr Cell) {
 }
 
 func main() {
+	runtime.GOMAXPROCS(1)
 	Init()
 	repl()
 

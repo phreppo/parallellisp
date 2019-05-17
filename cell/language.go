@@ -100,6 +100,10 @@ func newLanguage() *language {
 				Sym:    "+",
 				Lambda: plusLambda},
 
+			"-": BuiltinLambdaCell{
+				Sym:    "-",
+				Lambda: minusLambda},
+
 			// "label",
 		},
 
@@ -295,6 +299,20 @@ func plusLambda(args Cell, env *EnvironmentEntry) EvalResult {
 		switch num := numCell.(type) {
 		case *IntCell:
 			tot += num.Val
+		default:
+			return newEvalResult(nil, newEvalError("[+] trying to add a non-number"))
+		}
+	}
+	return newEvalResult(MakeInt(tot), nil)
+}
+
+func minusLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	nums := extractCars(args)
+	tot := (nums[0].(*IntCell)).Val
+	for _, numCell := range nums[1:] {
+		switch num := numCell.(type) {
+		case *IntCell:
+			tot -= num.Val
 		default:
 			return newEvalResult(nil, newEvalError("[+] trying to add a non-number"))
 		}

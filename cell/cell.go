@@ -7,6 +7,7 @@ import (
 
 type Cell interface {
 	IsAtom() bool
+	Eq(Cell) bool
 }
 
 /*******************************************************************************
@@ -25,6 +26,15 @@ func (i IntCell) String() string {
 	return strconv.Itoa(i.Val)
 }
 
+func (i IntCell) Eq(c Cell) bool {
+	switch castedC := c.(type) {
+	case *IntCell:
+		return castedC.Val == i.Val
+	default:
+		return false
+	}
+}
+
 /*******************************************************************************
  String cell
 *******************************************************************************/
@@ -39,6 +49,15 @@ func (s StringCell) IsAtom() bool {
 
 func (s StringCell) String() string {
 	return ("\"" + s.Str + "\"")
+}
+
+func (s StringCell) Eq(c Cell) bool {
+	switch castedC := c.(type) {
+	case *StringCell:
+		return castedC.Str == s.Str
+	default:
+		return false
+	}
 }
 
 /*******************************************************************************
@@ -57,6 +76,15 @@ func (s SymbolCell) String() string {
 	return s.Sym
 }
 
+func (s SymbolCell) Eq(c Cell) bool {
+	switch castedC := c.(type) {
+	case *SymbolCell:
+		return castedC.Sym == s.Sym
+	default:
+		return false
+	}
+}
+
 /*******************************************************************************
  Builtin lambda cell
 *******************************************************************************/
@@ -72,6 +100,15 @@ func (l BuiltinLambdaCell) IsAtom() bool {
 
 func (l BuiltinLambdaCell) String() string {
 	return l.Sym
+}
+
+func (l BuiltinLambdaCell) Eq(c Cell) bool {
+	switch castedC := c.(type) {
+	case *BuiltinLambdaCell:
+		return castedC.Sym == l.Sym
+	default:
+		return false
+	}
 }
 
 /*******************************************************************************
@@ -92,6 +129,15 @@ func (m BuiltinMacroCell) String() string {
 		return "'"
 	}
 	return m.Sym
+}
+
+func (l BuiltinMacroCell) Eq(c Cell) bool {
+	switch castedC := c.(type) {
+	case *BuiltinMacroCell:
+		return castedC.Sym == l.Sym
+	default:
+		return false
+	}
 }
 
 /*******************************************************************************
@@ -129,5 +175,14 @@ func (c ConsCell) String() string {
 		return "'" + rest[1:] // skip first char
 	} else {
 		return "(" + left + rest + ")"
+	}
+}
+
+func (cons1 ConsCell) Eq(cons2 Cell) bool {
+	switch castedC := cons2.(type) {
+	case *ConsCell:
+		return cons1.Car.Eq(castedC.Car) && cons1.Cdr.Eq(castedC.Cdr)
+	default:
+		return false
 	}
 }

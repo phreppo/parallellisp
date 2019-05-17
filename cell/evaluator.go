@@ -78,7 +78,10 @@ func eval(req *EvalRequest) {
 		case *BuiltinMacroCell:
 			replyChan <- car.Macro(c.Cdr, env)
 		default:
+			fmt.Println(c.Cdr)
 			argsResult := evlis(c.Cdr)
+			fmt.Println(argsResult)
+
 			if argsResult.Err != nil {
 				replyChan <- newEvalResult(nil, argsResult.Err)
 			} else {

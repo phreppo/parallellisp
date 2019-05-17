@@ -69,7 +69,7 @@ func newLanguage() *language {
 				Lambda: consLambda},
 			"eq": BuiltinLambdaCell{
 				Sym:    "eq",
-				Lambda: unimplementedLambda},
+				Lambda: eqLambda},
 			"atom": BuiltinLambdaCell{
 				Sym:    "atom",
 				Lambda: atomLambda},
@@ -166,6 +166,27 @@ func consLambda(args Cell, env *EnvironmentEntry) *EvalResult {
 		}
 	default:
 		return newEvalResult(nil, newEvalError("[cons] not enough arguments"))
+	}
+}
+
+func eqLambda(args Cell, env *EnvironmentEntry) *EvalResult {
+	// fmt.Println(args)
+
+	switch firstArg := args.(type) {
+	case *ConsCell:
+		switch secondArg := firstArg.Cdr.(type) {
+		case *ConsCell:
+			if firstArg.Car.Eq(secondArg.Car) {
+				return newEvalResult(MakeSymbol("T"), nil)
+			} else {
+				return newEvalResult(nil, nil)
+			}
+		default:
+			// fmt.Println(secondArg)
+			return newEvalResult(nil, newEvalError("[eq] not enough argumentsbbbbbbbbbbbbb"))
+		}
+	default:
+		return newEvalResult(nil, newEvalError("[eq] not enough argumentsaaaaaaaaaaaaaaaa"))
 	}
 }
 

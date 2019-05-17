@@ -14,7 +14,7 @@ import (
 func repl() {
 	reader := bufio.NewReader(os.Stdin)
 	for {
-		fmt.Print(aurora.BrightYellow("𝜋 "))
+		fmt.Print(aurora.BrightGreen("𝜋 "))
 		source, _ := reader.ReadString('\n')
 		sexpr, err := Parse(source)
 		if err != nil {
@@ -30,7 +30,7 @@ func evalAndPrint(sexpr Cell) {
 	EvalService <- NewEvalRequest(sexpr, SimpleEnv(), ansChan)
 	result := <-ansChan
 	if result.Err != nil {
-		fmt.Println("  😘 ", aurora.Red(result.Err))
+		fmt.Println(" ", aurora.Red(result.Err), "  😘 ")
 	} else {
 		fmt.Println(" ", result.Cell)
 	}

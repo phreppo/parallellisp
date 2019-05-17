@@ -165,11 +165,16 @@ func apply(function Cell, args Cell, env *EnvironmentEntry) EvalResult {
 	case *BuiltinLambdaCell:
 		return functionCasted.Lambda(args, env)
 	case *ConsCell:
-		newEnv, err := pairlis(unsafeCadr(function), args, env)
-		if err != nil {
-			return newEvalResult(nil, err)
+		if Lisp.IsLambdaSymbol(functionCasted.Car) {
+			newEnv, err := pairlis(unsafeCadr(function), args, env)
+			if err != nil {
+				return newEvalResult(nil, err)
+			}
+			return eval(unsafeCaddr(function), newEnv)
+		} else {
+			// label check here
+			return newEvalResult(nil, newEvalError("[apply] trying to apply a non-lambda"))
 		}
-		return eval(unsafeCaddr(function), newEnv)
 	case *SymbolCell:
 		evaluedFunction := eval(function, env)
 		if evaluedFunction.Err != nil {
@@ -177,7 +182,7 @@ func apply(function Cell, args Cell, env *EnvironmentEntry) EvalResult {
 		}
 		return apply(evaluedFunction.Cell, args, env)
 	default:
-		return newEvalResult(nil, newEvalError("[apply] for now, only builtin lambads can be applied"))
+		return newEvalResult(nil, newEvalError("[apply] trying to apply non-builtin, non-lambda, non-symbol"))
 	}
 }
 

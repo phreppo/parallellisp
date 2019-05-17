@@ -162,5 +162,8 @@ func eq(c1, c2 Cell) bool {
 	if c1 == nil && c2 == nil {
 		return true
 	}
+	if c1 == nil || c2 == nil {
+		return false
+	}
 	return c1.Eq(c2)
 }

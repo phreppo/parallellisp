@@ -32,11 +32,12 @@ func evalAndPrint(sexpr Cell) {
 	if result.Err != nil {
 		fmt.Println("  ", aurora.Red(result.Err), "😘")
 	} else {
-		fmt.Println("  ", result.Cell, "✓")
+		fmt.Println("  ", result.Cell, aurora.BrightGreen("✓"))
 	}
 }
 
 func main() {
+	InitLanguage()
 	InitMemory()
 	InitGlobalEnv()
 	repl()

@@ -6,7 +6,11 @@ import (
 )
 
 // Lisp is the global variable for the language
-var Lisp = newLanguage()
+var Lisp *language
+
+func InitLanguage() {
+	Lisp = newLanguage()
+}
 
 type language struct {
 	builtinLambdas        map[string]BuiltinLambdaCell
@@ -57,6 +61,15 @@ func (lang *language) IsBuiltinSpecialSymbol(s string) (bool, Cell) {
 
 func (lang *language) GetTrueSymbol() Cell {
 	return &(lang.trueSymbol)
+}
+
+func (lang *language) IsLambdaSymbol(c Cell) bool {
+	switch sym := c.(type) {
+	case *BuiltinMacroCell:
+		return sym.Sym == "lambda"
+	default:
+		return false
+	}
 }
 
 func newLanguage() *language {

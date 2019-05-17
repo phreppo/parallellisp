@@ -63,8 +63,7 @@ func server(service <-chan EvalRequest) {
 }
 
 func serve(req EvalRequest) {
-	replyChan := req.ReplyChan
-	replyChan <- eval(req)
+	req.ReplyChan <- eval(req)
 }
 
 func eval(req EvalRequest) EvalResult {
@@ -167,9 +166,43 @@ func apply(function Cell, args Cell, env *EnvironmentEntry) EvalResult {
 	switch functionCasted := function.(type) {
 	case *BuiltinLambdaCell:
 		return functionCasted.Lambda(args, env)
+	case *ConsCell:
+		newEnv, err := pairlis(unsafeCadr(function), args, env)
+		if err != nil {
+			return newEvalResult(nil, err)
+		}
+		req := NewEvalRequest(unsafeCaddr(function), newEnv, nil)
+		return eval(req)
+	case *SymbolCell:
+		req := NewEvalRequest(function, env, nil)
+		evaluedFunction := eval(req)
+		if evaluedFunction.Err != nil {
+			return newEvalResult(nil, evaluedFunction.Err)
+		}
+		return apply(evaluedFunction.Cell, args, env)
 	default:
-		return newEvalResult(nil, newEvalError("[apply] for now only builtin lambads can be applied"))
+		return newEvalResult(nil, newEvalError("[apply] for now, only builtin lambads can be applied"))
 	}
+}
+
+func unsafeCar(c Cell) Cell {
+	return (c.(*ConsCell)).Car
+}
+
+func unsafeCdr(c Cell) Cell {
+	return (c.(*ConsCell)).Cdr
+}
+
+func unsafeCaar(c Cell) Cell {
+	return unsafeCar(unsafeCar(c))
+}
+
+func unsafeCadr(c Cell) Cell {
+	return unsafeCar(unsafeCdr(c.(*ConsCell)))
+}
+
+func unsafeCaddr(c Cell) Cell {
+	return unsafeCadr(unsafeCdr(c.(*ConsCell)))
 }
 
 // Pre: symbol != nil, env. pair != nil
@@ -188,4 +221,17 @@ func assoc(symbol *SymbolCell, env *EnvironmentEntry) EvalResult {
 		act = act.Next
 	}
 	return newEvalResult(nil, newEvalError("[assoc] symbol "+symbol.Sym+" not in env"))
+}
+
+func pairlis(formalParameters, actualParameters Cell, oldEnv *EnvironmentEntry) (*EnvironmentEntry, error) {
+	formalParametersSlice := extractCars(formalParameters)
+	actualParametersSlice := extractCars(actualParameters)
+	if len(actualParametersSlice) != len(formalParametersSlice) {
+		return nil, newEvalError("[pairlis] mismatching number of formal and actual parameters ")
+	}
+	newEntry := oldEnv
+	for i, formal := range formalParametersSlice {
+		newEntry = NewEnvironmentEntry(formal.(*SymbolCell), actualParametersSlice[i], newEntry)
+	}
+	return newEntry, nil
 }

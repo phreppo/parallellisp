@@ -83,10 +83,6 @@ func newLanguage() *language {
 				Sym:    "atom",
 				Lambda: atomLambda},
 
-			"lambda": BuiltinLambdaCell{
-				Sym:    "lambda",
-				Lambda: unimplementedLambda},
-
 			// "label",
 		},
 
@@ -103,6 +99,10 @@ func newLanguage() *language {
 			"cond": BuiltinMacroCell{
 				Sym:   "cond",
 				Macro: condMacro},
+
+			"lambda": BuiltinMacroCell{
+				Sym:   "lambda",
+				Macro: lambdaMacro},
 		},
 
 		builtinSpecialSymbols: map[string]SymbolCell{
@@ -234,6 +234,11 @@ func atomLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	default:
 		return newEvalResult(nil, newEvalError("[atom] not enough arguments"))
 	}
+}
+
+func lambdaMacro(args Cell, env *EnvironmentEntry) EvalResult {
+	// lambda autoquote
+	return newEvalResult(MakeCons(MakeSymbol("lambda"), args), nil)
 }
 
 func unimplementedMacro(c Cell, env *EnvironmentEntry) EvalResult {

@@ -6,7 +6,6 @@ import (
 )
 
 type Cell interface {
-	IsAtom() bool
 	Eq(Cell) bool
 }
 
@@ -16,10 +15,6 @@ type Cell interface {
 
 type IntCell struct {
 	Val int
-}
-
-func (i IntCell) IsAtom() bool {
-	return true
 }
 
 func (i IntCell) String() string {
@@ -43,10 +38,6 @@ type StringCell struct {
 	Str string
 }
 
-func (s StringCell) IsAtom() bool {
-	return true
-}
-
 func (s StringCell) String() string {
 	return ("\"" + s.Str + "\"")
 }
@@ -66,10 +57,6 @@ func (s StringCell) Eq(c Cell) bool {
 
 type SymbolCell struct {
 	Sym string
-}
-
-func (s SymbolCell) IsAtom() bool {
-	return true
 }
 
 func (s SymbolCell) String() string {
@@ -94,10 +81,6 @@ type BuiltinLambdaCell struct {
 	Lambda func(Cell, *EnvironmentEntry) EvalResult
 }
 
-func (l BuiltinLambdaCell) IsAtom() bool {
-	return true
-}
-
 func (l BuiltinLambdaCell) String() string {
 	return l.Sym
 }
@@ -118,10 +101,6 @@ func (l BuiltinLambdaCell) Eq(c Cell) bool {
 type BuiltinMacroCell struct {
 	Sym   string
 	Macro func(Cell, *EnvironmentEntry) EvalResult
-}
-
-func (m BuiltinMacroCell) IsAtom() bool {
-	return true
 }
 
 func (m BuiltinMacroCell) String() string {
@@ -147,10 +126,6 @@ func (l BuiltinMacroCell) Eq(c Cell) bool {
 type ConsCell struct {
 	Car Cell
 	Cdr Cell
-}
-
-func (c ConsCell) IsAtom() bool {
-	return false
 }
 
 func (c ConsCell) String() string {

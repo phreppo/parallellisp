@@ -82,7 +82,7 @@ func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
 		case *BuiltinMacroCell:
 			return car.Macro(c.Cdr, env)
 		default:
-			argsResult := evlis(c.Cdr, env)
+			argsResult := evlisSequential(c.Cdr, env)
 			if argsResult.Err != nil {
 				return newEvalResult(nil, argsResult.Err)
 			} else {
@@ -95,7 +95,7 @@ func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
 	}
 }
 
-func evlis(args Cell, env *EnvironmentEntry) EvalResult {
+func evlisParallel(args Cell, env *EnvironmentEntry) EvalResult {
 	unvaluedArgs := extractCars(args)
 
 	if len(unvaluedArgs) == 0 {
@@ -127,6 +127,25 @@ func evlis(args Cell, env *EnvironmentEntry) EvalResult {
 			}
 			appendCellToArgs(&top, &actCons, &(evaluedArg.Cell))
 		}
+	}
+
+	return newEvalResult(top, nil)
+}
+
+func evlisSequential(args Cell, env *EnvironmentEntry) EvalResult {
+	unvaluedArgs := extractCars(args)
+
+	if len(unvaluedArgs) == 0 {
+		return newEvalResult(nil, nil)
+	}
+
+	n := len(unvaluedArgs)
+
+	var top Cell
+	var actCons Cell
+	for i := 0; i < n; i++ {
+		evaluedArg := eval(unvaluedArgs[i], env)
+		appendCellToArgs(&top, &actCons, &(evaluedArg.Cell))
 	}
 
 	return newEvalResult(top, nil)

@@ -10,18 +10,12 @@ func initMemory() {
 
 // MakeInt supplies a Int Cell. Blocking: use only in sequential code
 func MakeInt(i int) Cell {
-	ans := make(chan Cell)
-	Mem.MakeInt <- IntRequest{i, ans}
-	intCell := <-ans
-	return intCell
+	return &IntCell{i}
 }
 
 // MakeString supplies a String Cell. Blocking: use only in sequential code
 func MakeString(s string) Cell {
-	ans := make(chan Cell)
-	Mem.MakeString <- StringRequest{s, ans}
-	stringCell := <-ans
-	return stringCell
+	return &StringCell{s}
 }
 
 // MakeSymbol supplies a Symbol Cell. Blocking: use only in sequential code
@@ -34,10 +28,7 @@ func MakeSymbol(s string) Cell {
 
 // MakeCons supplies a Cons Cell. Blocking: use only in sequential code
 func MakeCons(car Cell, cdr Cell) Cell {
-	ans := make(chan Cell)
-	Mem.MakeCons <- ConsRequest{car, cdr, ans}
-	consCell := <-ans
-	return consCell
+	return &ConsCell{car, cdr}
 }
 
 // IntRequest allows to build Int Cell Requests for a memory

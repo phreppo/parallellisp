@@ -266,7 +266,7 @@ func eqLambda(args Cell, env *EnvironmentEntry) EvalResult {
 		switch secondArg := firstArg.Cdr.(type) {
 		case *ConsCell:
 			if eq(firstArg.Car, secondArg.Car) {
-				return newEvalResult(MakeSymbol("t"), nil)
+				return newEvalResult(Lisp.GetTrueSymbol(), nil)
 			} else {
 				return newEvalResult(nil, nil)
 			}

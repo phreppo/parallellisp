@@ -2,6 +2,7 @@ package cell
 
 import (
 	"fmt"
+	"runtime"
 )
 
 var EvalService = startEvalService()
@@ -82,7 +83,12 @@ func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
 		case *BuiltinMacroCell:
 			return car.Macro(c.Cdr, env)
 		default:
-			argsResult := evlisSequential(c.Cdr, env)
+			var argsResult EvalResult
+			if runtime.NumGoroutine() < runtime.NumCPU() {
+				argsResult = evlisParallel(c.Cdr, env)
+			} else {
+				argsResult = evlisSequential(c.Cdr, env)
+			}
 			if argsResult.Err != nil {
 				return newEvalResult(nil, argsResult.Err)
 			} else {
@@ -133,21 +139,19 @@ func evlisParallel(args Cell, env *EnvironmentEntry) EvalResult {
 }
 
 func evlisSequential(args Cell, env *EnvironmentEntry) EvalResult {
-	unvaluedArgs := extractCars(args)
-
-	if len(unvaluedArgs) == 0 {
-		return newEvalResult(nil, nil)
-	}
-
-	n := len(unvaluedArgs)
-
+	actArg := args
 	var top Cell
 	var actCons Cell
-	for i := 0; i < n; i++ {
-		evaluedArg := eval(unvaluedArgs[i], env)
-		appendCellToArgs(&top, &actCons, &(evaluedArg.Cell))
-	}
+	var evaluedArg EvalResult
 
+	for actArg != nil {
+		evaluedArg = eval(actArg.(*ConsCell).Car, env)
+		if evaluedArg.Err != nil {
+			return evaluedArg
+		}
+		appendCellToArgs(&top, &actCons, &(evaluedArg.Cell))
+		actArg = (actArg.(*ConsCell)).Cdr
+	}
 	return newEvalResult(top, nil)
 }
 

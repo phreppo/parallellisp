@@ -9,7 +9,7 @@ import (
 
 	"github.com/logrusorgru/aurora"
 	. "github.com/parof/parallellisp/cell"
-	. "github.com/parof/parallellisp/parser"
+	"github.com/parof/parallellisp/parser"
 )
 
 func repl() {
@@ -17,7 +17,7 @@ func repl() {
 	for {
 		fmt.Print(aurora.BrightBlue("-> "))
 		source, _ := reader.ReadString('\n')
-		sexpr, err := Parse(source)
+		sexpr, err := parser.Parse(source)
 		if err != nil {
 			fmt.Println("  ", aurora.Red(err))
 		} else {

@@ -58,40 +58,43 @@ func startEvalService() chan EvalRequest {
 func server(service <-chan EvalRequest) {
 	for {
 		req := <-service
-		go eval(req)
+		go serve(req)
 	}
 }
 
-func eval(req EvalRequest) {
+func serve(req EvalRequest) {
 	replyChan := req.ReplyChan
+	replyChan <- eval(req)
+}
+
+func eval(req EvalRequest) EvalResult {
 	toEval := req.Cell
 	env := req.Env
 	if toEval == nil {
-		replyChan <- newEvalResult(nil, nil)
+		return newEvalResult(nil, nil)
 	}
 	switch c := toEval.(type) {
 	case *IntCell:
-		replyChan <- newEvalResult(c, nil)
+		return newEvalResult(c, nil)
 	case *StringCell:
-		replyChan <- newEvalResult(c, nil)
+		return newEvalResult(c, nil)
 	case *SymbolCell:
-		replyChan <- newEvalResult(c, nil)
+		return newEvalResult(c, nil)
 	case *ConsCell:
 		switch car := c.Car.(type) {
 		case *BuiltinMacroCell:
-			replyChan <- car.Macro(c.Cdr, env)
+			return car.Macro(c.Cdr, env)
 		default:
 			argsResult := evlis(c.Cdr)
-
 			if argsResult.Err != nil {
-				replyChan <- newEvalResult(nil, argsResult.Err)
+				return newEvalResult(nil, argsResult.Err)
 			} else {
-				replyChan <- apply(car, argsResult.Cell, env)
+				return apply(car, argsResult.Cell, env)
 			}
 		}
 	default:
 		error := newEvalError("[eval] Unknown cell type: " + fmt.Sprintf("%v", toEval))
-		replyChan <- newEvalResult(nil, error)
+		return newEvalResult(nil, error)
 	}
 }
 
@@ -104,28 +107,47 @@ func evlis(args Cell) EvalResult {
 
 	var replyChans []chan EvalResult
 	n := len(*unvaluedArgs)
-	for i := 0; i < n; i++ {
+	for i := 0; i < n-1; i++ {
 		newChan := make(chan EvalResult)
 		replyChans = append(replyChans, newChan)
-		go eval(NewEvalRequest((*unvaluedArgs)[i], EmptyEnv(), newChan))
+		go serve(NewEvalRequest((*unvaluedArgs)[i], EmptyEnv(), newChan)) // TODO: empty env!!
+	}
+
+	lastArgResult := eval(NewEvalRequest((*unvaluedArgs)[n-1], EmptyEnv(), nil))
+	if lastArgResult.Err != nil {
+		return lastArgResult
 	}
 
 	var top Cell
 	var actCons Cell
 	for i := 0; i < n; i++ {
-		evaluedArg := <-replyChans[i]
-		if evaluedArg.Err != nil {
-			return newEvalResult(nil, evaluedArg.Err)
-		}
-		if top == nil {
-			top = MakeCons(evaluedArg.Cell, nil)
-			actCons = top
+		if i == n-1 {
+			if top == nil {
+				top = MakeCons(lastArgResult.Cell, nil)
+				actCons = top
+			} else {
+				tmp := MakeCons(lastArgResult.Cell, nil)
+				switch actConsCasted := actCons.(type) {
+				case *ConsCell:
+					actConsCasted.Cdr = tmp
+					actCons = actConsCasted.Cdr
+				}
+			}
 		} else {
-			tmp := MakeCons(evaluedArg.Cell, nil)
-			switch actConsCasted := actCons.(type) {
-			case *ConsCell:
-				actConsCasted.Cdr = tmp
-				actCons = actConsCasted.Cdr
+			evaluedArg := <-replyChans[i]
+			if evaluedArg.Err != nil {
+				return newEvalResult(nil, evaluedArg.Err)
+			}
+			if top == nil {
+				top = MakeCons(evaluedArg.Cell, nil)
+				actCons = top
+			} else {
+				tmp := MakeCons(evaluedArg.Cell, nil)
+				switch actConsCasted := actCons.(type) {
+				case *ConsCell:
+					actConsCasted.Cdr = tmp
+					actCons = actConsCasted.Cdr
+				}
 			}
 		}
 	}

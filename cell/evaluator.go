@@ -141,14 +141,11 @@ func extractCars(args Cell) []Cell {
 	if args == nil {
 		return argsArray
 	}
+	var actCons *ConsCell
 	for act != nil {
-		switch actCons := act.(type) {
-		case *ConsCell:
-			argsArray = append(argsArray, actCons.Car)
-			act = actCons.Cdr
-		default:
-			panic("wrong argument format")
-		}
+		actCons = act.(*ConsCell)
+		argsArray = append(argsArray, actCons.Car)
+		act = actCons.Cdr
 	}
 	return argsArray
 }
@@ -160,11 +157,9 @@ func appendCellToArgs(top, actCell, toAppend *Cell) {
 		*actCell = *top
 	} else {
 		tmp := MakeCons((*toAppend), nil)
-		switch actConsCasted := (*actCell).(type) {
-		case *ConsCell:
-			actConsCasted.Cdr = tmp
-			*actCell = actConsCasted.Cdr
-		}
+		actConsCasted := (*actCell).(*ConsCell)
+		actConsCasted.Cdr = tmp
+		*actCell = actConsCasted.Cdr
 	}
 }
 
@@ -179,7 +174,7 @@ func apply(function Cell, args Cell, env *EnvironmentEntry) EvalResult {
 
 // Pre: symbol != nil, env. pair != nil
 func assoc(symbol *SymbolCell, env *EnvironmentEntry) EvalResult {
-	if res, ok := GlobalEnv[symbol.Sym]; ok {
+	if res, isInGlobalEnv := GlobalEnv[symbol.Sym]; isInGlobalEnv {
 		return newEvalResult(res, nil)
 	}
 	if env == nil {

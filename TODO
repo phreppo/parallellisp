@@ -1,3 +1,3 @@
 [ora] c e qualcosa che non va nella valutazione o il parsing degli argomenti: valuta (eq '(1) '(1))
-[quando vuoi] la extract args non dovrebbe ritornare qualcosa non sullo heap ma magari sullo stack?
+[quando vuoi] la newnev entry potrebbe mettere sullo stack invece che sullo heap?
 [alla fine] implementare nell interfaccia di cell una versione unsafe di car e cdr che panichino se fa una merda il resto

@@ -1,9 +1,7 @@
-package parser
+package cell
 
 import (
 	"fmt"
-
-	. "github.com/parof/parallellisp/cell"
 )
 
 var tokensIndex = 0

@@ -79,13 +79,13 @@ func eval(req EvalRequest) EvalResult {
 	case *StringCell:
 		return newEvalResult(c, nil)
 	case *SymbolCell:
-		return newEvalResult(c, nil)
+		return assoc(c, env)
 	case *ConsCell:
 		switch car := c.Car.(type) {
 		case *BuiltinMacroCell:
 			return car.Macro(c.Cdr, env)
 		default:
-			argsResult := evlis(c.Cdr)
+			argsResult := evlis(c.Cdr, env)
 			if argsResult.Err != nil {
 				return newEvalResult(nil, argsResult.Err)
 			} else {
@@ -98,7 +98,7 @@ func eval(req EvalRequest) EvalResult {
 	}
 }
 
-func evlis(args Cell) EvalResult {
+func evlis(args Cell, env *EnvironmentEntry) EvalResult {
 	unvaluedArgs := extractCars(args)
 
 	if len(*unvaluedArgs) == 0 {
@@ -110,10 +110,10 @@ func evlis(args Cell) EvalResult {
 	for i := 0; i < n-1; i++ {
 		newChan := make(chan EvalResult)
 		replyChans = append(replyChans, newChan)
-		go serve(NewEvalRequest((*unvaluedArgs)[i], EmptyEnv(), newChan)) // TODO: empty env!!
+		go serve(NewEvalRequest((*unvaluedArgs)[i], env, newChan)) // TODO: empty env!!
 	}
 
-	lastArgResult := eval(NewEvalRequest((*unvaluedArgs)[n-1], EmptyEnv(), nil))
+	lastArgResult := eval(NewEvalRequest((*unvaluedArgs)[n-1], env, nil))
 	if lastArgResult.Err != nil {
 		return lastArgResult
 	}
@@ -173,6 +173,21 @@ func apply(function Cell, args Cell, env *EnvironmentEntry) EvalResult {
 	case *BuiltinLambdaCell:
 		return functionCasted.Lambda(args, env)
 	default:
-		return newEvalResult(nil, newEvalError("[apply] partial implementation"))
+		return newEvalResult(nil, newEvalError("[apply] for now only builtin lambads can be applied"))
 	}
+}
+
+// Pre: symbol != nil, env. pair != nil
+func assoc(symbol *SymbolCell, env *EnvironmentEntry) EvalResult {
+	if env == nil {
+		return newEvalResult(nil, newEvalError("[assoc] symbol "+symbol.Sym+" not in env"))
+	}
+	act := env
+	for act != nil {
+		if *(act.Pair.Symbol) == *symbol {
+			return newEvalResult(env.Pair.Value, nil)
+		}
+		act = act.Next
+	}
+	return newEvalResult(nil, newEvalError("[assoc] symbol "+symbol.Sym+" not in env"))
 }

@@ -128,11 +128,11 @@ func condMacro(args Cell, env *EnvironmentEntry) EvalResult {
 		condAndBody = extractCars(arg)
 		cond = (*condAndBody)[0]
 		body = (*condAndBody)[1]
-		condResult = eval(NewEvalRequest(cond, EmptyEnv(), nil))
+		condResult = eval(NewEvalRequest(cond, env, nil))
 		if condResult.Err != nil {
 			return condResult
 		} else if condResult.Cell != nil {
-			return eval(NewEvalRequest(body, EmptyEnv(), nil))
+			return eval(NewEvalRequest(body, env, nil))
 		}
 	}
 	return newEvalResult(nil, newEvalError("[cond] none condition was verified"))

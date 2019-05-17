@@ -119,15 +119,15 @@ func newLanguage() *language {
 func condMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	argsArray := extractCars(args)
 
-	var condAndBody *[]Cell
+	var condAndBody []Cell
 	var cond Cell
 	var body Cell
 	var condResult EvalResult
 
-	for _, arg := range *argsArray {
+	for _, arg := range argsArray {
 		condAndBody = extractCars(arg)
-		cond = (*condAndBody)[0]
-		body = (*condAndBody)[1]
+		cond = (condAndBody)[0]
+		body = (condAndBody)[1]
 		condResult = eval(NewEvalRequest(cond, env, nil))
 		if condResult.Err != nil {
 			return condResult

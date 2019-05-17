@@ -101,19 +101,19 @@ func eval(req EvalRequest) EvalResult {
 func evlis(args Cell, env *EnvironmentEntry) EvalResult {
 	unvaluedArgs := extractCars(args)
 
-	if len(*unvaluedArgs) == 0 {
+	if len(unvaluedArgs) == 0 {
 		return newEvalResult(nil, nil)
 	}
 
 	var replyChans []chan EvalResult
-	n := len(*unvaluedArgs)
+	n := len(unvaluedArgs)
 	for i := 0; i < n-1; i++ {
 		newChan := make(chan EvalResult)
 		replyChans = append(replyChans, newChan)
-		go serve(NewEvalRequest((*unvaluedArgs)[i], env, newChan)) // TODO: empty env!!
+		go serve(NewEvalRequest(unvaluedArgs[i], env, newChan)) // TODO: empty env!!
 	}
 
-	lastArgResult := eval(NewEvalRequest((*unvaluedArgs)[n-1], env, nil))
+	lastArgResult := eval(NewEvalRequest(unvaluedArgs[n-1], env, nil))
 	if lastArgResult.Err != nil {
 		return lastArgResult
 	}
@@ -135,16 +135,16 @@ func evlis(args Cell, env *EnvironmentEntry) EvalResult {
 	return newEvalResult(top, nil)
 }
 
-func extractCars(args Cell) *[]Cell {
+func extractCars(args Cell) []Cell {
 	act := args
-	var argsArray = new([]Cell)
+	var argsArray []Cell
 	if args == nil {
 		return argsArray
 	}
 	for act != nil {
 		switch actCons := act.(type) {
 		case *ConsCell:
-			*argsArray = append(*argsArray, actCons.Car)
+			argsArray = append(argsArray, actCons.Car)
 			act = actCons.Cdr
 		default:
 			panic("wrong argument format")

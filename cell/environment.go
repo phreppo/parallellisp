@@ -30,6 +30,6 @@ type EnvironmentPair struct {
 
 var GlobalEnv = make(map[string]Cell)
 
-func InitGlobalEnv() {
+func initGlobalEnv() {
 	GlobalEnv["id"], _ = Parse("(lambda (x) x)")
 }

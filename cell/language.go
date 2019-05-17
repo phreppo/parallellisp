@@ -8,7 +8,7 @@ import (
 // Lisp is the global variable for the language
 var Lisp *language
 
-func InitLanguage() {
+func initLanguage() {
 	Lisp = newLanguage()
 }
 

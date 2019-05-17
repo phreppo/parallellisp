@@ -3,8 +3,7 @@ package cell
 // Mem is the global memory
 var Mem *memory
 
-// InitMemory initializes the global memory. Must be called before parsing
-func InitMemory() {
+func initMemory() {
 	Mem = newMemory()
 	Mem.symbolFactory = newSymbolCellSupplier()
 }

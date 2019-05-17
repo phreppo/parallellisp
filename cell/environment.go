@@ -41,4 +41,5 @@ var GlobalEnv = make(map[string]Cell)
 
 func initGlobalEnv() {
 	GlobalEnv["id"], _ = Parse("(lambda (x) x)")
+	GlobalEnv["t"], _ = Parse("t")
 }

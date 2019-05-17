@@ -96,6 +96,10 @@ func newLanguage() *language {
 				Sym:    "atom",
 				Lambda: atomLambda},
 
+			"+": BuiltinLambdaCell{
+				Sym:    "+",
+				Lambda: plusLambda},
+
 			// "label",
 		},
 
@@ -161,17 +165,28 @@ func quoteMacro(args Cell, env *EnvironmentEntry) EvalResult {
 }
 
 func timeMacro(args Cell, env *EnvironmentEntry) EvalResult {
+	if args == nil {
+		return newEvalResult(nil, newEvalError("[time] too few arguments"))
+	}
 	now := time.Now()
 	start := now.UnixNano()
 
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	result := eval(unsafeCar(args), env)
+	if result.Err != nil {
+		return result
+	}
 
 	now = time.Now()
 	afterEvalTime := now.UnixNano()
 	elapsedMillis := (afterEvalTime - start) / 1000000
 	fmt.Println("time:", elapsedMillis, "ms")
 
-	return newEvalResult(nil, nil)
+	return result
+}
+
+func lambdaMacro(args Cell, env *EnvironmentEntry) EvalResult {
+	// lambda autoquote
+	return newEvalResult(MakeCons(MakeSymbol("lambda"), args), nil)
 }
 
 func carLambda(args Cell, env *EnvironmentEntry) EvalResult {
@@ -249,9 +264,18 @@ func atomLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	}
 }
 
-func lambdaMacro(args Cell, env *EnvironmentEntry) EvalResult {
-	// lambda autoquote
-	return newEvalResult(MakeCons(MakeSymbol("lambda"), args), nil)
+func plusLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	nums := extractCars(args)
+	tot := 0
+	for _, numCell := range nums {
+		switch num := numCell.(type) {
+		case *IntCell:
+			tot += num.Val
+		default:
+			return newEvalResult(nil, newEvalError("[+] trying to add a non-number"))
+		}
+	}
+	return newEvalResult(MakeInt(tot), nil)
 }
 
 func unimplementedMacro(c Cell, env *EnvironmentEntry) EvalResult {

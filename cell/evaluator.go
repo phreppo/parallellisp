@@ -99,7 +99,7 @@ func eval(req EvalRequest) EvalResult {
 }
 
 func evlis(args Cell) EvalResult {
-	unvaluedArgs := extractArgs(args)
+	unvaluedArgs := extractCars(args)
 
 	if len(*unvaluedArgs) == 0 {
 		return newEvalResult(nil, nil)
@@ -135,7 +135,7 @@ func evlis(args Cell) EvalResult {
 	return newEvalResult(top, nil)
 }
 
-func extractArgs(args Cell) *[]Cell {
+func extractCars(args Cell) *[]Cell {
 	act := args
 	var argsArray = new([]Cell)
 	if args == nil {

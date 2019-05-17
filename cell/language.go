@@ -102,7 +102,7 @@ func newLanguage() *language {
 
 			"cond": BuiltinMacroCell{
 				Sym:   "cond",
-				Macro: unimplementedMacro},
+				Macro: condMacro},
 		},
 
 		builtinSpecialSymbols: map[string]SymbolCell{
@@ -114,6 +114,28 @@ func newLanguage() *language {
 		trueSymbol: SymbolCell{Sym: "t"},
 	}
 	return &lisp
+}
+
+func condMacro(args Cell, env *EnvironmentEntry) EvalResult {
+	argsArray := extractCars(args)
+
+	var condAndBody *[]Cell
+	var cond Cell
+	var body Cell
+	var condResult EvalResult
+
+	for _, arg := range *argsArray {
+		condAndBody = extractCars(arg)
+		cond = (*condAndBody)[0]
+		body = (*condAndBody)[1]
+		condResult = eval(NewEvalRequest(cond, EmptyEnv(), nil))
+		if condResult.Err != nil {
+			return condResult
+		} else if condResult.Cell != nil {
+			return eval(NewEvalRequest(body, EmptyEnv(), nil))
+		}
+	}
+	return newEvalResult(nil, newEvalError("[cond] none condition was verified"))
 }
 
 func quoteMacro(args Cell, env *EnvironmentEntry) EvalResult {

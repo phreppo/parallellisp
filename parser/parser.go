@@ -69,6 +69,7 @@ func buildQuote(tokens []token) (Cell, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	firstConsArg := MakeCons(quotedSexpression, nil)
 	topCons := MakeCons(quoteSym, firstConsArg)
 	return topCons, nil
@@ -94,6 +95,7 @@ func buildCons(tokens []token) (Cell, error) {
 		return nil, err
 	}
 	if nextToken.typ == tokClose {
+		extractNextToken(tokens)
 		return top, nil
 	}
 

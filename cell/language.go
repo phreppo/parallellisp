@@ -176,17 +176,16 @@ func eqLambda(args Cell, env *EnvironmentEntry) *EvalResult {
 	case *ConsCell:
 		switch secondArg := firstArg.Cdr.(type) {
 		case *ConsCell:
-			if firstArg.Car.Eq(secondArg.Car) {
+			if eq(firstArg.Car, secondArg.Car) {
 				return newEvalResult(MakeSymbol("T"), nil)
 			} else {
 				return newEvalResult(nil, nil)
 			}
 		default:
-			// fmt.Println(secondArg)
-			return newEvalResult(nil, newEvalError("[eq] not enough argumentsbbbbbbbbbbbbb"))
+			return newEvalResult(nil, newEvalError("[eq] not enough arguments"))
 		}
 	default:
-		return newEvalResult(nil, newEvalError("[eq] not enough argumentsaaaaaaaaaaaaaaaa"))
+		return newEvalResult(nil, newEvalError("[eq] not enough arguments"))
 	}
 }
 

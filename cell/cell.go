@@ -154,10 +154,6 @@ func (c ConsCell) IsAtom() bool {
 }
 
 func (c ConsCell) String() string {
-	// left := fmt.Sprintf("%v", c.Car)
-	// right := fmt.Sprintf("%v", c.Cdr)
-	// return "(" + left + " . " + right + ")"
-
 	left := fmt.Sprintf("%v", c.Car)
 	rest := ""
 	act := c.Cdr
@@ -179,10 +175,18 @@ func (c ConsCell) String() string {
 }
 
 func (cons1 ConsCell) Eq(cons2 Cell) bool {
-	switch castedC := cons2.(type) {
+	switch castedCons2 := cons2.(type) {
 	case *ConsCell:
-		return cons1.Car.Eq(castedC.Car) && cons1.Cdr.Eq(castedC.Cdr)
+		return eq(cons1.Car, castedCons2.Car) && eq(cons1.Cdr, castedCons2.Cdr)
 	default:
 		return false
+	}
+}
+
+func eq(c1, c2 Cell) bool {
+	if c1 == nil && c2 == nil {
+		return true
+	} else {
+		return c1.Eq(c2)
 	}
 }

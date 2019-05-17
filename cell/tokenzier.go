@@ -8,14 +8,16 @@ import (
 type tokenType int
 
 const (
-	tokNone  tokenType = 0
-	tokOpen  tokenType = 1
-	tokClose tokenType = 2
-	tokDot   tokenType = 3
-	tokQuote tokenType = 4
-	tokSym   tokenType = 5
-	tokNum   tokenType = 6
-	tokStr   tokenType = 7
+	tokNone          tokenType = 0
+	tokOpen          tokenType = 1
+	tokClose         tokenType = 2
+	tokDot           tokenType = 3
+	tokQuote         tokenType = 4
+	tokSym           tokenType = 5
+	tokNum           tokenType = 6
+	tokStr           tokenType = 7
+	tokOpenParallel  tokenType = 8
+	tokCloseParallel tokenType = 9
 )
 
 type token struct {
@@ -30,8 +32,12 @@ func (t token) String() string {
 		return "NONE"
 	case tokOpen:
 		return "("
+	case tokOpenParallel:
+		return "{"
 	case tokClose:
 		return ")"
+	case tokCloseParallel:
+		return "}"
 	case tokDot:
 		return "."
 	case tokQuote:
@@ -70,6 +76,10 @@ func readOneToken(source string) (token, string) {
 		return token{typ: tokOpen}, source[index+1:]
 	} else if nextChar == ')' {
 		return token{typ: tokClose}, source[index+1:]
+	} else if nextChar == '{' {
+		return token{typ: tokOpenParallel}, source[index+1:]
+	} else if nextChar == '}' {
+		return token{typ: tokCloseParallel}, source[index+1:]
 	} else if nextChar == '.' {
 		return token{typ: tokDot}, source[index+1:]
 	} else if nextChar == '\'' {
@@ -105,7 +115,7 @@ func firstWordOrNumber(str string) (string, string) {
 	stringWithoutBlanks := str[wordBeginningIndex:]
 	result := ""
 	for i, r := range stringWithoutBlanks {
-		if r == '\n' || r == ' ' || r == '.' || r == '(' || r == ')' || r == '\'' {
+		if r == '\n' || r == ' ' || r == '.' || r == '(' || r == ')' || r == '{' || r == '}' || r == '\'' {
 			return result, stringWithoutBlanks[i:]
 		}
 		result += string(r)

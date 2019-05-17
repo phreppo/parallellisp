@@ -2,7 +2,6 @@ package cell
 
 import (
 	"fmt"
-	"runtime"
 )
 
 var EvalService = startEvalService()
@@ -83,12 +82,13 @@ func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
 		case *BuiltinMacroCell:
 			return car.Macro(c.Cdr, env)
 		default:
-			var argsResult EvalResult
-			if runtime.NumGoroutine() < runtime.NumCPU() {
-				argsResult = evlisParallel(c.Cdr, env)
-			} else {
-				argsResult = evlisSequential(c.Cdr, env)
-			}
+			// var argsResult EvalResult
+			// if runtime.NumGoroutine() < runtime.NumCPU() {
+			// 	argsResult = evlisParallel(c.Cdr, env)
+			// } else {
+			// 	argsResult = evlisSequential(c.Cdr, env)
+			// }
+			argsResult := c.Evlis(c.Cdr, env)
 			if argsResult.Err != nil {
 				return newEvalResult(nil, argsResult.Err)
 			} else {

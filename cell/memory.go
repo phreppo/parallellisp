@@ -20,5 +20,5 @@ func MakeSymbol(s string) Cell {
 
 // MakeCons supplies a Cons Cell. Blocking: use only in sequential code
 func MakeCons(car Cell, cdr Cell) Cell {
-	return &ConsCell{car, cdr}
+	return &ConsCell{car, cdr, evlisSequential}
 }

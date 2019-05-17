@@ -124,8 +124,9 @@ func (l BuiltinMacroCell) Eq(c Cell) bool {
 *******************************************************************************/
 
 type ConsCell struct {
-	Car Cell
-	Cdr Cell
+	Car   Cell
+	Cdr   Cell
+	Evlis func(args Cell, env *EnvironmentEntry) EvalResult
 }
 
 func (c ConsCell) String() string {

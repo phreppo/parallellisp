@@ -36,6 +36,13 @@ func ricParse(tokens []token) (Cell, error) {
 		return buildQuote(tokens)
 	case tokOpen:
 		return buildCons(tokens)
+	case tokOpenParallel:
+		cons, err := buildCons(tokens)
+		if err != nil {
+			return nil, err
+		}
+		(*(cons.(*ConsCell))).Evlis = evlisParallel
+		return cons, nil
 	default:
 		return nil, ParseError{"parse error near token " + fmt.Sprintf("%v", actualToken)}
 	}
@@ -147,7 +154,7 @@ func buildCons(tokens []token) (Cell, error) {
 				return nil, err
 			}
 
-			if maybeClosePar.typ == tokClose {
+			if maybeClosePar.typ == tokClose || maybeClosePar.typ == tokCloseParallel {
 				extractNextToken(tokens)
 				return top, nil
 			}

@@ -91,7 +91,7 @@ func (s SymbolCell) Eq(c Cell) bool {
 
 type BuiltinLambdaCell struct {
 	Sym    string
-	Lambda func(Cell, *EnvironmentEntry) *EvalResult
+	Lambda func(Cell, *EnvironmentEntry) EvalResult
 }
 
 func (l BuiltinLambdaCell) IsAtom() bool {
@@ -117,7 +117,7 @@ func (l BuiltinLambdaCell) Eq(c Cell) bool {
 
 type BuiltinMacroCell struct {
 	Sym   string
-	Macro func(Cell, *EnvironmentEntry) *EvalResult
+	Macro func(Cell, *EnvironmentEntry) EvalResult
 }
 
 func (m BuiltinMacroCell) IsAtom() bool {

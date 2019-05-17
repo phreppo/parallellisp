@@ -103,7 +103,7 @@ func newLanguage() *language {
 	return &lisp
 }
 
-func quoteMacro(args Cell, env *EnvironmentEntry) *EvalResult {
+func quoteMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	switch cons := args.(type) {
 	case *ConsCell:
 		return newEvalResult(cons.Car, nil)
@@ -112,7 +112,7 @@ func quoteMacro(args Cell, env *EnvironmentEntry) *EvalResult {
 	}
 }
 
-func timeMacro(args Cell, env *EnvironmentEntry) *EvalResult {
+func timeMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	now := time.Now()
 	start := now.UnixNano()
 
@@ -126,7 +126,7 @@ func timeMacro(args Cell, env *EnvironmentEntry) *EvalResult {
 	return newEvalResult(nil, nil)
 }
 
-func carLambda(args Cell, env *EnvironmentEntry) *EvalResult {
+func carLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	switch topCons := args.(type) {
 	case *ConsCell:
 		switch cons := topCons.Car.(type) {
@@ -140,7 +140,7 @@ func carLambda(args Cell, env *EnvironmentEntry) *EvalResult {
 	}
 }
 
-func cdrLambda(args Cell, env *EnvironmentEntry) *EvalResult {
+func cdrLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	switch topCons := args.(type) {
 	case *ConsCell:
 		switch cons := topCons.Car.(type) {
@@ -154,7 +154,7 @@ func cdrLambda(args Cell, env *EnvironmentEntry) *EvalResult {
 	}
 }
 
-func consLambda(args Cell, env *EnvironmentEntry) *EvalResult {
+func consLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	switch firstCons := args.(type) {
 	case *ConsCell:
 		switch cons := firstCons.Cdr.(type) {
@@ -169,7 +169,7 @@ func consLambda(args Cell, env *EnvironmentEntry) *EvalResult {
 	}
 }
 
-func eqLambda(args Cell, env *EnvironmentEntry) *EvalResult {
+func eqLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	// fmt.Println(args)
 
 	switch firstArg := args.(type) {
@@ -189,7 +189,7 @@ func eqLambda(args Cell, env *EnvironmentEntry) *EvalResult {
 	}
 }
 
-func atomLambda(args Cell, env *EnvironmentEntry) *EvalResult {
+func atomLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	switch firstCons := args.(type) {
 	case *ConsCell:
 		switch firstCons.Car.(type) {
@@ -203,10 +203,10 @@ func atomLambda(args Cell, env *EnvironmentEntry) *EvalResult {
 	}
 }
 
-func unimplementedMacro(c Cell, env *EnvironmentEntry) *EvalResult {
+func unimplementedMacro(c Cell, env *EnvironmentEntry) EvalResult {
 	panic("unimplemented macro")
 }
 
-func unimplementedLambda(c Cell, env *EnvironmentEntry) *EvalResult {
+func unimplementedLambda(c Cell, env *EnvironmentEntry) EvalResult {
 	panic("unimplemented lambda")
 }

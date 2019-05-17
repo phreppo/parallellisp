@@ -10,9 +10,10 @@ type EvalError struct {
 	Err string
 }
 
-func newEvalError(e string) *EvalError {
-	r := new(EvalError)
-	r.Err = e
+func newEvalError(e string) EvalError {
+	r := EvalError{
+		Err: e,
+	}
 	return r
 }
 
@@ -21,24 +22,26 @@ type EvalResult struct {
 	Err  error
 }
 
-func newEvalResult(c Cell, e error) *EvalResult {
-	r := new(EvalResult)
-	r.Cell = c
-	r.Err = e
+func newEvalResult(c Cell, e error) EvalResult {
+	r := EvalResult{
+		Cell: c,
+		Err:  e,
+	}
 	return r
 }
 
 type EvalRequest struct {
 	Cell      Cell
 	Env       *EnvironmentEntry
-	ReplyChan chan *EvalResult
+	ReplyChan chan EvalResult
 }
 
-func NewEvalRequest(c Cell, env *EnvironmentEntry, replChan chan *EvalResult) *EvalRequest {
-	r := new(EvalRequest)
-	r.Cell = c
-	r.Env = env
-	r.ReplyChan = replChan
+func NewEvalRequest(c Cell, env *EnvironmentEntry, replChan chan EvalResult) EvalRequest {
+	r := EvalRequest{
+		Cell:      c,
+		Env:       env,
+		ReplyChan: replChan,
+	}
 	return r
 }
 
@@ -46,20 +49,20 @@ func (e EvalError) Error() string {
 	return e.Err
 }
 
-func startEvalService() chan *EvalRequest {
-	service := make(chan *EvalRequest)
+func startEvalService() chan EvalRequest {
+	service := make(chan EvalRequest)
 	go server(service)
 	return service
 }
 
-func server(service <-chan *EvalRequest) {
+func server(service <-chan EvalRequest) {
 	for {
 		req := <-service
 		go eval(req)
 	}
 }
 
-func eval(req *EvalRequest) {
+func eval(req EvalRequest) {
 	replyChan := req.ReplyChan
 	toEval := req.Cell
 	env := req.Env
@@ -92,17 +95,17 @@ func eval(req *EvalRequest) {
 	}
 }
 
-func evlis(args Cell) *EvalResult {
+func evlis(args Cell) EvalResult {
 	unvaluedArgs := extractArgs(args)
 
 	if len(*unvaluedArgs) == 0 {
 		return newEvalResult(nil, nil)
 	}
 
-	var replyChans []chan *EvalResult
+	var replyChans []chan EvalResult
 	n := len(*unvaluedArgs)
 	for i := 0; i < n; i++ {
-		newChan := make(chan *EvalResult)
+		newChan := make(chan EvalResult)
 		replyChans = append(replyChans, newChan)
 		go eval(NewEvalRequest((*unvaluedArgs)[i], EmptyEnv(), newChan))
 	}
@@ -149,12 +152,11 @@ func extractArgs(args Cell) *[]Cell {
 	return argsArray
 }
 
-func apply(function Cell, args Cell, env *EnvironmentEntry) *EvalResult {
+func apply(function Cell, args Cell, env *EnvironmentEntry) EvalResult {
 	switch functionCasted := function.(type) {
 	case *BuiltinLambdaCell:
 		return functionCasted.Lambda(args, env)
 	default:
 		return newEvalResult(nil, newEvalError("[apply] partial implementation"))
 	}
-	return nil
 }

@@ -27,7 +27,7 @@ func repl() {
 }
 
 func evalAndPrint(sexpr Cell) {
-	ansChan := make(chan *EvalResult)
+	ansChan := make(chan EvalResult)
 	EvalService <- NewEvalRequest(sexpr, EmptyEnv(), ansChan)
 	result := <-ansChan
 	if result.Err != nil {
@@ -103,7 +103,7 @@ func evalCellInRandomTime(i int) {
 
 	intCell := <-ans
 
-	ansChan := make(chan *EvalResult)
+	ansChan := make(chan EvalResult)
 	EvalService <- NewEvalRequest(intCell, EmptyEnv(), ansChan)
 
 	r := rand.Intn(1000)

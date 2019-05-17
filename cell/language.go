@@ -120,6 +120,10 @@ func newLanguage() *language {
 			"lambda": BuiltinMacroCell{
 				Sym:   "lambda",
 				Macro: lambdaMacro},
+
+			"defun": BuiltinMacroCell{
+				Sym:   "defun",
+				Macro: defunMacro},
 		},
 
 		builtinSpecialSymbols: map[string]SymbolCell{
@@ -187,6 +191,26 @@ func timeMacro(args Cell, env *EnvironmentEntry) EvalResult {
 func lambdaMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	// lambda autoquote
 	return newEvalResult(MakeCons(MakeSymbol("lambda"), args), nil)
+}
+
+func defunMacro(args Cell, env *EnvironmentEntry) EvalResult {
+	argsSlice := extractCars(args)
+	if len(argsSlice) != 3 {
+		return newEvalResult(nil, newEvalError("[defun] wrong number of arguments"))
+	}
+	name := argsSlice[0]
+	formalParameters := argsSlice[1]
+	lambdaBody := argsSlice[2]
+	bodyCons := MakeCons(lambdaBody, nil)
+	argsAndBodyCons := MakeCons(formalParameters, bodyCons)
+	ret := MakeCons(MakeSymbol("lambda"), argsAndBodyCons)
+	switch nameSymbolCell := name.(type) {
+	case *SymbolCell:
+		GlobalEnv[nameSymbolCell.Sym] = ret
+	default:
+		return newEvalResult(nil, newEvalError("[defun] the name of the lambda must be a symbol"))
+	}
+	return newEvalResult(ret, nil)
 }
 
 func carLambda(args Cell, env *EnvironmentEntry) EvalResult {

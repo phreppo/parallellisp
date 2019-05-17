@@ -216,8 +216,8 @@ func assoc(symbol *SymbolCell, env *EnvironmentEntry) EvalResult {
 	}
 	act := env
 	for act != nil {
-		if *(act.Pair.Symbol) == *symbol {
-			return newEvalResult(env.Pair.Value, nil)
+		if (act.Pair.Symbol.Sym) == symbol.Sym {
+			return newEvalResult(act.Pair.Value, nil)
 		}
 		act = act.Next
 	}

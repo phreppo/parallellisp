@@ -1,5 +1,7 @@
 package cell
 
+import "fmt"
+
 func EmptyEnv() *EnvironmentEntry {
 	return nil
 }
@@ -21,6 +23,13 @@ func NewEnvironmentEntry(sym *SymbolCell, value Cell, next *EnvironmentEntry) *E
 type EnvironmentEntry struct {
 	Pair *EnvironmentPair
 	Next *EnvironmentEntry
+}
+
+func (e *EnvironmentEntry) String() string {
+	if e == nil {
+		return ""
+	}
+	return fmt.Sprintf("%v -> %v\n", e.Pair.Symbol, e.Pair.Value) + fmt.Sprintf("%v", e.Next)
 }
 
 type EnvironmentPair struct {

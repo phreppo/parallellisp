@@ -63,12 +63,10 @@ func server(service <-chan EvalRequest) {
 }
 
 func serve(req EvalRequest) {
-	req.ReplyChan <- eval(req)
+	req.ReplyChan <- eval(req.Cell, req.Env)
 }
 
-func eval(req EvalRequest) EvalResult {
-	toEval := req.Cell
-	env := req.Env
+func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
 	if toEval == nil {
 		return newEvalResult(nil, nil)
 	}
@@ -112,7 +110,7 @@ func evlis(args Cell, env *EnvironmentEntry) EvalResult {
 		go serve(NewEvalRequest(unvaluedArgs[i], env, newChan)) // TODO: empty env!!
 	}
 
-	lastArgResult := eval(NewEvalRequest(unvaluedArgs[n-1], env, nil))
+	lastArgResult := eval(unvaluedArgs[n-1], env)
 	if lastArgResult.Err != nil {
 		return lastArgResult
 	}
@@ -171,11 +169,9 @@ func apply(function Cell, args Cell, env *EnvironmentEntry) EvalResult {
 		if err != nil {
 			return newEvalResult(nil, err)
 		}
-		req := NewEvalRequest(unsafeCaddr(function), newEnv, nil)
-		return eval(req)
+		return eval(unsafeCaddr(function), newEnv)
 	case *SymbolCell:
-		req := NewEvalRequest(function, env, nil)
-		evaluedFunction := eval(req)
+		evaluedFunction := eval(function, env)
 		if evaluedFunction.Err != nil {
 			return newEvalResult(nil, evaluedFunction.Err)
 		}

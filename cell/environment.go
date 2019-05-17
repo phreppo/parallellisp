@@ -27,3 +27,5 @@ type EnvironmentPair struct {
 	Symbol *SymbolCell
 	Value  Cell
 }
+
+var GlobalEnv = map[Cell]Cell{}

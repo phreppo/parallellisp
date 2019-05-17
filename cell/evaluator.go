@@ -179,7 +179,7 @@ func apply(function Cell, args Cell, env *EnvironmentEntry) EvalResult {
 
 // Pre: symbol != nil, env. pair != nil
 func assoc(symbol *SymbolCell, env *EnvironmentEntry) EvalResult {
-	if res, ok := GlobalEnv[symbol]; ok {
+	if res, ok := GlobalEnv[symbol.Sym]; ok {
 		return newEvalResult(res, nil)
 	}
 	if env == nil {

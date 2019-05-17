@@ -38,6 +38,7 @@ func evalAndPrint(sexpr Cell) {
 
 func main() {
 	InitMemory()
+	InitGlobalEnv()
 	repl()
 
 	// tokens := Tokenize(" -33 +   \"ciao\" \"come -33 stai?\" io bene")

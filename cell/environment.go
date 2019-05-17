@@ -28,4 +28,8 @@ type EnvironmentPair struct {
 	Value  Cell
 }
 
-var GlobalEnv = map[Cell]Cell{}
+var GlobalEnv = make(map[string]Cell)
+
+func InitGlobalEnv() {
+	GlobalEnv["id"], _ = Parse("(lambda (x) x)")
+}

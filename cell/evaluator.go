@@ -122,33 +122,13 @@ func evlis(args Cell) EvalResult {
 	var actCons Cell
 	for i := 0; i < n; i++ {
 		if i == n-1 {
-			if top == nil {
-				top = MakeCons(lastArgResult.Cell, nil)
-				actCons = top
-			} else {
-				tmp := MakeCons(lastArgResult.Cell, nil)
-				switch actConsCasted := actCons.(type) {
-				case *ConsCell:
-					actConsCasted.Cdr = tmp
-					actCons = actConsCasted.Cdr
-				}
-			}
+			appendCellToArgs(&top, &actCons, &(lastArgResult.Cell))
 		} else {
 			evaluedArg := <-replyChans[i]
 			if evaluedArg.Err != nil {
 				return newEvalResult(nil, evaluedArg.Err)
 			}
-			if top == nil {
-				top = MakeCons(evaluedArg.Cell, nil)
-				actCons = top
-			} else {
-				tmp := MakeCons(evaluedArg.Cell, nil)
-				switch actConsCasted := actCons.(type) {
-				case *ConsCell:
-					actConsCasted.Cdr = tmp
-					actCons = actConsCasted.Cdr
-				}
-			}
+			appendCellToArgs(&top, &actCons, &(evaluedArg.Cell))
 		}
 	}
 
@@ -156,7 +136,6 @@ func evlis(args Cell) EvalResult {
 }
 
 func extractArgs(args Cell) *[]Cell {
-
 	act := args
 	var argsArray = new([]Cell)
 	if args == nil {
@@ -172,6 +151,21 @@ func extractArgs(args Cell) *[]Cell {
 		}
 	}
 	return argsArray
+}
+
+// appends to append after actCell, maybe initializing top. Has side effects
+func appendCellToArgs(top, actCell, toAppend *Cell) {
+	if *top == nil {
+		*top = MakeCons((*toAppend), nil)
+		*actCell = *top
+	} else {
+		tmp := MakeCons((*toAppend), nil)
+		switch actConsCasted := (*actCell).(type) {
+		case *ConsCell:
+			actConsCasted.Cdr = tmp
+			*actCell = actConsCasted.Cdr
+		}
+	}
 }
 
 func apply(function Cell, args Cell, env *EnvironmentEntry) EvalResult {

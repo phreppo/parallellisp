@@ -186,7 +186,6 @@ func (cons1 ConsCell) Eq(cons2 Cell) bool {
 func eq(c1, c2 Cell) bool {
 	if c1 == nil && c2 == nil {
 		return true
-	} else {
-		return c1.Eq(c2)
 	}
+	return c1.Eq(c2)
 }

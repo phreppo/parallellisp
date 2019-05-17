@@ -55,24 +55,34 @@ func (lang *language) IsBuiltinSpecialSymbol(s string) (bool, Cell) {
 	return isBuiltinSpecialSymbol, &builtinSpecialSymbol
 }
 
+func (lang *language) GetTrueSymbol() Cell {
+	return &(lang.trueSymbol)
+}
+
 func newLanguage() *language {
 	lisp := language{
 		builtinLambdas: map[string]BuiltinLambdaCell{
+
 			"car": BuiltinLambdaCell{
 				Sym:    "car",
 				Lambda: carLambda},
+
 			"cdr": BuiltinLambdaCell{
 				Sym:    "cdr",
 				Lambda: cdrLambda},
+
 			"cons": BuiltinLambdaCell{
 				Sym:    "cons",
 				Lambda: consLambda},
+
 			"eq": BuiltinLambdaCell{
 				Sym:    "eq",
 				Lambda: eqLambda},
+
 			"atom": BuiltinLambdaCell{
 				Sym:    "atom",
 				Lambda: atomLambda},
+
 			"lambda": BuiltinLambdaCell{
 				Sym:    "lambda",
 				Lambda: unimplementedLambda},
@@ -81,12 +91,15 @@ func newLanguage() *language {
 		},
 
 		builtinMacros: map[string]BuiltinMacroCell{
+
 			"quote": BuiltinMacroCell{
 				Sym:   "quote",
 				Macro: quoteMacro},
+
 			"time": BuiltinMacroCell{
 				Sym:   "time",
 				Macro: timeMacro},
+
 			"cond": BuiltinMacroCell{
 				Sym:   "cond",
 				Macro: unimplementedMacro},
@@ -170,14 +183,12 @@ func consLambda(args Cell, env *EnvironmentEntry) EvalResult {
 }
 
 func eqLambda(args Cell, env *EnvironmentEntry) EvalResult {
-	// fmt.Println(args)
-
 	switch firstArg := args.(type) {
 	case *ConsCell:
 		switch secondArg := firstArg.Cdr.(type) {
 		case *ConsCell:
 			if eq(firstArg.Car, secondArg.Car) {
-				return newEvalResult(MakeSymbol("T"), nil)
+				return newEvalResult(MakeSymbol("t"), nil)
 			} else {
 				return newEvalResult(nil, nil)
 			}

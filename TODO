@@ -2,3 +2,4 @@
 [quando vuoi] la newnev entry potrebbe mettere sullo stack invece che sullo heap?
 [alla fine] implementare nell interfaccia di cell una versione unsafe di car e cdr che panichino se fa una merda il resto
 [alla fine] provare un array invece diuna slice per gli argomenti se va piu veloce
+[alla fine] mettere le freccie per canali di input e di output

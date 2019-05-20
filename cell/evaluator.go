@@ -2,7 +2,13 @@ package cell
 
 import (
 	"fmt"
+	"runtime"
+	"sync/atomic"
 )
+
+var ops int32
+
+var nmax = int32(runtime.NumCPU())
 
 var EvalService = startEvalService()
 
@@ -82,13 +88,15 @@ func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
 		case *BuiltinMacroCell:
 			return car.Macro(c.Cdr, env)
 		default:
-			// var argsResult EvalResult
+			var argsResult EvalResult
 			// if runtime.NumGoroutine() < runtime.NumCPU() {
-			// 	argsResult = evlisParallel(c.Cdr, env)
-			// } else {
-			// 	argsResult = evlisSequential(c.Cdr, env)
-			// }
-			argsResult := c.Evlis(c.Cdr, env)
+			if atomic.LoadInt32(&ops) < nmax {
+				// argsResult = evlisParallel(c.Cdr, env)
+				argsResult = c.Evlis(c.Cdr, env)
+			} else {
+				argsResult = evlisSequential(c.Cdr, env)
+			}
+			// argsResult := c.Evlis(c.Cdr, env)
 			if argsResult.Err != nil {
 				return newEvalResult(nil, argsResult.Err)
 			} else {
@@ -110,6 +118,9 @@ func evlisParallel(args Cell, env *EnvironmentEntry) EvalResult {
 
 	var replyChans []chan EvalResult
 	n := len(unvaluedArgs)
+
+	atomic.AddInt32(&ops, int32(n))
+
 	for i := 0; i < n-1; i++ {
 		newChan := make(chan EvalResult)
 		replyChans = append(replyChans, newChan)
@@ -128,6 +139,7 @@ func evlisParallel(args Cell, env *EnvironmentEntry) EvalResult {
 			appendCellToArgs(&top, &actCons, &(lastArgResult.Cell))
 		} else {
 			evaluedArg := <-replyChans[i]
+			atomic.AddInt32(&ops, -1)
 			if evaluedArg.Err != nil {
 				return newEvalResult(nil, evaluedArg.Err)
 			}

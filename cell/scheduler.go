@@ -5,20 +5,26 @@ import (
 	"sync/atomic"
 )
 
+var globalScheduler *scheduler
+
+func initGlobalScheduler() {
+	globalScheduler = newScheduler(int32(runtime.NumCPU()))
+}
+
 type scheduler struct {
 	slaves    int32
 	maxSlaves int32
 }
 
-func newScheduler() *scheduler {
+func newScheduler(maxSlaves int32) *scheduler {
 	return &scheduler{
 		slaves:    0,
-		maxSlaves: int32(runtime.NumCPU()),
+		maxSlaves: maxSlaves,
 	}
 }
 
 func (s *scheduler) shouldParallelize() bool {
-	return atomic.LoadInt32(&(s.slaves)) < s.maxSlaves
+	return atomic.LoadInt32(&(s.slaves)) <= s.maxSlaves
 }
 
 func (s *scheduler) addJob() {

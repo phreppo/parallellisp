@@ -40,7 +40,9 @@ type EnvironmentPair struct {
 var GlobalEnv = make(map[string]Cell)
 
 func initGlobalEnv() {
+
 	GlobalEnv["id"], _ = Parse("(lambda (x) x)")
+	GlobalEnv["tests"], _ = Parse("\"examples/test.lisp\"")
 	GlobalEnv["t"], _ = Parse("t")
 	GlobalEnv["fib"], _ = Parse("(lambda (n) (cond ((eq n 0) 0) ((eq n 1) 1) (t (+ (fib (- n 1)) (fib (- n 2)))))) ")
 	GlobalEnv["f"], _ = Parse("\"examples/fib.lisp\"")

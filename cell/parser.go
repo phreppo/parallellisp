@@ -8,12 +8,34 @@ var tokensIndex = 0
 
 // Parse returns the result, if there were errors parsing and eventually one error message
 func Parse(source string) (Cell, error) {
+	sexpressions, err := ParseMultipleSexpressions(source)
+	if len(sexpressions) > 1 {
+		return nil, ParseError{"[parser] too many sexpressions"}
+	}
+	if err != nil {
+		return nil, err
+	}
+	return sexpressions[0], nil
+}
+
+// ParseMultipleSexpressions resturns the array of parser sexpressions
+func ParseMultipleSexpressions(source string) ([]Cell, error) {
 	tokensIndex = 0
 	tokens := tokenize(source)
 	if len(tokens) == 1 && tokens[0].typ == tokNone {
 		return nil, ParseError{"empty source"}
 	}
-	return ricParse(tokens)
+
+	var result []Cell
+
+	for enoughTokens(tokens) {
+		actualSexpression, err := ricParse(tokens)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, actualSexpression)
+	}
+	return result, nil
 }
 
 func ricParse(tokens []token) (Cell, error) {

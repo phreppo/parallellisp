@@ -16,7 +16,7 @@ func repl() {
 		source, _ := reader.ReadString('\n')
 		sexpr, err := Parse(source)
 		if err != nil {
-			fmt.Println("  ", aurora.Red(err))
+			fmt.Println(" ", aurora.BrightRed(err))
 		} else {
 			evalAndPrint(sexpr)
 		}

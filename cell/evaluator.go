@@ -112,7 +112,6 @@ func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
 	}
 }
 
-// todo: qui dovresti mettere prima di tutto l accodamento del numero di parametri, perche senno dopo il numero di goroutine va fuori controllo
 func evlisParallel(args Cell, env *EnvironmentEntry) EvalResult {
 	n := getNumberOfArgs(args)
 	scheduler.AddJobs(int32(n - 1))

@@ -109,6 +109,10 @@ func newLanguage() *language {
 				Sym:    "load",
 				Lambda: loadLambda},
 
+			"write": BuiltinLambdaCell{
+				Sym:    "write",
+				Lambda: writeLambda},
+
 			// "label",
 		},
 
@@ -345,6 +349,12 @@ func loadLambda(args Cell, env *EnvironmentEntry) EvalResult {
 		}
 	}
 	return lastEvalued
+}
+
+func writeLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	phrase := extractCars(args)
+	fmt.Println((phrase[0].(*StringCell)).Str)
+	return newEvalPositiveResult(phrase[0])
 }
 
 func unimplementedMacro(c Cell, env *EnvironmentEntry) EvalResult {

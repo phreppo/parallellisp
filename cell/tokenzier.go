@@ -78,13 +78,28 @@ func (t token) String() string {
 
 // tokenize produces an array fo tokens
 func tokenize(source string) []token {
-	tok, rest := readOneToken(source)
+	tok, rest := readOneToken(removeComments(source))
 	var result []token
 	for (tok.typ) != tokNone {
 		result = append(result, tok)
 		tok, rest = readOneToken(rest)
 	}
 	return result
+}
+
+func removeComments(source string) string {
+	if source == "" {
+		return ""
+	}
+	if source[0] != ';' {
+		return string(source[0]) + removeComments(source[1:])
+	}
+	for index, r := range source {
+		if r == '\n' {
+			return removeComments(source[index+1:])
+		}
+	}
+	return ""
 }
 
 // returns the token and the remaining string

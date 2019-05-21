@@ -18,6 +18,14 @@
         (t {+ (fib (- n 1)) (fib (- n 2))})
     ))
 
+{defun pp-fib {n} 
+    ; computes the fibonacci number of n with the parallel evaluation of subterms
+    {cond 
+        {{eq n 0} 0} 
+        {{eq n 1} 1} 
+        {t {+ {fib {- n 1}} {fib {- n 2}}}}
+    }}
+
 (defun p-bench (fun n) 
     ; applies fun to n 8 times and then sums these results, parallel
     {+ (fun n) (fun n) (fun n) (fun n) (fun n) (fun n) (fun n) (fun n)})
@@ -33,3 +41,6 @@
 
 (write "par bench, par fib")
 (time (p-bench p-fib 25))
+
+(write "par bench, stupid par fib")
+{time {p-bench pp-fib 25}}

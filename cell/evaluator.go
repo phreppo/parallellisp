@@ -2,6 +2,8 @@ package cell
 
 import (
 	"fmt"
+
+	"github.com/parof/parallellisp/scheduler"
 )
 
 var EvalService = startEvalService()
@@ -91,7 +93,7 @@ func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
 			return car.Macro(c.Cdr, env)
 		default:
 			var argsResult EvalResult
-			if globalScheduler.shouldParallelize() {
+			if scheduler.ShouldParallelize() {
 				argsResult = c.Evlis(c.Cdr, env)
 			} else {
 				argsResult = evlisSequential(c.Cdr, env)
@@ -117,7 +119,7 @@ func evlisParallel(args Cell, env *EnvironmentEntry) EvalResult {
 
 	var replyChans []chan EvalResult
 	n := len(unvaluedArgs)
-	globalScheduler.addJobs(int32(n - 1))
+	scheduler.AddJobs(int32(n - 1))
 
 	for i := 0; i < n-1; i++ {
 		newChan := make(chan EvalResult)
@@ -137,7 +139,7 @@ func evlisParallel(args Cell, env *EnvironmentEntry) EvalResult {
 			appendCellToArgs(&top, &actCons, &(lastArgResult.Cell))
 		} else {
 			evaluedArg := <-replyChans[i]
-			globalScheduler.jobEnded()
+			scheduler.JobEnded()
 			if evaluedArg.Err != nil {
 				return newEvalErrorResult(evaluedArg.Err)
 			}

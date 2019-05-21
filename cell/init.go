@@ -4,5 +4,4 @@ package cell
 func Init() {
 	initLanguage()
 	initGlobalEnv()
-	initGlobalScheduler()
 }

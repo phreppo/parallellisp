@@ -20,13 +20,22 @@ const (
 	tokCloseParallel tokenType = 9
 )
 
+const (
+	dotChar              = '.'
+	openParChar          = '('
+	closeParChar         = ')'
+	openParParallelChar  = '{'
+	closeParParallelChar = '}'
+	quoteChar            = '\''
+)
+
 var atomicCharTokens = map[rune]bool{
-	'.':  true,
-	'(':  true,
-	')':  true,
-	'{':  true,
-	'}':  true,
-	'\'': true,
+	dotChar:              true,
+	openParChar:          true,
+	closeParChar:         true,
+	openParParallelChar:  true,
+	closeParParallelChar: true,
+	quoteChar:            true,
 }
 
 func isAtmoicCharToken(r rune) bool {
@@ -86,17 +95,17 @@ func readOneToken(source string) (token, string) {
 	nextChar, index := firstChar(source)
 	if index < 0 {
 		return token{typ: tokNone}, source
-	} else if nextChar == '(' {
+	} else if nextChar == openParChar {
 		return token{typ: tokOpen}, source[index+1:]
-	} else if nextChar == ')' {
+	} else if nextChar == closeParChar {
 		return token{typ: tokClose}, source[index+1:]
-	} else if nextChar == '{' {
+	} else if nextChar == openParParallelChar {
 		return token{typ: tokOpenParallel}, source[index+1:]
-	} else if nextChar == '}' {
+	} else if nextChar == closeParParallelChar {
 		return token{typ: tokCloseParallel}, source[index+1:]
-	} else if nextChar == '.' {
+	} else if nextChar == dotChar {
 		return token{typ: tokDot}, source[index+1:]
-	} else if nextChar == '\'' {
+	} else if nextChar == quoteChar {
 		return token{typ: tokQuote}, source[index+1:]
 	} else if nextChar == '"' {
 		rest := source[index+1:]

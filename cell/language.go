@@ -2,6 +2,7 @@ package cell
 
 import (
 	"fmt"
+	"io/ioutil"
 	"time"
 )
 
@@ -103,6 +104,10 @@ func newLanguage() *language {
 			"-": BuiltinLambdaCell{
 				Sym:    "-",
 				Lambda: minusLambda},
+
+			"load": BuiltinLambdaCell{
+				Sym:    "load",
+				Lambda: loadLambda},
 
 			// "label",
 		},
@@ -314,10 +319,32 @@ func minusLambda(args Cell, env *EnvironmentEntry) EvalResult {
 		case *IntCell:
 			tot -= num.Val
 		default:
-			return newEvalResult(nil, newEvalError("[+] trying to add a non-number"))
+			return newEvalResult(nil, newEvalError("[-] trying to subtract a non-number"))
 		}
 	}
 	return newEvalResult(MakeInt(tot), nil)
+}
+
+func loadLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	files := extractCars(args)
+	fileName := (files[0].(*StringCell)).Str
+	dat, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return newEvalErrorResult(newEvalError("[load] error opening file"))
+	}
+	source := string(dat)
+	sexpressions, err := ParseMultipleSexpressions(source)
+	if err != nil {
+		return newEvalErrorResult(err)
+	}
+	var lastEvalued EvalResult
+	for _, sexpression := range sexpressions {
+		lastEvalued = eval(sexpression, env)
+		if lastEvalued.Err != nil {
+			return lastEvalued
+		}
+	}
+	return lastEvalued
 }
 
 func unimplementedMacro(c Cell, env *EnvironmentEntry) EvalResult {

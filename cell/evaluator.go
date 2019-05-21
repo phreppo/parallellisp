@@ -123,14 +123,14 @@ func evlisParallel(args Cell, env *EnvironmentEntry) EvalResult {
 
 	var replyChans []chan EvalResult
 	act := args
-	for act != nil && unsafeCdr(act) != nil {
+	for act != nil && cdr(act) != nil {
 		newChan := make(chan EvalResult)
 		replyChans = append(replyChans, newChan)
-		go serve(NewEvalRequest(unsafeCar(act), env, newChan))
-		act = unsafeCdr(act)
+		go serve(NewEvalRequest(car(act), env, newChan))
+		act = cdr(act)
 	}
 
-	lastArgResult := eval(unsafeCar(act), env)
+	lastArgResult := eval(car(act), env)
 	if lastArgResult.Err != nil {
 		return lastArgResult
 	}
@@ -159,10 +159,10 @@ func getNumberOfArgs(c Cell) int {
 	actNotNil := (act != nil)
 	for actNotNil {
 		count++
-		if unsafeCdr(act) == nil {
+		if cdr(act) == nil {
 			actNotNil = false
 		}
-		act = unsafeCdr(act)
+		act = cdr(act)
 	}
 	return count
 }
@@ -218,11 +218,11 @@ func apply(function Cell, args Cell, env *EnvironmentEntry) EvalResult {
 		return functionCasted.Lambda(args, env)
 	case *ConsCell:
 		if Lisp.IsLambdaSymbol(functionCasted.Car) {
-			newEnv, err := pairlis(unsafeCadr(function), args, env)
+			newEnv, err := pairlis(cadr(function), args, env)
 			if err != nil {
 				return newEvalErrorResult(err)
 			}
-			return eval(unsafeCaddr(function), newEnv)
+			return eval(caddr(function), newEnv)
 		} else {
 			// label check here
 			return newEvalErrorResult(newEvalError("[apply] trying to apply a non-lambda"))
@@ -238,24 +238,24 @@ func apply(function Cell, args Cell, env *EnvironmentEntry) EvalResult {
 	}
 }
 
-func unsafeCar(c Cell) Cell {
+func car(c Cell) Cell {
 	return (c.(*ConsCell)).Car
 }
 
-func unsafeCdr(c Cell) Cell {
+func cdr(c Cell) Cell {
 	return (c.(*ConsCell)).Cdr
 }
 
-func unsafeCaar(c Cell) Cell {
-	return unsafeCar(unsafeCar(c))
+func caar(c Cell) Cell {
+	return car(car(c))
 }
 
-func unsafeCadr(c Cell) Cell {
-	return unsafeCar(unsafeCdr(c.(*ConsCell)))
+func cadr(c Cell) Cell {
+	return car(cdr(c.(*ConsCell)))
 }
 
-func unsafeCaddr(c Cell) Cell {
-	return unsafeCadr(unsafeCdr(c.(*ConsCell)))
+func caddr(c Cell) Cell {
+	return cadr(cdr(c.(*ConsCell)))
 }
 
 // Pre: symbol != nil, env. pair != nil
@@ -284,7 +284,7 @@ func pairlis(formalParameters, actualParameters Cell, oldEnv *EnvironmentEntry) 
 		if actActual == nil {
 			return nil, newEvalError("[parilis] not enough actual parameters")
 		}
-		newEntry = NewEnvironmentEntry((unsafeCar(actFormal)).(*SymbolCell), unsafeCar(actActual), newEntry)
+		newEntry = NewEnvironmentEntry((car(actFormal)).(*SymbolCell), car(actActual), newEntry)
 		actFormal = (actFormal.(*ConsCell)).Cdr
 		actActual = (actActual.(*ConsCell)).Cdr
 	}

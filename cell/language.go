@@ -157,16 +157,16 @@ func condMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	var body Cell
 	var condResult EvalResult
 	for actBranch != nil {
-		condAndBody = unsafeCar(actBranch)
-		cond = unsafeCar(condAndBody)
-		body = unsafeCadr(condAndBody)
+		condAndBody = car(actBranch)
+		cond = car(condAndBody)
+		body = cadr(condAndBody)
 		condResult = eval(cond, env)
 		if condResult.Err != nil {
 			return condResult
 		} else if condResult.Cell != nil {
 			return eval(body, env)
 		}
-		actBranch = unsafeCdr(actBranch)
+		actBranch = cdr(actBranch)
 	}
 	return newEvalResult(nil, newEvalError("[cond] none condition was verified"))
 }
@@ -187,7 +187,7 @@ func timeMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	now := time.Now()
 	start := now.UnixNano()
 
-	result := eval(unsafeCar(args), env)
+	result := eval(car(args), env)
 	if result.Err != nil {
 		return result
 	}
@@ -304,8 +304,8 @@ func plusLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	tot := 0
 	act := args
 	for act != nil {
-		tot += (unsafeCar(act).(*IntCell)).Val
-		act = unsafeCdr(act)
+		tot += (car(act).(*IntCell)).Val
+		act = cdr(act)
 	}
 	return newEvalPositiveResult(MakeInt(tot))
 }
@@ -314,11 +314,11 @@ func minusLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	if args == nil {
 		return newEvalErrorResult(newEvalError("[-] too few arguments"))
 	}
-	tot := (unsafeCar(args).(*IntCell)).Val
-	act := unsafeCdr(args)
+	tot := (car(args).(*IntCell)).Val
+	act := cdr(args)
 	for act != nil {
-		tot -= (unsafeCar(act).(*IntCell)).Val
-		act = unsafeCdr(act)
+		tot -= (car(act).(*IntCell)).Val
+		act = cdr(act)
 	}
 	return newEvalPositiveResult(MakeInt(tot))
 }

@@ -6,13 +6,13 @@
         (t (+ (fib (- n 1)) (fib (- n 2))))
     ))
 
-(defun clisp-bench (n) 
-    ; applies fun to n 8 times and then sums these results, sequential
-    (+ (fib n) (fib n) (fib n) (fib n) (fib n) (fib n) (fib n) (fib n)))
-
 (defun bench (fun n) 
     ; applies fun to n 8 times and then sums these results, sequential
     (+ (fun n) (fun n) (fun n) (fun n) (fun n) (fun n) (fun n) (fun n)))
+
+(defun clisp-bench (n) 
+    ; applies fun to n 8 times and then sums these results, sequential
+    (+ (fib n) (fib n) (fib n) (fib n) (fib n) (fib n) (fib n) (fib n))) 
 
 (defun clisp-bench (n) 
     ; applies fun to n 8 times and then sums these results, sequential

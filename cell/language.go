@@ -292,12 +292,12 @@ func atomLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	case *ConsCell:
 		switch firstCons.Car.(type) {
 		case *ConsCell:
-			return newEvalResult(nil, nil)
+			return newEvalPositiveResult(nil)
 		default:
-			return newEvalResult(MakeSymbol("t"), nil)
+			return newEvalPositiveResult(MakeSymbol("t"))
 		}
 	default:
-		return newEvalResult(nil, newEvalError("[atom] not enough arguments"))
+		return newEvalErrorResult(newEvalError("[atom] not enough arguments"))
 	}
 }
 

@@ -277,14 +277,16 @@ func assoc(symbol *SymbolCell, env *EnvironmentEntry) EvalResult {
 }
 
 func pairlis(formalParameters, actualParameters Cell, oldEnv *EnvironmentEntry) (*EnvironmentEntry, error) {
-	formalParametersSlice := extractCars(formalParameters)
-	actualParametersSlice := extractCars(actualParameters)
-	if len(actualParametersSlice) != len(formalParametersSlice) {
-		return nil, newEvalError("[pairlis] mismatching number of formal and actual parameters ")
-	}
+	actFormal := formalParameters
+	actActual := actualParameters
 	newEntry := oldEnv
-	for i, formal := range formalParametersSlice {
-		newEntry = NewEnvironmentEntry(formal.(*SymbolCell), actualParametersSlice[i], newEntry)
+	for actFormal != nil {
+		if actActual == nil {
+			return nil, newEvalError("[parilis] not enough actual parameters")
+		}
+		newEntry = NewEnvironmentEntry((unsafeCar(actFormal)).(*SymbolCell), unsafeCar(actActual), newEntry)
+		actFormal = (actFormal.(*ConsCell)).Cdr
+		actActual = (actActual.(*ConsCell)).Cdr
 	}
 	return newEntry, nil
 }

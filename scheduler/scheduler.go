@@ -1,7 +1,6 @@
 package scheduler
 
 import (
-	"runtime"
 	"sync/atomic"
 )
 
@@ -25,7 +24,9 @@ func JobEnded() {
 	trafficWarden.jobEnded()
 }
 
-var trafficWarden = newScheduler(int32(runtime.NumCPU()))
+// var trafficWarden = newScheduler(int32(runtime.NumCPU()))
+
+var trafficWarden = newScheduler(6400)
 
 type scheduler struct {
 	slaves    int32

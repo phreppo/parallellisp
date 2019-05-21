@@ -20,6 +20,20 @@ const (
 	tokCloseParallel tokenType = 9
 )
 
+var atomicCharTokens = map[rune]bool{
+	'.':  true,
+	'(':  true,
+	')':  true,
+	'{':  true,
+	'}':  true,
+	'\'': true,
+}
+
+func isAtmoicCharToken(r rune) bool {
+	_, ok := atomicCharTokens[r]
+	return ok
+}
+
 type token struct {
 	typ tokenType
 	str string
@@ -115,7 +129,7 @@ func firstWordOrNumber(str string) (string, string) {
 	stringWithoutBlanks := str[wordBeginningIndex:]
 	result := ""
 	for i, r := range stringWithoutBlanks {
-		if r == '\n' || r == ' ' || r == '.' || r == '(' || r == ')' || r == '{' || r == '}' || r == '\'' {
+		if r == '\n' || r == ' ' || isAtmoicCharToken(r) {
 			return result, stringWithoutBlanks[i:]
 		}
 		result += string(r)

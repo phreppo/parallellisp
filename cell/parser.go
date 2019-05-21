@@ -35,9 +35,9 @@ func ricParse(tokens []token) (Cell, error) {
 	case tokQuote:
 		return buildQuote(tokens)
 	case tokOpen:
-		return buildCons(tokens)
+		return buildCons(tokens, tokOpen, tokClose)
 	case tokOpenParallel:
-		cons, err := buildCons(tokens)
+		cons, err := buildCons(tokens, tokCloseParallel, tokCloseParallel)
 		if err != nil {
 			return nil, err
 		}
@@ -80,12 +80,12 @@ func buildQuote(tokens []token) (Cell, error) {
 	return topCons, nil
 }
 
-func buildCons(tokens []token) (Cell, error) {
+func buildCons(tokens []token, openParToken, closeParToken tokenType) (Cell, error) {
 	nextToken, err := readNextToken(tokens)
 	if err != nil {
 		return nil, err
 	}
-	if nextToken.typ == tokClose {
+	if nextToken.typ == closeParToken {
 		return nil, nil
 	}
 	left, err := ricParse(tokens)
@@ -99,7 +99,7 @@ func buildCons(tokens []token) (Cell, error) {
 	if err != nil {
 		return nil, err
 	}
-	if nextToken.typ == tokClose {
+	if nextToken.typ == closeParToken {
 		extractNextToken(tokens)
 		return top, nil
 	}
@@ -122,7 +122,7 @@ func buildCons(tokens []token) (Cell, error) {
 				return nil, err
 			}
 
-			if closePar.typ != tokClose {
+			if closePar.typ != closeParToken {
 				return nil, ParseError{"parenthesis not closed near " + fmt.Sprintf("%v", right)}
 			}
 			switch cons := actCons.(type) {
@@ -154,13 +154,12 @@ func buildCons(tokens []token) (Cell, error) {
 				return nil, err
 			}
 
-			if maybeClosePar.typ == tokClose || maybeClosePar.typ == tokCloseParallel {
+			if maybeClosePar.typ == closeParToken {
 				extractNextToken(tokens)
 				return top, nil
 			}
 		}
 	}
-	return top, nil
 }
 
 type ParseError struct {

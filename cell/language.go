@@ -151,23 +151,22 @@ func newLanguage() *language {
 }
 
 func condMacro(args Cell, env *EnvironmentEntry) EvalResult {
-	argsArray := extractCars(args)
-
-	var condAndBody []Cell
+	actBranch := args
+	var condAndBody Cell
 	var cond Cell
 	var body Cell
 	var condResult EvalResult
-
-	for _, arg := range argsArray {
-		condAndBody = extractCars(arg)
-		cond = (condAndBody)[0]
-		body = (condAndBody)[1]
+	for actBranch != nil {
+		condAndBody = unsafeCar(actBranch)
+		cond = unsafeCar(condAndBody)
+		body = unsafeCadr(condAndBody)
 		condResult = eval(cond, env)
 		if condResult.Err != nil {
 			return condResult
 		} else if condResult.Cell != nil {
 			return eval(body, env)
 		}
+		actBranch = unsafeCdr(actBranch)
 	}
 	return newEvalResult(nil, newEvalError("[cond] none condition was verified"))
 }
@@ -302,31 +301,26 @@ func atomLambda(args Cell, env *EnvironmentEntry) EvalResult {
 }
 
 func plusLambda(args Cell, env *EnvironmentEntry) EvalResult {
-	nums := extractCars(args)
 	tot := 0
-	for _, numCell := range nums {
-		switch num := numCell.(type) {
-		case *IntCell:
-			tot += num.Val
-		default:
-			return newEvalResult(nil, newEvalError("[+] trying to add a non-number"))
-		}
+	act := args
+	for act != nil {
+		tot += (unsafeCar(act).(*IntCell)).Val
+		act = unsafeCdr(act)
 	}
-	return newEvalResult(MakeInt(tot), nil)
+	return newEvalPositiveResult(MakeInt(tot))
 }
 
 func minusLambda(args Cell, env *EnvironmentEntry) EvalResult {
-	nums := extractCars(args)
-	tot := (nums[0].(*IntCell)).Val
-	for _, numCell := range nums[1:] {
-		switch num := numCell.(type) {
-		case *IntCell:
-			tot -= num.Val
-		default:
-			return newEvalResult(nil, newEvalError("[-] trying to subtract a non-number"))
-		}
+	if args == nil {
+		return newEvalErrorResult(newEvalError("[-] too few arguments"))
 	}
-	return newEvalResult(MakeInt(tot), nil)
+	tot := (unsafeCar(args).(*IntCell)).Val
+	act := unsafeCdr(args)
+	for act != nil {
+		tot -= (unsafeCar(act).(*IntCell)).Val
+		act = unsafeCdr(act)
+	}
+	return newEvalPositiveResult(MakeInt(tot))
 }
 
 func loadLambda(args Cell, env *EnvironmentEntry) EvalResult {

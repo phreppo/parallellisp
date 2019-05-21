@@ -68,12 +68,15 @@ func startEvalService() chan EvalRequest {
 func server(service <-chan EvalRequest) {
 	for {
 		req := <-service
+		scheduler.AddJob()
 		go serve(req)
 	}
 }
 
 func serve(req EvalRequest) {
-	req.ReplyChan <- eval(req.Cell, req.Env)
+	result := eval(req.Cell, req.Env)
+	scheduler.JobEnded()
+	req.ReplyChan <- result
 }
 
 func eval(toEval Cell, env *EnvironmentEntry) EvalResult {

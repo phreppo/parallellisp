@@ -114,23 +114,23 @@ func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
 
 // todo: qui dovresti mettere prima di tutto l accodamento del numero di parametri, perche senno dopo il numero di goroutine va fuori controllo
 func evlisParallel(args Cell, env *EnvironmentEntry) EvalResult {
-	unvaluedArgs := extractCars(args)
+	n := getNumberOfArgs(args)
+	scheduler.AddJobs(int32(n - 1))
 
-	if len(unvaluedArgs) == 0 {
+	if n == 0 {
 		return newEvalPositiveResult(nil)
 	}
 
 	var replyChans []chan EvalResult
-	n := len(unvaluedArgs)
-	scheduler.AddJobs(int32(n - 1))
-
-	for i := 0; i < n-1; i++ {
+	act := args
+	for act != nil && unsafeCdr(act) != nil {
 		newChan := make(chan EvalResult)
 		replyChans = append(replyChans, newChan)
-		go serve(NewEvalRequest(unvaluedArgs[i], env, newChan))
+		go serve(NewEvalRequest(unsafeCar(act), env, newChan))
+		act = unsafeCdr(act)
 	}
 
-	lastArgResult := eval(unvaluedArgs[n-1], env)
+	lastArgResult := eval(unsafeCar(act), env)
 	if lastArgResult.Err != nil {
 		return lastArgResult
 	}
@@ -151,6 +151,20 @@ func evlisParallel(args Cell, env *EnvironmentEntry) EvalResult {
 	}
 
 	return newEvalPositiveResult(top)
+}
+
+func getNumberOfArgs(c Cell) int {
+	count := 0
+	act := c
+	actNotNil := (act != nil)
+	for actNotNil {
+		count++
+		if unsafeCdr(act) == nil {
+			actNotNil = false
+		}
+		act = unsafeCdr(act)
+	}
+	return count
 }
 
 func evlisSequential(args Cell, env *EnvironmentEntry) EvalResult {

@@ -32,15 +32,24 @@
     
 (write "seq bench, seq fib")
 (time (bench fib 25))
+(write "
+")
+
 
 (write "seq bench, par fib")
 (time (bench p-fib 25))
+(write "
+")
 
 (write "par bench, seq fib")
 (time (p-bench fib 25))
+(write "
+")
 
 (write "par bench, par fib")
 (time (p-bench p-fib 25))
+(write "
+")
 
 (write "par bench, stupid par fib")
 {time {p-bench pp-fib 25}}

@@ -3,3 +3,4 @@
 [alla fine] analisi semantica doppo il parsing per vedere che le espressioni contengano side effect sul global solo al toplevel
 [alla fine] provare un array invece diuna slice per gli argomenti se va piu veloce
 [alla fine] mettere le freccie per canali di input e di output
+[rimuovere la variabile globale dell indice perfavore]

@@ -355,7 +355,7 @@ func writeLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	} else if len(phrases) > 1 {
 		return newEvalErrorResult(newEvalError("[write] write needs at least one string argument"))
 	}
-	fmt.Println((phrases[0].(*StringCell)).Str)
+	fmt.Println(phrases[0])
 	return newEvalPositiveResult(phrases[0])
 }
 

@@ -145,9 +145,8 @@ func (c ConsCell) String() string {
 	}
 	if left == "'" {
 		return "'" + rest[1:] // skip first char
-	} else {
-		return "(" + left + rest + ")"
 	}
+	return "(" + left + rest + ")"
 }
 
 func (cons1 ConsCell) Eq(cons2 Cell) bool {

@@ -168,21 +168,21 @@ func condMacro(args Cell, env *EnvironmentEntry) EvalResult {
 		}
 		actBranch = cdr(actBranch)
 	}
-	return newEvalResult(nil, newEvalError("[cond] none condition was verified"))
+	return newEvalErrorResult(newEvalError("[cond] none condition was verified"))
 }
 
 func quoteMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	switch cons := args.(type) {
 	case *ConsCell:
-		return newEvalResult(cons.Car, nil)
+		return newEvalPositiveResult(cons.Car)
 	default:
-		return newEvalResult(nil, newEvalError("[quote] Can't quote"+fmt.Sprint(cons)))
+		return newEvalErrorResult(newEvalError("[quote] Can't quote" + fmt.Sprint(cons)))
 	}
 }
 
 func timeMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	if args == nil {
-		return newEvalResult(nil, newEvalError("[time] too few arguments"))
+		return newEvalErrorResult(newEvalError("[time] too few arguments"))
 	}
 	now := time.Now()
 	start := now.UnixNano()
@@ -202,13 +202,13 @@ func timeMacro(args Cell, env *EnvironmentEntry) EvalResult {
 
 func lambdaMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	// lambda autoquote
-	return newEvalResult(MakeCons(MakeSymbol("lambda"), args), nil)
+	return newEvalPositiveResult(MakeCons(MakeSymbol("lambda"), args))
 }
 
 func defunMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	argsSlice := extractCars(args)
 	if len(argsSlice) != 3 {
-		return newEvalResult(nil, newEvalError("[defun] wrong number of arguments"))
+		return newEvalErrorResult(newEvalError("[defun] wrong number of arguments"))
 	}
 	name := argsSlice[0]
 	formalParameters := argsSlice[1]
@@ -220,9 +220,9 @@ func defunMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	case *SymbolCell:
 		GlobalEnv[nameSymbolCell.Sym] = ret
 	default:
-		return newEvalResult(nil, newEvalError("[defun] the name of the lambda must be a symbol"))
+		return newEvalErrorResult(newEvalError("[defun] the name of the lambda must be a symbol"))
 	}
-	return newEvalResult(ret, nil)
+	return newEvalPositiveResult(ret)
 }
 
 func carLambda(args Cell, env *EnvironmentEntry) EvalResult {
@@ -258,13 +258,12 @@ func consLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	case *ConsCell:
 		switch cons := firstCons.Cdr.(type) {
 		case *ConsCell:
-			result := MakeCons(firstCons.Car, cons.Car)
-			return newEvalResult(result, nil)
+			return newEvalPositiveResult(MakeCons(firstCons.Car, cons.Car))
 		default:
-			return newEvalResult(nil, newEvalError("[cons] not enough arguments"))
+			return newEvalErrorResult(newEvalError("[cons] not enough arguments"))
 		}
 	default:
-		return newEvalResult(nil, newEvalError("[cons] not enough arguments"))
+		return newEvalErrorResult(newEvalError("[cons] not enough arguments"))
 	}
 }
 
@@ -274,15 +273,15 @@ func eqLambda(args Cell, env *EnvironmentEntry) EvalResult {
 		switch secondArg := firstArg.Cdr.(type) {
 		case *ConsCell:
 			if eq(firstArg.Car, secondArg.Car) {
-				return newEvalResult(Lisp.GetTrueSymbol(), nil)
+				return newEvalPositiveResult(Lisp.GetTrueSymbol())
 			} else {
-				return newEvalResult(nil, nil)
+				return newEvalPositiveResult(nil)
 			}
 		default:
-			return newEvalResult(nil, newEvalError("[eq] not enough arguments"))
+			return newEvalErrorResult(newEvalError("[eq] not enough arguments"))
 		}
 	default:
-		return newEvalResult(nil, newEvalError("[eq] not enough arguments"))
+		return newEvalErrorResult(newEvalError("[eq] not enough arguments"))
 	}
 }
 
@@ -293,7 +292,7 @@ func atomLambda(args Cell, env *EnvironmentEntry) EvalResult {
 		case *ConsCell:
 			return newEvalPositiveResult(nil)
 		default:
-			return newEvalPositiveResult(MakeSymbol("t"))
+			return newEvalPositiveResult(Lisp.GetTrueSymbol())
 		}
 	default:
 		return newEvalErrorResult(newEvalError("[atom] not enough arguments"))
@@ -325,10 +324,13 @@ func minusLambda(args Cell, env *EnvironmentEntry) EvalResult {
 
 func loadLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	files := extractCars(args)
+	if len(files) != 1 {
+		return newEvalErrorResult(newEvalError("[load] load needs exaclty one argument"))
+	}
 	fileName := (files[0].(*StringCell)).Str
 	dat, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		return newEvalErrorResult(newEvalError("[load] error opening file"))
+		return newEvalErrorResult(newEvalError("[load] error opening file " + fileName))
 	}
 	source := string(dat)
 	sexpressions, err := ParseMultipleSexpressions(source)
@@ -346,9 +348,15 @@ func loadLambda(args Cell, env *EnvironmentEntry) EvalResult {
 }
 
 func writeLambda(args Cell, env *EnvironmentEntry) EvalResult {
-	phrase := extractCars(args)
-	fmt.Println((phrase[0].(*StringCell)).Str)
-	return newEvalPositiveResult(phrase[0])
+	phrases := extractCars(args)
+	if len(phrases) == 0 {
+		fmt.Println()
+		return newEvalPositiveResult(MakeString(""))
+	} else if len(phrases) > 1 {
+		return newEvalErrorResult(newEvalError("[write] write needs at least one string argument"))
+	}
+	fmt.Println((phrases[0].(*StringCell)).Str)
+	return newEvalPositiveResult(phrases[0])
 }
 
 func unimplementedMacro(c Cell, env *EnvironmentEntry) EvalResult {

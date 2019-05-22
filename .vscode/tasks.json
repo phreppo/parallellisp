@@ -1,29 +1,9 @@
 {
 	"command": "go",
-	"isShellCommand": true,
-	"showOutput": "silent",
+	"type": "shell",
 	"tasks": [
         {
-            "taskName": "install",
-            "args": [
-                "-v",
-                "./..."
-            ],
-            "isBuildCommand": true,
-            "problemMatcher": [
-                "$go"
-            ]
-        },
-        {
-            "taskName": "test",
-            "args": [
-                "-v",
-                "./..."
-            ],
-            "isTestCommand": true
-        },
-        {
-            "label": "rungo",
+            "label": "Run",
             "command": "go run parallellisp.go",
             "group": {
                 "kind": "build",
@@ -31,7 +11,12 @@
             },
             "problemMatcher": [
                 "$go"
-            ]
+            ], 
+            "presentation": {
+                "panel": "new",
+                "reveal": "always",
+                "focus": true
+            }
         }
     ]
 }

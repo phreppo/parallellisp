@@ -16,11 +16,19 @@ func repl() {
 		source, _ := reader.ReadString('\n')
 		sexpr, err := Parse(source)
 		if err != nil {
-			fmt.Println(" ", aurora.BrightRed(err))
+			printError(err)
 		} else {
-			evalAndPrint(sexpr)
+			if ok, err := SemanticAnalysis(sexpr); !ok {
+				printError(err)
+			} else {
+				evalAndPrint(sexpr)
+			}
 		}
 	}
+}
+
+func printError(e error) {
+	fmt.Println(" ", aurora.BrightRed(e), aurora.BrightRed("✗"))
 }
 
 func evalAndPrint(sexpr Cell) {
@@ -28,7 +36,7 @@ func evalAndPrint(sexpr Cell) {
 	EvalService <- NewEvalRequest(sexpr, SimpleEnv(), ansChan)
 	result := <-ansChan
 	if result.Err != nil {
-		fmt.Println(" ", aurora.BrightRed(result.Err), aurora.BrightRed("✗"))
+		printError(result.Err)
 	} else {
 		fmt.Println(" ", result.Cell, aurora.BrightGreen("✓"))
 	}

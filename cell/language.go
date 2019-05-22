@@ -60,6 +60,17 @@ func (lang *language) IsBuiltinSpecialSymbol(s string) (bool, Cell) {
 	return isBuiltinSpecialSymbol, &builtinSpecialSymbol
 }
 
+func (lang *language) HasSideEffect(c Cell) bool {
+	switch cell := c.(type) {
+	case *BuiltinLambdaCell:
+		return cell.Sym == "write" || cell.Sym == "load"
+	case *BuiltinMacroCell:
+		return cell.Sym == "defun"
+	default:
+		return false
+	}
+}
+
 func (lang *language) GetTrueSymbol() Cell {
 	return &(lang.trueSymbol)
 }
@@ -355,7 +366,7 @@ func writeLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	} else if len(phrases) > 1 {
 		return newEvalErrorResult(newEvalError("[write] write needs at least one string argument"))
 	}
-	fmt.Println(phrases[0])
+	fmt.Println((phrases[0].(*StringCell)).Str)
 	return newEvalPositiveResult(phrases[0])
 }
 

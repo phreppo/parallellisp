@@ -23,3 +23,5 @@ nil
 (atom nil)
 (atom '(1 2 3 4))
 (eq 3 (car '(1 2 3 4)))
+(let ((x 1) (y 2)) (+ x y))
+(eq (let ((x '(7 2 3 4)) (y 2)) (+ (car x) y)) 9)

@@ -253,8 +253,16 @@ func cadr(c Cell) Cell {
 	return car(cdr(c.(*ConsCell)))
 }
 
+func cdar(c Cell) Cell {
+	return cdr(car(c.(*ConsCell)))
+}
+
 func caddr(c Cell) Cell {
 	return cadr(cdr(c.(*ConsCell)))
+}
+
+func cadar(c Cell) Cell {
+	return cadr(car(c.(*ConsCell)))
 }
 
 // Pre: symbol != nil, env. pair != nil

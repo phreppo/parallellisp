@@ -102,6 +102,20 @@ func setqMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	}
 }
 
+func letMacro(args Cell, env *EnvironmentEntry) EvalResult {
+	pairs := car(args)
+	newEnv := env
+	for pairs != nil {
+		evaluedValue := eval(cadar(pairs), env)
+		if evaluedValue.Err != nil {
+			return evaluedValue
+		}
+		newEnv = NewEnvironmentEntry(caar(pairs).(*SymbolCell), evaluedValue.Cell, newEnv)
+		pairs = cdr(pairs)
+	}
+	return eval(cadr(args), newEnv)
+}
+
 func carLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	switch topCons := args.(type) {
 	case *ConsCell:

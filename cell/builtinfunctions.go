@@ -338,6 +338,26 @@ func memberLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	return newEvalPositiveResult(nil)
 }
 
+func nthLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	n := (car(args).(*IntCell)).Val
+	act := cadr(args)
+	for n > 0 {
+		n--
+		act = cdr(act)
+	}
+	return newEvalPositiveResult(car(act))
+}
+
+func lengthLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	n := 0
+	act := car(args)
+	for act != nil {
+		n++
+		act = cdr(act)
+	}
+	return newEvalPositiveResult(MakeInt(n))
+}
+
 func unimplementedMacro(c Cell, env *EnvironmentEntry) EvalResult {
 	panic("unimplemented macro")
 }

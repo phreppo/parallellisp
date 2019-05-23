@@ -158,6 +158,14 @@ func newLanguage() *language {
 				Sym:    "member",
 				Lambda: memberLambda},
 
+			"nth": BuiltinLambdaCell{
+				Sym:    "nth",
+				Lambda: nthLambda},
+
+			"length": BuiltinLambdaCell{
+				Sym:    "length",
+				Lambda: lengthLambda},
+
 			"load": BuiltinLambdaCell{
 				Sym:    "load",
 				Lambda: loadLambda},

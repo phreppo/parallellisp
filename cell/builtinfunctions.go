@@ -219,6 +219,35 @@ func notLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	return newEvalPositiveResult(nil)
 }
 
+func greaterLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	return listRelationalComparison(args, env, func(left, right int) bool { return left > right })
+}
+
+func greaterEqLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	return listRelationalComparison(args, env, func(left, right int) bool { return left >= right })
+}
+
+func lessLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	return listRelationalComparison(args, env, func(left, right int) bool { return left < right })
+}
+
+func lessEqLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	return listRelationalComparison(args, env, func(left, right int) bool { return left <= right })
+}
+
+func listRelationalComparison(args Cell, env *EnvironmentEntry, operator func(int, int) bool) EvalResult {
+	act := cdr(args)
+	last := car(args)
+	for act != nil {
+		if !(operator((last.(*IntCell)).Val, (car(act).(*IntCell)).Val)) {
+			return newEvalPositiveResult(nil)
+		}
+		last = car(act)
+		act = cdr(act)
+	}
+	return newEvalPositiveResult(Lisp.GetTrueSymbol())
+}
+
 func divLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	if args == nil {
 		return newEvalErrorResult(newEvalError("[/] too few arguments"))

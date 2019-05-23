@@ -57,9 +57,9 @@ func (lang *language) IsBuiltinSpecialSymbol(s string) (bool, Cell) {
 func (lang *language) HasSideEffect(c Cell) bool {
 	switch cell := c.(type) {
 	case *BuiltinLambdaCell:
-		return cell.Sym == "write" || cell.Sym == "load"
+		return cell.Sym == "write" || cell.Sym == "load" || cell.Sym == "set"
 	case *BuiltinMacroCell:
-		return cell.Sym == "defun"
+		return cell.Sym == "defun" || cell.Sym == "setq"
 	default:
 		return false
 	}
@@ -166,6 +166,10 @@ func newLanguage() *language {
 				Sym:    "length",
 				Lambda: lengthLambda},
 
+			"set": BuiltinLambdaCell{
+				Sym:    "set",
+				Lambda: setLambda},
+
 			"load": BuiltinLambdaCell{
 				Sym:    "load",
 				Lambda: loadLambda},
@@ -198,6 +202,10 @@ func newLanguage() *language {
 			"defun": BuiltinMacroCell{
 				Sym:   "defun",
 				Macro: defunMacro},
+
+			"setq": BuiltinMacroCell{
+				Sym:   "setq",
+				Macro: setqMacro},
 		},
 
 		builtinSpecialSymbols: map[string]SymbolCell{

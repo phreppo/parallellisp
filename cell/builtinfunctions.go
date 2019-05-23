@@ -81,6 +81,27 @@ func defunMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	return newEvalPositiveResult(ret)
 }
 
+func setqMacro(args Cell, env *EnvironmentEntry) EvalResult {
+	argsSlice := extractCars(args)
+	if len(argsSlice) != 2 {
+		return newEvalErrorResult(newEvalError("[setq] wrong number of arguments"))
+	}
+	name := argsSlice[0]
+	value := argsSlice[1]
+
+	switch name.(type) {
+	case (*SymbolCell):
+		evaluedVal := eval(value, env)
+		if evaluedVal.Err != nil {
+			return evaluedVal
+		}
+		newArgs := MakeCons(name, MakeCons(evaluedVal.Cell, nil))
+		return setLambda(newArgs, env)
+	default:
+		return newEvalErrorResult(newEvalError("[setq] first argument must be a symbol"))
+	}
+}
+
 func carLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	switch topCons := args.(type) {
 	case *ConsCell:
@@ -356,6 +377,13 @@ func lengthLambda(args Cell, env *EnvironmentEntry) EvalResult {
 		act = cdr(act)
 	}
 	return newEvalPositiveResult(MakeInt(n))
+}
+
+func setLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	id := car(args)
+	val := cadr(args)
+	GlobalEnv[(id.(*SymbolCell)).Sym] = val
+	return newEvalPositiveResult(val)
 }
 
 func unimplementedMacro(c Cell, env *EnvironmentEntry) EvalResult {

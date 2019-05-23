@@ -154,6 +154,10 @@ func newLanguage() *language {
 				Sym:    "reverse",
 				Lambda: reverseLambda},
 
+			"member": BuiltinLambdaCell{
+				Sym:    "member",
+				Lambda: memberLambda},
+
 			"load": BuiltinLambdaCell{
 				Sym:    "load",
 				Lambda: loadLambda},

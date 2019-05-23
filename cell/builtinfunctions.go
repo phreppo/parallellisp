@@ -326,6 +326,18 @@ func reverseLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	return newEvalPositiveResult(top)
 }
 
+func memberLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	toFind := car(args)
+	act := cadr(args)
+	for act != nil {
+		if eq(toFind, car(act)) {
+			return newEvalPositiveResult(act)
+		}
+		act = cdr(act)
+	}
+	return newEvalPositiveResult(nil)
+}
+
 func unimplementedMacro(c Cell, env *EnvironmentEntry) EvalResult {
 	panic("unimplemented macro")
 }

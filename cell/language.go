@@ -118,6 +118,18 @@ func newLanguage() *language {
 				Sym:    "/",
 				Lambda: divLambda},
 
+			"or": BuiltinLambdaCell{
+				Sym:    "or",
+				Lambda: orLambda},
+
+			"and": BuiltinLambdaCell{
+				Sym:    "and",
+				Lambda: andLambda},
+
+			"not": BuiltinLambdaCell{
+				Sym:    "not",
+				Lambda: notLambda},
+
 			"load": BuiltinLambdaCell{
 				Sym:    "load",
 				Lambda: loadLambda},

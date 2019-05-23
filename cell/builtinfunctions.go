@@ -187,6 +187,38 @@ func minusLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	return newEvalPositiveResult(MakeInt(tot))
 }
 
+func orLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	act := args
+	for act != nil {
+		if car(act) != nil {
+			return newEvalPositiveResult(car(act))
+		}
+		act = cdr(act)
+	}
+	return newEvalPositiveResult(nil)
+}
+
+func andLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	act := args
+	var last Cell
+	for act != nil {
+		last = car(act)
+		if last == nil {
+			return newEvalPositiveResult(nil)
+		}
+		act = cdr(act)
+	}
+	return newEvalPositiveResult(last)
+}
+
+func notLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	toNegate := car(args)
+	if toNegate == nil {
+		return newEvalPositiveResult(Lisp.GetTrueSymbol())
+	}
+	return newEvalPositiveResult(nil)
+}
+
 func divLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	if args == nil {
 		return newEvalErrorResult(newEvalError("[/] too few arguments"))

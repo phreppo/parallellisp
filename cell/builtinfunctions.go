@@ -303,6 +303,19 @@ func writeLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	return newEvalPositiveResult(phrases[0])
 }
 
+func listLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	var top Cell
+	var actLast Cell
+	var newVal Cell
+	act := args
+	for act != nil {
+		newVal = car(act)
+		appendCellToArgs(&top, &actLast, &newVal)
+		act = cdr(act)
+	}
+	return newEvalPositiveResult(top)
+}
+
 func unimplementedMacro(c Cell, env *EnvironmentEntry) EvalResult {
 	panic("unimplemented macro")
 }

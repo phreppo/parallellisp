@@ -146,6 +146,10 @@ func newLanguage() *language {
 				Sym:    "not",
 				Lambda: notLambda},
 
+			"list": BuiltinLambdaCell{
+				Sym:    "list",
+				Lambda: listLambda},
+
 			"load": BuiltinLambdaCell{
 				Sym:    "load",
 				Lambda: loadLambda},

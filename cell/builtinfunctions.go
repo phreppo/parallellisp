@@ -316,6 +316,16 @@ func listLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	return newEvalPositiveResult(top)
 }
 
+func reverseLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	var top Cell
+	act := car(args)
+	for act != nil {
+		top = MakeCons(car(act), top)
+		act = cdr(act)
+	}
+	return newEvalPositiveResult(top)
+}
+
 func unimplementedMacro(c Cell, env *EnvironmentEntry) EvalResult {
 	panic("unimplemented macro")
 }

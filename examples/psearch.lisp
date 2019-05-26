@@ -19,7 +19,7 @@
         ((eq lst nil) nil)
         ((eq (length lst) 1) 
             (eq (car lst) x))
-        ((<= (length lst) (/ initialSize ncpu))
+        ((< (length lst) (/ initialSize ncpu))
             (present x lst))
         (t {or 
                 (smart-ppresent-ric x (first-half lst)  initialSize)
@@ -32,12 +32,14 @@
 
 (defun genial-ppresent-ric (x lst partitions)
     (cond 
-        ((<= partitions ncpu)
+        ((< partitions ncpu)
             ; divide
-            {or 
-                (genial-ppresent-ric x (first-half lst)  (* partitions 2))
-                (genial-ppresent-ric x (second-half lst) (* partitions 2))
-            })
+            (let ((new-partitions (* partitions 2)))
+                {or 
+                    (genial-ppresent-ric x (first-half lst)  new-partitions)
+                    (genial-ppresent-ric x (second-half lst) new-partitions)
+                }
+            ))
         (t (present x lst))
     ))
 

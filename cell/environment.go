@@ -46,6 +46,7 @@ func initGlobalEnv() {
 	GlobalEnv["t"], _ = Parse("t")
 	GlobalEnv["fib"], _ = Parse("(lambda (n) (cond ((eq n 0) 0) ((eq n 1) 1) (t (+ (fib (- n 1)) (fib (- n 2)))))) ")
 	GlobalEnv["f"], _ = Parse("\"examples/pfib.lisp\"")
+	GlobalEnv["m"], _ = Parse("\"examples/mergesort.lisp\"")
 	GlobalEnv["b"], _ = Parse("(lambda (n) (time {+ (fib n) (fib n) (fib n) (fib n) (fib n) (fib n) (fib n) (fib n)}))")
 	GlobalEnv["toz"], _ = Parse("(lambda (n) (cond ((eq n 0) 0) (t (toz (- n 1))) ))")
 }

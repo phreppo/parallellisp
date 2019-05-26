@@ -2,6 +2,8 @@ package cell
 
 import (
 	"fmt"
+
+	"github.com/parof/parallellisp/scheduler"
 )
 
 var EvalService = startEvalService()
@@ -28,6 +30,14 @@ func newEvalResult(c Cell, e error) EvalResult {
 		Err:  e,
 	}
 	return r
+}
+
+func newEvalPositiveResult(c Cell) EvalResult {
+	return newEvalResult(c, nil)
+}
+
+func newEvalErrorResult(e error) EvalResult {
+	return newEvalResult(nil, e)
 }
 
 type EvalRequest struct {
@@ -58,23 +68,26 @@ func startEvalService() chan EvalRequest {
 func server(service <-chan EvalRequest) {
 	for {
 		req := <-service
+		scheduler.AddJob()
 		go serve(req)
 	}
 }
 
 func serve(req EvalRequest) {
-	req.ReplyChan <- eval(req.Cell, req.Env)
+	result := eval(req.Cell, req.Env)
+	scheduler.JobEnded()
+	req.ReplyChan <- result
 }
 
 func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
 	if toEval == nil {
-		return newEvalResult(nil, nil)
+		return newEvalPositiveResult(nil)
 	}
 	switch c := toEval.(type) {
 	case *IntCell:
-		return newEvalResult(c, nil)
+		return newEvalPositiveResult(c)
 	case *StringCell:
-		return newEvalResult(c, nil)
+		return newEvalPositiveResult(c)
 	case *SymbolCell:
 		return assoc(c, env)
 	case *ConsCell:
@@ -82,41 +95,41 @@ func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
 		case *BuiltinMacroCell:
 			return car.Macro(c.Cdr, env)
 		default:
-			// var argsResult EvalResult
-			// if runtime.NumGoroutine() < runtime.NumCPU() {
-			// 	argsResult = evlisParallel(c.Cdr, env)
-			// } else {
-			// 	argsResult = evlisSequential(c.Cdr, env)
-			// }
-			argsResult := c.Evlis(c.Cdr, env)
+			var argsResult EvalResult
+			if scheduler.ShouldParallelize() {
+				argsResult = c.Evlis(c.Cdr, env)
+			} else {
+				argsResult = evlisSequential(c.Cdr, env)
+			}
 			if argsResult.Err != nil {
-				return newEvalResult(nil, argsResult.Err)
+				return newEvalErrorResult(argsResult.Err)
 			} else {
 				return apply(car, argsResult.Cell, env)
 			}
 		}
 	default:
-		error := newEvalError("[eval] Unknown cell type: " + fmt.Sprintf("%v", toEval))
-		return newEvalResult(nil, error)
+		return newEvalErrorResult(newEvalError("[eval] Unknown cell type: " + fmt.Sprintf("%v", toEval)))
 	}
 }
 
 func evlisParallel(args Cell, env *EnvironmentEntry) EvalResult {
-	unvaluedArgs := extractCars(args)
+	n := getNumberOfArgs(args)
+	scheduler.AddJobs(int32(n - 1))
 
-	if len(unvaluedArgs) == 0 {
-		return newEvalResult(nil, nil)
+	if n == 0 {
+		return newEvalPositiveResult(nil)
 	}
 
 	var replyChans []chan EvalResult
-	n := len(unvaluedArgs)
-	for i := 0; i < n-1; i++ {
+	act := args
+	for act != nil && cdr(act) != nil {
 		newChan := make(chan EvalResult)
 		replyChans = append(replyChans, newChan)
-		go serve(NewEvalRequest(unvaluedArgs[i], env, newChan)) // TODO: empty env!!
+		go serve(NewEvalRequest(car(act), env, newChan))
+		act = cdr(act)
 	}
 
-	lastArgResult := eval(unvaluedArgs[n-1], env)
+	lastArgResult := eval(car(act), env)
 	if lastArgResult.Err != nil {
 		return lastArgResult
 	}
@@ -128,14 +141,29 @@ func evlisParallel(args Cell, env *EnvironmentEntry) EvalResult {
 			appendCellToArgs(&top, &actCons, &(lastArgResult.Cell))
 		} else {
 			evaluedArg := <-replyChans[i]
+			scheduler.JobEnded()
 			if evaluedArg.Err != nil {
-				return newEvalResult(nil, evaluedArg.Err)
+				return newEvalErrorResult(evaluedArg.Err)
 			}
 			appendCellToArgs(&top, &actCons, &(evaluedArg.Cell))
 		}
 	}
 
-	return newEvalResult(top, nil)
+	return newEvalPositiveResult(top)
+}
+
+func getNumberOfArgs(c Cell) int {
+	count := 0
+	act := c
+	actNotNil := (act != nil)
+	for actNotNil {
+		count++
+		if cdr(act) == nil {
+			actNotNil = false
+		}
+		act = cdr(act)
+	}
+	return count
 }
 
 func evlisSequential(args Cell, env *EnvironmentEntry) EvalResult {
@@ -189,73 +217,83 @@ func apply(function Cell, args Cell, env *EnvironmentEntry) EvalResult {
 		return functionCasted.Lambda(args, env)
 	case *ConsCell:
 		if Lisp.IsLambdaSymbol(functionCasted.Car) {
-			newEnv, err := pairlis(unsafeCadr(function), args, env)
+			newEnv, err := pairlis(cadr(function), args, env)
 			if err != nil {
-				return newEvalResult(nil, err)
+				return newEvalErrorResult(err)
 			}
-			return eval(unsafeCaddr(function), newEnv)
+			return eval(caddr(function), newEnv)
 		} else {
 			// label check here
-			return newEvalResult(nil, newEvalError("[apply] trying to apply a non-lambda"))
+			return newEvalErrorResult(newEvalError("[apply] trying to apply a non-lambda"))
 		}
 	case *SymbolCell:
 		evaluedFunction := eval(function, env)
 		if evaluedFunction.Err != nil {
-			return newEvalResult(nil, evaluedFunction.Err)
+			return newEvalErrorResult(evaluedFunction.Err)
 		}
 		return apply(evaluedFunction.Cell, args, env)
 	default:
-		return newEvalResult(nil, newEvalError("[apply] trying to apply non-builtin, non-lambda, non-symbol"))
+		return newEvalErrorResult(newEvalError("[apply] trying to apply non-builtin, non-lambda, non-symbol"))
 	}
 }
 
-func unsafeCar(c Cell) Cell {
+func car(c Cell) Cell {
 	return (c.(*ConsCell)).Car
 }
 
-func unsafeCdr(c Cell) Cell {
+func cdr(c Cell) Cell {
 	return (c.(*ConsCell)).Cdr
 }
 
-func unsafeCaar(c Cell) Cell {
-	return unsafeCar(unsafeCar(c))
+func caar(c Cell) Cell {
+	return car(car(c))
 }
 
-func unsafeCadr(c Cell) Cell {
-	return unsafeCar(unsafeCdr(c.(*ConsCell)))
+func cadr(c Cell) Cell {
+	return car(cdr(c.(*ConsCell)))
 }
 
-func unsafeCaddr(c Cell) Cell {
-	return unsafeCadr(unsafeCdr(c.(*ConsCell)))
+func cdar(c Cell) Cell {
+	return cdr(car(c.(*ConsCell)))
+}
+
+func caddr(c Cell) Cell {
+	return cadr(cdr(c.(*ConsCell)))
+}
+
+func cadar(c Cell) Cell {
+	return cadr(car(c.(*ConsCell)))
 }
 
 // Pre: symbol != nil, env. pair != nil
 func assoc(symbol *SymbolCell, env *EnvironmentEntry) EvalResult {
 	if res, isInGlobalEnv := GlobalEnv[symbol.Sym]; isInGlobalEnv {
-		return newEvalResult(res, nil)
+		return newEvalPositiveResult(res)
 	}
 	if env == nil {
-		return newEvalResult(nil, newEvalError("[assoc] symbol "+symbol.Sym+" not in env"))
+		return newEvalErrorResult(newEvalError("[assoc] symbol " + symbol.Sym + " not in env"))
 	}
 	act := env
 	for act != nil {
 		if (act.Pair.Symbol.Sym) == symbol.Sym {
-			return newEvalResult(act.Pair.Value, nil)
+			return newEvalPositiveResult(act.Pair.Value)
 		}
 		act = act.Next
 	}
-	return newEvalResult(nil, newEvalError("[assoc] symbol "+symbol.Sym+" not in env"))
+	return newEvalErrorResult(newEvalError("[assoc] symbol " + symbol.Sym + " not in env"))
 }
 
 func pairlis(formalParameters, actualParameters Cell, oldEnv *EnvironmentEntry) (*EnvironmentEntry, error) {
-	formalParametersSlice := extractCars(formalParameters)
-	actualParametersSlice := extractCars(actualParameters)
-	if len(actualParametersSlice) != len(formalParametersSlice) {
-		return nil, newEvalError("[pairlis] mismatching number of formal and actual parameters ")
-	}
+	actFormal := formalParameters
+	actActual := actualParameters
 	newEntry := oldEnv
-	for i, formal := range formalParametersSlice {
-		newEntry = NewEnvironmentEntry(formal.(*SymbolCell), actualParametersSlice[i], newEntry)
+	for actFormal != nil {
+		if actActual == nil {
+			return nil, newEvalError("[parilis] not enough actual parameters")
+		}
+		newEntry = NewEnvironmentEntry((car(actFormal)).(*SymbolCell), car(actActual), newEntry)
+		actFormal = (actFormal.(*ConsCell)).Cdr
+		actActual = (actActual.(*ConsCell)).Cdr
 	}
 	return newEntry, nil
 }

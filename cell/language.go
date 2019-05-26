@@ -1,10 +1,5 @@
 package cell
 
-import (
-	"fmt"
-	"time"
-)
-
 // Lisp is the global variable for the language
 var Lisp *language
 
@@ -59,6 +54,17 @@ func (lang *language) IsBuiltinSpecialSymbol(s string) (bool, Cell) {
 	return isBuiltinSpecialSymbol, &builtinSpecialSymbol
 }
 
+func (lang *language) HasSideEffect(c Cell) bool {
+	switch cell := c.(type) {
+	case *BuiltinLambdaCell:
+		return cell.Sym == "write" || cell.Sym == "load" || cell.Sym == "set"
+	case *BuiltinMacroCell:
+		return cell.Sym == "defun" || cell.Sym == "setq"
+	default:
+		return false
+	}
+}
+
 func (lang *language) GetTrueSymbol() Cell {
 	return &(lang.trueSymbol)
 }
@@ -104,6 +110,74 @@ func newLanguage() *language {
 				Sym:    "-",
 				Lambda: minusLambda},
 
+			"*": BuiltinLambdaCell{
+				Sym:    "*",
+				Lambda: multLambda},
+
+			"/": BuiltinLambdaCell{
+				Sym:    "/",
+				Lambda: divLambda},
+
+			">": BuiltinLambdaCell{
+				Sym:    ">",
+				Lambda: greaterLambda},
+
+			">=": BuiltinLambdaCell{
+				Sym:    ">=",
+				Lambda: greaterEqLambda},
+
+			"<": BuiltinLambdaCell{
+				Sym:    "<",
+				Lambda: lessLambda},
+
+			"<=": BuiltinLambdaCell{
+				Sym:    "<=",
+				Lambda: lessEqLambda},
+
+			"or": BuiltinLambdaCell{
+				Sym:    "or",
+				Lambda: orLambda},
+
+			"and": BuiltinLambdaCell{
+				Sym:    "and",
+				Lambda: andLambda},
+
+			"not": BuiltinLambdaCell{
+				Sym:    "not",
+				Lambda: notLambda},
+
+			"list": BuiltinLambdaCell{
+				Sym:    "list",
+				Lambda: listLambda},
+
+			"reverse": BuiltinLambdaCell{
+				Sym:    "reverse",
+				Lambda: reverseLambda},
+
+			"member": BuiltinLambdaCell{
+				Sym:    "member",
+				Lambda: memberLambda},
+
+			"nth": BuiltinLambdaCell{
+				Sym:    "nth",
+				Lambda: nthLambda},
+
+			"length": BuiltinLambdaCell{
+				Sym:    "length",
+				Lambda: lengthLambda},
+
+			"set": BuiltinLambdaCell{
+				Sym:    "set",
+				Lambda: setLambda},
+
+			"load": BuiltinLambdaCell{
+				Sym:    "load",
+				Lambda: loadLambda},
+
+			"write": BuiltinLambdaCell{
+				Sym:    "write",
+				Lambda: writeLambda},
+
 			// "label",
 		},
 
@@ -128,6 +202,14 @@ func newLanguage() *language {
 			"defun": BuiltinMacroCell{
 				Sym:   "defun",
 				Macro: defunMacro},
+
+			"setq": BuiltinMacroCell{
+				Sym:   "setq",
+				Macro: setqMacro},
+
+			"let": BuiltinMacroCell{
+				Sym:   "let",
+				Macro: letMacro},
 		},
 
 		builtinSpecialSymbols: map[string]SymbolCell{
@@ -139,191 +221,4 @@ func newLanguage() *language {
 		trueSymbol: SymbolCell{Sym: "t"},
 	}
 	return &lisp
-}
-
-func condMacro(args Cell, env *EnvironmentEntry) EvalResult {
-	argsArray := extractCars(args)
-
-	var condAndBody []Cell
-	var cond Cell
-	var body Cell
-	var condResult EvalResult
-
-	for _, arg := range argsArray {
-		condAndBody = extractCars(arg)
-		cond = (condAndBody)[0]
-		body = (condAndBody)[1]
-		condResult = eval(cond, env)
-		if condResult.Err != nil {
-			return condResult
-		} else if condResult.Cell != nil {
-			return eval(body, env)
-		}
-	}
-	return newEvalResult(nil, newEvalError("[cond] none condition was verified"))
-}
-
-func quoteMacro(args Cell, env *EnvironmentEntry) EvalResult {
-	switch cons := args.(type) {
-	case *ConsCell:
-		return newEvalResult(cons.Car, nil)
-	default:
-		return newEvalResult(nil, newEvalError("[quote] Can't quote"+fmt.Sprint(cons)))
-	}
-}
-
-func timeMacro(args Cell, env *EnvironmentEntry) EvalResult {
-	if args == nil {
-		return newEvalResult(nil, newEvalError("[time] too few arguments"))
-	}
-	now := time.Now()
-	start := now.UnixNano()
-
-	result := eval(unsafeCar(args), env)
-	if result.Err != nil {
-		return result
-	}
-
-	now = time.Now()
-	afterEvalTime := now.UnixNano()
-	elapsedMillis := (afterEvalTime - start) / 1000000
-	fmt.Println("time:", elapsedMillis, "ms")
-
-	return result
-}
-
-func lambdaMacro(args Cell, env *EnvironmentEntry) EvalResult {
-	// lambda autoquote
-	return newEvalResult(MakeCons(MakeSymbol("lambda"), args), nil)
-}
-
-func defunMacro(args Cell, env *EnvironmentEntry) EvalResult {
-	argsSlice := extractCars(args)
-	if len(argsSlice) != 3 {
-		return newEvalResult(nil, newEvalError("[defun] wrong number of arguments"))
-	}
-	name := argsSlice[0]
-	formalParameters := argsSlice[1]
-	lambdaBody := argsSlice[2]
-	bodyCons := MakeCons(lambdaBody, nil)
-	argsAndBodyCons := MakeCons(formalParameters, bodyCons)
-	ret := MakeCons(MakeSymbol("lambda"), argsAndBodyCons)
-	switch nameSymbolCell := name.(type) {
-	case *SymbolCell:
-		GlobalEnv[nameSymbolCell.Sym] = ret
-	default:
-		return newEvalResult(nil, newEvalError("[defun] the name of the lambda must be a symbol"))
-	}
-	return newEvalResult(ret, nil)
-}
-
-func carLambda(args Cell, env *EnvironmentEntry) EvalResult {
-	switch topCons := args.(type) {
-	case *ConsCell:
-		switch cons := topCons.Car.(type) {
-		case *ConsCell:
-			return newEvalResult(cons.Car, nil)
-		default:
-			return newEvalResult(nil, newEvalError("[car] car applied to atom"))
-		}
-	default:
-		return newEvalResult(nil, newEvalError("[car] not enough arguments"))
-	}
-}
-
-func cdrLambda(args Cell, env *EnvironmentEntry) EvalResult {
-	switch topCons := args.(type) {
-	case *ConsCell:
-		switch cons := topCons.Car.(type) {
-		case *ConsCell:
-			return newEvalResult(cons.Cdr, nil)
-		default:
-			return newEvalResult(nil, newEvalError("[cdr] cdr applied to atom"))
-		}
-	default:
-		return newEvalResult(nil, newEvalError("[cdr] not enough arguments"))
-	}
-}
-
-func consLambda(args Cell, env *EnvironmentEntry) EvalResult {
-	switch firstCons := args.(type) {
-	case *ConsCell:
-		switch cons := firstCons.Cdr.(type) {
-		case *ConsCell:
-			result := MakeCons(firstCons.Car, cons.Car)
-			return newEvalResult(result, nil)
-		default:
-			return newEvalResult(nil, newEvalError("[cons] not enough arguments"))
-		}
-	default:
-		return newEvalResult(nil, newEvalError("[cons] not enough arguments"))
-	}
-}
-
-func eqLambda(args Cell, env *EnvironmentEntry) EvalResult {
-	switch firstArg := args.(type) {
-	case *ConsCell:
-		switch secondArg := firstArg.Cdr.(type) {
-		case *ConsCell:
-			if eq(firstArg.Car, secondArg.Car) {
-				return newEvalResult(Lisp.GetTrueSymbol(), nil)
-			} else {
-				return newEvalResult(nil, nil)
-			}
-		default:
-			return newEvalResult(nil, newEvalError("[eq] not enough arguments"))
-		}
-	default:
-		return newEvalResult(nil, newEvalError("[eq] not enough arguments"))
-	}
-}
-
-func atomLambda(args Cell, env *EnvironmentEntry) EvalResult {
-	switch firstCons := args.(type) {
-	case *ConsCell:
-		switch firstCons.Car.(type) {
-		case *ConsCell:
-			return newEvalResult(nil, nil)
-		default:
-			return newEvalResult(MakeSymbol("t"), nil)
-		}
-	default:
-		return newEvalResult(nil, newEvalError("[atom] not enough arguments"))
-	}
-}
-
-func plusLambda(args Cell, env *EnvironmentEntry) EvalResult {
-	nums := extractCars(args)
-	tot := 0
-	for _, numCell := range nums {
-		switch num := numCell.(type) {
-		case *IntCell:
-			tot += num.Val
-		default:
-			return newEvalResult(nil, newEvalError("[+] trying to add a non-number"))
-		}
-	}
-	return newEvalResult(MakeInt(tot), nil)
-}
-
-func minusLambda(args Cell, env *EnvironmentEntry) EvalResult {
-	nums := extractCars(args)
-	tot := (nums[0].(*IntCell)).Val
-	for _, numCell := range nums[1:] {
-		switch num := numCell.(type) {
-		case *IntCell:
-			tot -= num.Val
-		default:
-			return newEvalResult(nil, newEvalError("[+] trying to add a non-number"))
-		}
-	}
-	return newEvalResult(MakeInt(tot), nil)
-}
-
-func unimplementedMacro(c Cell, env *EnvironmentEntry) EvalResult {
-	panic("unimplemented macro")
-}
-
-func unimplementedLambda(c Cell, env *EnvironmentEntry) EvalResult {
-	panic("unimplemented lambda")
 }

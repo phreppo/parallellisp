@@ -20,6 +20,29 @@ const (
 	tokCloseParallel tokenType = 9
 )
 
+const (
+	dotChar              = '.'
+	openParChar          = '('
+	closeParChar         = ')'
+	openParParallelChar  = '{'
+	closeParParallelChar = '}'
+	quoteChar            = '\''
+)
+
+var atomicCharTokens = map[rune]bool{
+	dotChar:              true,
+	openParChar:          true,
+	closeParChar:         true,
+	openParParallelChar:  true,
+	closeParParallelChar: true,
+	quoteChar:            true,
+}
+
+func isAtmoicCharToken(r rune) bool {
+	_, ok := atomicCharTokens[r]
+	return ok
+}
+
 type token struct {
 	typ tokenType
 	str string
@@ -55,13 +78,28 @@ func (t token) String() string {
 
 // tokenize produces an array fo tokens
 func tokenize(source string) []token {
-	tok, rest := readOneToken(source)
+	tok, rest := readOneToken(removeComments(source))
 	var result []token
 	for (tok.typ) != tokNone {
 		result = append(result, tok)
 		tok, rest = readOneToken(rest)
 	}
 	return result
+}
+
+func removeComments(source string) string {
+	if source == "" {
+		return ""
+	}
+	if source[0] != ';' {
+		return string(source[0]) + removeComments(source[1:])
+	}
+	for index, r := range source {
+		if r == '\n' {
+			return removeComments(source[index+1:])
+		}
+	}
+	return ""
 }
 
 // returns the token and the remaining string
@@ -72,17 +110,17 @@ func readOneToken(source string) (token, string) {
 	nextChar, index := firstChar(source)
 	if index < 0 {
 		return token{typ: tokNone}, source
-	} else if nextChar == '(' {
+	} else if nextChar == openParChar {
 		return token{typ: tokOpen}, source[index+1:]
-	} else if nextChar == ')' {
+	} else if nextChar == closeParChar {
 		return token{typ: tokClose}, source[index+1:]
-	} else if nextChar == '{' {
+	} else if nextChar == openParParallelChar {
 		return token{typ: tokOpenParallel}, source[index+1:]
-	} else if nextChar == '}' {
+	} else if nextChar == closeParParallelChar {
 		return token{typ: tokCloseParallel}, source[index+1:]
-	} else if nextChar == '.' {
+	} else if nextChar == dotChar {
 		return token{typ: tokDot}, source[index+1:]
-	} else if nextChar == '\'' {
+	} else if nextChar == quoteChar {
 		return token{typ: tokQuote}, source[index+1:]
 	} else if nextChar == '"' {
 		rest := source[index+1:]
@@ -115,7 +153,7 @@ func firstWordOrNumber(str string) (string, string) {
 	stringWithoutBlanks := str[wordBeginningIndex:]
 	result := ""
 	for i, r := range stringWithoutBlanks {
-		if r == '\n' || r == ' ' || r == '.' || r == '(' || r == ')' || r == '{' || r == '}' || r == '\'' {
+		if r == '\n' || r == ' ' || isAtmoicCharToken(r) {
 			return result, stringWithoutBlanks[i:]
 		}
 		result += string(r)

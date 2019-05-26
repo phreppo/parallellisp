@@ -1,4 +1,6 @@
-[ora] c e qualcosa che non va nella valutazione o il parsing degli argomenti: valuta (eq '(1) '(1))
-[quando vuoi] la newnev entry potrebbe mettere sullo stack invece che sullo heap?
-[alla fine] implementare nell interfaccia di cell una versione unsafe di car e cdr che panichino se fa una merda il resto
+[possima] cambiare il modo di avere parallelismo: modello serviroti (consapevoli) e server
+[se necessario] mandare un nuovo thread solo valuto qualcosa che non e un atomo
+[alla fine] analisi semantica doppo il parsing per vedere che le espressioni contengano side effect sul global solo al toplevel
 [alla fine] provare un array invece diuna slice per gli argomenti se va piu veloce
+[alla fine] mettere le freccie per canali di input e di output
+[rimuovere la variabile globale dell indice perfavore]

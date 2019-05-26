@@ -4,20 +4,40 @@ import (
 	"fmt"
 )
 
-var tokensIndex = 0
-
 // Parse returns the result, if there were errors parsing and eventually one error message
 func Parse(source string) (Cell, error) {
-	tokensIndex = 0
+	sexpressions, err := ParseMultipleSexpressions(source)
+	if len(sexpressions) > 1 {
+		return nil, ParseError{"[parser] too many sexpressions"}
+	}
+	if err != nil {
+		return nil, err
+	}
+	return sexpressions[0], nil
+}
+
+// ParseMultipleSexpressions resturns the array of parser sexpressions
+func ParseMultipleSexpressions(source string) ([]Cell, error) {
 	tokens := tokenize(source)
 	if len(tokens) == 1 && tokens[0].typ == tokNone {
 		return nil, ParseError{"empty source"}
 	}
-	return ricParse(tokens)
+
+	var tokensIndex = 0
+	var result []Cell
+
+	for enoughTokens(tokens, &tokensIndex) {
+		actualSexpression, err := ricParse(tokens, &tokensIndex)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, actualSexpression)
+	}
+	return result, nil
 }
 
-func ricParse(tokens []token) (Cell, error) {
-	actualToken, err := extractNextToken(tokens)
+func ricParse(tokens []token, tokensIndex *int) (Cell, error) {
+	actualToken, err := extractNextToken(tokens, tokensIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -33,11 +53,11 @@ func ricParse(tokens []token) (Cell, error) {
 		newSym := MakeSymbol(actualToken.str)
 		return newSym, nil
 	case tokQuote:
-		return buildQuote(tokens)
+		return buildQuote(tokens, tokensIndex)
 	case tokOpen:
-		return buildCons(tokens)
+		return buildCons(tokens, tokOpen, tokClose, tokensIndex)
 	case tokOpenParallel:
-		cons, err := buildCons(tokens)
+		cons, err := buildCons(tokens, tokCloseParallel, tokCloseParallel, tokensIndex)
 		if err != nil {
 			return nil, err
 		}
@@ -48,29 +68,29 @@ func ricParse(tokens []token) (Cell, error) {
 	}
 }
 
-func extractNextToken(tokens []token) (token, error) {
-	if !enoughTokens(tokens) {
+func extractNextToken(tokens []token, tokensIndex *int) (token, error) {
+	if !enoughTokens(tokens, tokensIndex) {
 		return token{typ: tokNone}, ParseError{"tokens ended"}
 	}
-	tok := tokens[tokensIndex]
-	tokensIndex++
+	tok := tokens[*tokensIndex]
+	(*tokensIndex)++
 	return tok, nil
 }
 
-func readNextToken(tokens []token) (token, error) {
-	if !enoughTokens(tokens) {
+func readNextToken(tokens []token, tokensIndex *int) (token, error) {
+	if !enoughTokens(tokens, tokensIndex) {
 		return token{typ: tokNone}, ParseError{"parenthesis not closed"}
 	}
-	return tokens[tokensIndex], nil
+	return tokens[(*tokensIndex)], nil
 }
 
-func enoughTokens(tokens []token) bool {
-	return tokensIndex < len(tokens)
+func enoughTokens(tokens []token, tokensIndex *int) bool {
+	return (*tokensIndex) < len(tokens)
 }
 
-func buildQuote(tokens []token) (Cell, error) {
+func buildQuote(tokens []token, tokensIndex *int) (Cell, error) {
 	quoteSym := MakeSymbol("quote")
-	quotedSexpression, err := ricParse(tokens)
+	quotedSexpression, err := ricParse(tokens, tokensIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -80,49 +100,49 @@ func buildQuote(tokens []token) (Cell, error) {
 	return topCons, nil
 }
 
-func buildCons(tokens []token) (Cell, error) {
-	nextToken, err := readNextToken(tokens)
+func buildCons(tokens []token, openParToken, closeParToken tokenType, tokensIndex *int) (Cell, error) {
+	nextToken, err := readNextToken(tokens, tokensIndex)
 	if err != nil {
 		return nil, err
 	}
-	if nextToken.typ == tokClose {
+	if nextToken.typ == closeParToken {
 		return nil, nil
 	}
-	left, err := ricParse(tokens)
+	left, err := ricParse(tokens, tokensIndex)
 	if err != nil {
 		return nil, err
 	}
 	top := MakeCons(left, nil)
 	actCons := top
 
-	nextToken, err = readNextToken(tokens)
+	nextToken, err = readNextToken(tokens, tokensIndex)
 	if err != nil {
 		return nil, err
 	}
-	if nextToken.typ == tokClose {
-		extractNextToken(tokens)
+	if nextToken.typ == closeParToken {
+		extractNextToken(tokens, tokensIndex)
 		return top, nil
 	}
 
 	for {
-		actualToken, err := readNextToken(tokens)
+		actualToken, err := readNextToken(tokens, tokensIndex)
 		if err != nil {
 			return nil, err
 		}
 		if actualToken.typ == tokDot {
-			extractNextToken(tokens) // extract the dot
+			extractNextToken(tokens, tokensIndex) // extract the dot
 			// last element
-			right, err := ricParse(tokens)
+			right, err := ricParse(tokens, tokensIndex)
 
 			if err != nil {
 				return nil, err
 			}
-			closePar, err := extractNextToken(tokens)
+			closePar, err := extractNextToken(tokens, tokensIndex)
 			if err != nil {
 				return nil, err
 			}
 
-			if closePar.typ != tokClose {
+			if closePar.typ != closeParToken {
 				return nil, ParseError{"parenthesis not closed near " + fmt.Sprintf("%v", right)}
 			}
 			switch cons := actCons.(type) {
@@ -131,7 +151,7 @@ func buildCons(tokens []token) (Cell, error) {
 			}
 			return top, nil
 		} else {
-			right, err := ricParse(tokens)
+			right, err := ricParse(tokens, tokensIndex)
 			if err != nil {
 				return nil, err
 			}
@@ -149,18 +169,17 @@ func buildCons(tokens []token) (Cell, error) {
 				actCons = (*cons).Cdr
 			}
 
-			maybeClosePar, err := readNextToken(tokens)
+			maybeClosePar, err := readNextToken(tokens, tokensIndex)
 			if err != nil {
 				return nil, err
 			}
 
-			if maybeClosePar.typ == tokClose || maybeClosePar.typ == tokCloseParallel {
-				extractNextToken(tokens)
+			if maybeClosePar.typ == closeParToken {
+				extractNextToken(tokens, tokensIndex)
 				return top, nil
 			}
 		}
 	}
-	return top, nil
 }
 
 type ParseError struct {

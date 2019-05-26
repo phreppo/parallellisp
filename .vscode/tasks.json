@@ -1,0 +1,22 @@
+{
+	"command": "go",
+	"type": "shell",
+	"tasks": [
+        {
+            "label": "Run",
+            "command": "go run parallellisp.go",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$go"
+            ], 
+            "presentation": {
+                "panel": "new",
+                "reveal": "always",
+                "focus": true
+            }
+        }
+    ]
+}

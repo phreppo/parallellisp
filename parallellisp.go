@@ -12,15 +12,23 @@ import (
 func repl() {
 	reader := bufio.NewReader(os.Stdin)
 	for {
-		fmt.Print(aurora.BrightGreen("😴 "))
+		fmt.Print(aurora.BrightBlue("λ "))
 		source, _ := reader.ReadString('\n')
 		sexpr, err := Parse(source)
 		if err != nil {
-			fmt.Println("  ", aurora.Red(err))
+			printError(err)
 		} else {
-			evalAndPrint(sexpr)
+			if ok, err := SemanticAnalysis(sexpr); !ok {
+				printError(err)
+			} else {
+				evalAndPrint(sexpr)
+			}
 		}
 	}
+}
+
+func printError(e error) {
+	fmt.Println(" ", aurora.BrightRed(e), aurora.BrightRed("✗"))
 }
 
 func evalAndPrint(sexpr Cell) {
@@ -28,9 +36,9 @@ func evalAndPrint(sexpr Cell) {
 	EvalService <- NewEvalRequest(sexpr, SimpleEnv(), ansChan)
 	result := <-ansChan
 	if result.Err != nil {
-		fmt.Println("  ", aurora.Red(result.Err), "😘")
+		printError(result.Err)
 	} else {
-		fmt.Println("  ", result.Cell, aurora.BrightGreen("✓"))
+		fmt.Println(" ", result.Cell, aurora.BrightGreen("✓"))
 	}
 }
 

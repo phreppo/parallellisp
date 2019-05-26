@@ -15,7 +15,7 @@
 (defun solveMazeRec 
     (maze actualCell exploredCells)
         (cond 
-            ((= actualCell -1)
+            ((eq actualCell -1)
                 exploredCells
             ) 
             ((member actualCell exploredCells)     
@@ -27,7 +27,7 @@
 
 (defun solveMaze 
     (maze)
-    (solveMazeRec maze 0 '()) )
+    (solveMazeRec maze 0 nil ))
 
 (defun first_arg (func) (car (cdr func)) )
 (defun second_arg (func) (car (cdr (cdr func))) )
@@ -91,12 +91,12 @@
 
 (defun mymult (x y) (* x y))
 
-(defun second (list) (car (cdr list)))
+(defun second (mylist) (car (cdr mylist)))
 
 (defun listoperations (l) (list (nth 0 l) 1 2 3 4 l))
 
 (write "maze")
-(time (dotimes (n 5) (solvemaze maze)))
+(time (dotimes (n 5) (solveMaze maze)))
 
 (write "ff")
 (time (dotimes (n 50000) (ff '(((((((((((a)))))))))))) ))
@@ -145,6 +145,3 @@
 
 (write "list operations")
 (time (dotimes (n 1000000) (listoperations '(1 2 3 4 "ciao"))))
-
-(write "setq")
-(time (dotimes (n 10000000) (setq var 30)))

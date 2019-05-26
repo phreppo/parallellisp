@@ -1,3 +1,5 @@
+(load "parallel.lisp")
+
 (defun fib (n) 
     ; computes the fibonacci number of n in the sequential way
     (cond 
@@ -48,3 +50,16 @@
 
 (write "par bench, stupid par fib")
 {time {p-bench stupid-p-fib 25}}
+
+(write "fib 32")
+(time (fib 32))
+
+(write "library fib 32")
+(time (parallelize 
+    32 
+    (lambda (n) (or (eq n 0) (eq n 1)))
+    (lambda (n) (- n 1))
+    (lambda (n) (- n 2))
+    +
+    fib
+))

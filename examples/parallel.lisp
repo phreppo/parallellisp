@@ -18,3 +18,20 @@
                 (sequential-algorithm (second-half lst))
             ))))
 
+(defun parallelize (generic-data is-base-case split-one split-two combinator sequential-algorithm)
+    (parallelize-ric generic-data 1 is-base-case split-one split-two combinator sequential-algorithm))
+
+(defun parallelize-ric (generic-data partitions is-base-case split-one split-two combinator sequential-algorithm)
+    (cond
+        ((is-base-case generic-data) (sequential-algorithm generic-data))
+        ((< partitions ncpu)
+            (let ((new-partitions (* partitions 2)))
+            {combinator 
+                (parallelize-ric (split-one generic-data) new-partitions is-base-case split-one split-two combinator sequential-algorithm)
+                (parallelize-ric (split-two generic-data) new-partitions is-base-case split-one split-two combinator sequential-algorithm)
+            }))
+        (t (combinator 
+                (sequential-algorithm (split-one generic-data))
+                (sequential-algorithm (split-two generic-data))
+            ))))
+

@@ -25,4 +25,4 @@
             (mergesort (drop lst (/ (length lst) 2)))))))
             
 (write "Merge sorting...")
-(time (dotimes (n 10) (mergesort llist)))
+(time (mergesort llist))

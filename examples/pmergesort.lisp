@@ -1,4 +1,5 @@
 (load "mergesort.lisp")
+(load "parallel.lisp")
             
 (defun pmergesort (lst)
   (cond 
@@ -9,4 +10,9 @@
         )))
 
 (write "Parallel merge sorting...")
-(time (dotimes (n 10) (pmergesort llist)))
+(time (pmergesort llist))
+
+(write "Library merge sorting...")
+(time (go llist merge mergesort))
+
+t

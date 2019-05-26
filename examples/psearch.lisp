@@ -1,4 +1,5 @@
 (load "search.lisp")
+(load "parallel.lisp")
 
 (defun ppresent (x lst)
     (cond 
@@ -61,4 +62,21 @@
 (time (genial-ppresent 9118 llist))
 (write "")
 
-t
+; hand-made closure
+(defun present-closed (lst)
+    (cond 
+        ((eq lst nil) nil)
+        ((eq (length lst) 1) 
+            (eq (car lst) closed-element))
+        (t (or 
+                (present closed-element (first-half lst))
+                (present closed-element (second-half lst)))
+        )))
+
+(setq closed-element 5900)
+(write "[PAR] libray present first element...")
+(time (go llist 'or 'present-closed))
+
+(setq closed-element 9118)
+(write "[PAR] library present last element...")
+(time (go llist or present-closed))

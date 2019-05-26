@@ -107,6 +107,11 @@ func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
 				return apply(car, argsResult.Cell, env)
 			}
 		}
+	// symbols autoquote
+	case *BuiltinMacroCell:
+		return newEvalPositiveResult(c)
+	case *BuiltinLambdaCell:
+		return newEvalPositiveResult(c)
 	default:
 		return newEvalErrorResult(newEvalError("[eval] Unknown cell type: " + fmt.Sprintf("%v", toEval)))
 	}

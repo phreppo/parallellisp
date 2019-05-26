@@ -1,3 +1,5 @@
+(load "biglist.lisp")
+
 (defun take (lst n) 
     (cond 
         ((eq n 0) nil) 
@@ -22,7 +24,5 @@
             (mergesort (take lst (/ (length lst) 2)))
             (mergesort (drop lst (/ (length lst) 2)))))))
             
-(setq l '(4 2 56 73 3 1 94 3 1 23 32  2 34 32 1 2 4 52 23  5 4 765 87 6 35 13 321 12 432 3))
-
-(write "Merge sorting...")
-(time (dotimes (n 1000)(mergesort l)))
+;; (write "Merge sorting...")
+(time (dotimes (n 10) (mergesort llist)))

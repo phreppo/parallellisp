@@ -113,6 +113,7 @@ func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
 }
 
 func evlisParallel(args Cell, env *EnvironmentEntry) EvalResult {
+	// fmt.Println("parallelooo", args)
 	n := getNumberOfArgs(args)
 	scheduler.AddJobs(int32(n - 1))
 

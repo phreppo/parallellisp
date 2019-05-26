@@ -4,7 +4,8 @@
 	"tasks": [
         {
             "label": "Run",
-            "command": "go run parallellisp.go",
+            // "command": "go run parallellisp.go",
+            "command": "./run",
             "group": {
                 "kind": "build",
                 "isDefault": true

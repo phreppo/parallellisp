@@ -4,3 +4,4 @@
 [alla fine] provare un array invece diuna slice per gli argomenti se va piu veloce
 [alla fine] mettere le freccie per canali di input e di output
 [rimuovere la variabile globale dell indice perfavore]
+[fare la defer di chiusura file nella load]

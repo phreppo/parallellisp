@@ -14,6 +14,10 @@ func repl() {
 	for {
 		fmt.Print(aurora.BrightBlue("λ "))
 		source, _ := reader.ReadString('\n')
+		if source == "\n" {
+			fmt.Println("  Bye!")
+			return
+		}
 		sexpr, err := Parse(source)
 		if err != nil {
 			printError(err)

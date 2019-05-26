@@ -1,4 +1,4 @@
-(load "biglist.lisp")
+(load "lists.lisp")
 
 (defun take (lst n) 
     (cond 
@@ -25,5 +25,8 @@
                 (present x (second-half lst)))
         )))
 
-(write "Sequential present")
-(time (present 5900 llist))
+(write "[SEQ] present first element...")
+(time (present 5900 llist)) ; on clisp: stack overflow!
+(write "[SEQ] present last element...")
+(time (present 9118 llist))
+(write "")

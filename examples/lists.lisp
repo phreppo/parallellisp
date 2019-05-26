@@ -1,5 +1,7 @@
+;; super small list
 (setq sslist '( 1 2 3 4 5 6 7 8 9 0))
 
+;; small list
 (setq slist '(
  78
  93
@@ -103,6 +105,7 @@
  60
 ))
 
+;; medium list
 (setq mlist '(
  499
  495
@@ -1106,6 +1109,7 @@
  890
 ))
 
+;; large list
 (setq llist 
   '(
  8761

@@ -421,6 +421,15 @@ func integerpLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	}
 }
 
+func onePlusLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	num := car(args).(*IntCell)
+	return newEvalPositiveResult(MakeInt(num.Val + 1))
+}
+func oneMinusLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	num := car(args).(*IntCell)
+	return newEvalPositiveResult(MakeInt(num.Val - 1))
+}
+
 func symbolpLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	switch car(args).(type) {
 	case *BuiltinLambdaCell:

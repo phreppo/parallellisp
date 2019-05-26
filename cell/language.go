@@ -186,6 +186,14 @@ func newLanguage() *language {
 				Sym:    "symbolp",
 				Lambda: symbolpLambda},
 
+			"1+": BuiltinLambdaCell{
+				Sym:    "1+",
+				Lambda: onePlusLambda},
+
+			"1-": BuiltinLambdaCell{
+				Sym:    "1-",
+				Lambda: oneMinusLambda},
+
 			// "label",
 		},
 

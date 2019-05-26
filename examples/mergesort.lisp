@@ -1,4 +1,4 @@
-(load "biglist.lisp")
+(load "lists.lisp")
 
 (defun take (lst n) 
     (cond 
@@ -24,5 +24,5 @@
             (mergesort (take lst (/ (length lst) 2)))
             (mergesort (drop lst (/ (length lst) 2)))))))
             
-;; (write "Merge sorting...")
+(write "Merge sorting...")
 (time (dotimes (n 10) (mergesort llist)))

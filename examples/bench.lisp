@@ -140,8 +140,8 @@
     (second '(a b c d e f g h))))
 
 (write "logical operations")
-(time (dotimes (n 4000000) 
+(time (dotimes (n 200000) 
     (or 1 2 3 (and 4 (not 5)))))
 
 (write "list operations")
-(time (dotimes (n 1000000) (listoperations '(1 2 3 4 "ciao"))))
+(time (dotimes (n 500000) (listoperations '(1 2 3 4 "ciao"))))

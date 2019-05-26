@@ -1,6 +1,9 @@
 package cell
 
-import "fmt"
+import (
+	"fmt"
+	"runtime"
+)
 
 func EmptyEnv() *EnvironmentEntry {
 	return nil
@@ -42,12 +45,13 @@ var GlobalEnv = make(map[string]Cell)
 func initGlobalEnv() {
 
 	GlobalEnv["id"], _ = Parse("(lambda (x) x)")
+	GlobalEnv["ncpu"], _ = Parse(fmt.Sprintf("%v", runtime.NumCPU()))
 	GlobalEnv["tests"], _ = Parse("\"examples/test.lisp\"")
 	GlobalEnv["bench"], _ = Parse("\"examples/bench.lisp\"")
 	GlobalEnv["t"], _ = Parse("t")
 	GlobalEnv["fib"], _ = Parse("(lambda (n) (cond ((eq n 0) 0) ((eq n 1) 1) (t (+ (fib (- n 1)) (fib (- n 2)))))) ")
 	GlobalEnv["f"], _ = Parse("\"examples/pfib.lisp\"")
-	GlobalEnv["m"], _ = Parse("\"examples/mergesort.lisp\"")
+	GlobalEnv["m"], _ = Parse("\"examples/pmergesort.lisp\"")
 	GlobalEnv["b"], _ = Parse("(lambda (n) (time {+ (fib n) (fib n) (fib n) (fib n) (fib n) (fib n) (fib n) (fib n)}))")
 	GlobalEnv["toz"], _ = Parse("(lambda (n) (cond ((eq n 0) 0) (t (toz (- n 1))) ))")
 }

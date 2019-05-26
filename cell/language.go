@@ -178,6 +178,14 @@ func newLanguage() *language {
 				Sym:    "write",
 				Lambda: writeLambda},
 
+			"integerp": BuiltinLambdaCell{
+				Sym:    "integerp",
+				Lambda: integerpLambda},
+
+			"symbolp": BuiltinLambdaCell{
+				Sym:    "symbolp",
+				Lambda: symbolpLambda},
+
 			// "label",
 		},
 

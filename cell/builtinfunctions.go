@@ -412,6 +412,28 @@ func setLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	return newEvalPositiveResult(val)
 }
 
+func integerpLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	switch car(args).(type) {
+	case *IntCell:
+		return newEvalPositiveResult(Lisp.GetTrueSymbol())
+	default:
+		return newEvalPositiveResult(nil)
+	}
+}
+
+func symbolpLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	switch car(args).(type) {
+	case *BuiltinLambdaCell:
+		return newEvalPositiveResult(Lisp.GetTrueSymbol())
+	case *BuiltinMacroCell:
+		return newEvalPositiveResult(Lisp.GetTrueSymbol())
+	case *SymbolCell:
+		return newEvalPositiveResult(Lisp.GetTrueSymbol())
+	default:
+		return newEvalPositiveResult(nil)
+	}
+}
+
 func unimplementedMacro(c Cell, env *EnvironmentEntry) EvalResult {
 	panic("unimplemented macro")
 }

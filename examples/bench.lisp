@@ -33,11 +33,11 @@
 (defun second_arg (func) (car (cdr (cdr func))) )
 (defun fun_name (func) (car func) )
 
-(defun mult (first second) (cons '* (cons first (cons second NIL))) )
-(defun expo (first second) (cons 'expt (cons first (cons second NIL))) )
-(defun sum  (first second) (cons '+ (cons first (cons second NIL))) )
-(defun diff (first second) (cons '- (cons first (cons second NIL))) )
-(defun frac (first second) (cons '/ (cons first (cons second NIL))) )
+(defun mult (first second) (cons '* (cons first (cons second nil))) )
+(defun expo (first second) (cons 'expt (cons first (cons second nil))) )
+(defun sum  (first second) (cons '+ (cons first (cons second nil))) )
+(defun diff (first second) (cons '- (cons first (cons second nil))) )
+(defun frac (first second) (cons '/ (cons first (cons second nil))) )
 
 (defun d (func) ( cond
     ((integerp func) 0) 
@@ -84,21 +84,6 @@
         (expo (second_arg func) 2)))
     (t 
       NIL)))
-
-(defun string-include (string1 string2)
-  (cond
-   ((eq (length string1) 0) nil)
-   ((> (length string1) (length string2)) nil) 
-   ((eq string1 (subseq string2 0 (length string1))) string1) 
-   (t (string-include string1 (subseq string2 1)))))
-  
-(defun check
-  (word)
-  (cond
-    ((string-include "cie" word) NIL)
-    ((and (string-include "ei" word)
-         (not (string-include "cei" word))) NIL)
-    (t t)))
 
 (defun ff (x) (cond ((atom x) x ) (t (ff (car x)))) )
 
@@ -153,10 +138,6 @@
 (write "second")
 (time (dotimes (n 1000000) 
     (second '(a b c d e f g h))))
-
-(write "grammar game")
-(time (dotimes (n 10000)
-    (map check '("a" "zombie" "transceiver" "veil" "icier"))))
 
 (write "logical operations")
 (time (dotimes (n 4000000) 

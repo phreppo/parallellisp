@@ -116,6 +116,18 @@ func letMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	return eval(cadr(args), newEnv)
 }
 
+func dotimesMacro(args Cell, env *EnvironmentEntry) EvalResult {
+	firstArg := car(args)
+	body := cadr(args)
+	varName := car(firstArg)
+	varValue := cadr(firstArg)
+	for i := 0; i < (varValue.(*IntCell)).Val; i++ {
+		newEnv := NewEnvironmentEntry(varName.(*SymbolCell), MakeInt(i), env)
+		eval(body, newEnv)
+	}
+	return newEvalPositiveResult(nil)
+}
+
 func carLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	switch topCons := args.(type) {
 	case *ConsCell:

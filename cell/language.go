@@ -210,6 +210,10 @@ func newLanguage() *language {
 			"let": BuiltinMacroCell{
 				Sym:   "let",
 				Macro: letMacro},
+
+			"dotimes": BuiltinMacroCell{
+				Sym:   "dotimes",
+				Macro: dotimesMacro},
 		},
 
 		builtinSpecialSymbols: map[string]SymbolCell{

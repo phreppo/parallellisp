@@ -4,3 +4,4 @@
 [fare la defer di chiusura file nella load]
 [ora] (lambda () 1) non parsa: hai un errore nel parser
 [closure] implementare le closure cosi la serach va una bomba
+[mettere nella parallelize il dato alla fine]

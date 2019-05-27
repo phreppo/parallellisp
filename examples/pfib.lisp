@@ -79,3 +79,12 @@
         fib
 ))
 
+;; quando avrai le closure pfib diventera 
+;; (setq pfib ((
+;;     parallelize 
+;;         (lambda (n) (or (eq n 0) (eq n 1)))
+;;         (lambda (n) (- n 2))
+;;         (lambda (n) (- n 1))
+;;         +
+;;         fib
+;; )))

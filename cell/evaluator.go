@@ -2,8 +2,6 @@ package cell
 
 import (
 	"fmt"
-
-	"github.com/parof/parallellisp/scheduler"
 )
 
 var EvalService = startEvalService()
@@ -68,14 +66,12 @@ func startEvalService() chan EvalRequest {
 func server(service <-chan EvalRequest) {
 	for {
 		req := <-service
-		scheduler.AddJob()
 		go serve(req)
 	}
 }
 
 func serve(req EvalRequest) {
 	result := eval(req.Cell, req.Env)
-	scheduler.JobEnded()
 	req.ReplyChan <- result
 }
 
@@ -96,11 +92,7 @@ func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
 			return car.Macro(c.Cdr, env)
 		default:
 			var argsResult EvalResult
-			if scheduler.ShouldParallelize() {
-				argsResult = c.Evlis(c.Cdr, env)
-			} else {
-				argsResult = evlisSequential(c.Cdr, env)
-			}
+			argsResult = c.Evlis(c.Cdr, env)
 			if argsResult.Err != nil {
 				return newEvalErrorResult(argsResult.Err)
 			} else {
@@ -119,7 +111,6 @@ func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
 
 func evlisParallel(args Cell, env *EnvironmentEntry) EvalResult {
 	n := getNumberOfArgs(args)
-	scheduler.AddJobs(int32(n - 1))
 
 	if n == 0 {
 		return newEvalPositiveResult(nil)
@@ -146,7 +137,6 @@ func evlisParallel(args Cell, env *EnvironmentEntry) EvalResult {
 			appendCellToArgs(&top, &actCons, &(lastArgResult.Cell))
 		} else {
 			evaluedArg := <-replyChans[i]
-			scheduler.JobEnded()
 			if evaluedArg.Err != nil {
 				return newEvalErrorResult(evaluedArg.Err)
 			}

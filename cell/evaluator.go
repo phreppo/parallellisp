@@ -211,14 +211,23 @@ func apply(function Cell, args Cell, env *EnvironmentEntry) EvalResult {
 		return functionCasted.Lambda(args, env)
 	case *ConsCell:
 		if Lisp.IsLambdaSymbol(functionCasted.Car) {
-			newEnv, err := pairlis(cadr(function), args, env)
+			formalParameters := cadr(function)
+			lambdaBody := caddr(function)
+			if isClosure(formalParameters, args) {
+				return newEvalPositiveResult(buildClosure(lambdaBody, formalParameters, args))
+			}
+			newEnv, err := pairlis(formalParameters, args, env)
 			if err != nil {
 				return newEvalErrorResult(err)
 			}
-			return eval(caddr(function), newEnv)
+			return eval(lambdaBody, newEnv)
 		} else {
-			// label check here
-			return newEvalErrorResult(newEvalError("[apply] trying to apply a non-lambda"))
+			// partial apply
+			partiallyAppliedFunction := eval(function, env)
+			if partiallyAppliedFunction.Err != nil {
+				return partiallyAppliedFunction
+			}
+			return apply(partiallyAppliedFunction.Cell, args, env)
 		}
 	case *SymbolCell:
 		evaluedFunction := eval(function, env)
@@ -229,6 +238,84 @@ func apply(function Cell, args Cell, env *EnvironmentEntry) EvalResult {
 	default:
 		return newEvalErrorResult(newEvalError("[apply] trying to apply non-builtin, non-lambda, non-symbol"))
 	}
+}
+
+func isClosure(formalParameters, actualParameters Cell) bool {
+	return listLengt(formalParameters) > listLengt(actualParameters)
+}
+
+func listLengt(c Cell) int {
+	n := 0
+	for c != nil {
+		n++
+		c = cdr(c)
+	}
+	return n
+}
+
+func buildClosure(lambdaBody, formalParameters, actualParameters Cell) Cell {
+	// ((lambda (x y) (+ x y)) 1)
+	// head
+	top := MakeCons(MakeSymbol("lambda"), nil)
+	act := top
+
+	// unmatched parameters
+	actFormal := formalParameters
+	actActual := actualParameters
+	found := false
+	closureEnv := EmptyEnv()
+
+	for actFormal != nil && !found {
+		if actActual == nil {
+			// fatto
+			found = true
+		} else {
+			closureEnv = NewEnvironmentEntry((car(actFormal)).(*SymbolCell), car(actActual), closureEnv)
+			actFormal = cdr(actFormal)
+			actActual = cdr(actActual)
+		}
+	}
+	appendCellToArgs(&top, &act, &actFormal)
+
+	closedBody := copyAndSubstituteSymbols(lambdaBody, closureEnv)
+	appendCellToArgs(&top, &act, &closedBody)
+	return top
+}
+
+func copyAndSubstituteSymbols(c Cell, env *EnvironmentEntry) Cell {
+	switch cell := c.(type) {
+	case *IntCell:
+		return cell
+	case *StringCell:
+		return cell
+	case *BuiltinLambdaCell:
+		return cell
+	case *BuiltinMacroCell:
+		return cell
+	case *SymbolCell:
+		if symbolIsInEnv(cell, env) {
+			return assoc(cell, env).Cell
+		}
+		return cell
+	case *ConsCell:
+		return MakeCons(copyAndSubstituteSymbols(cell.Car, env), copyAndSubstituteSymbols(cell.Cdr, env))
+	default:
+		return nil
+	}
+}
+
+func symbolIsInEnv(c *SymbolCell, env *EnvironmentEntry) bool {
+	if env == nil {
+		return false
+	}
+	act := env
+	for act != nil {
+		if (act.Pair.Symbol.Sym) == c.Sym {
+			return true
+		}
+		act = act.Next
+	}
+	return false
 }
 
 func car(c Cell) Cell {

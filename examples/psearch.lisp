@@ -75,8 +75,11 @@
 
 (setq closed-element 5900)
 (write "[PAR] libray present first element...")
-(time (go llist 'or 'present-closed))
+(time (go llist or present-closed))
 
 (setq closed-element 9118)
 (write "[PAR] library present last element...")
 (time (go llist or present-closed))
+
+(write "[PAR][CLOSURE] library present last element...")
+(time (go llist or (present 5900)))

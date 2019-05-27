@@ -9,11 +9,6 @@ func EmptyEnv() *EnvironmentEntry {
 	return nil
 }
 
-func SimpleEnv() *EnvironmentEntry {
-	list, _ := Parse("(1 2 3 4)")
-	return NewEnvironmentEntry(MakeSymbol("l").(*SymbolCell), list, nil)
-}
-
 func NewEnvironmentEntry(sym *SymbolCell, value Cell, next *EnvironmentEntry) *EnvironmentEntry {
 	newEntry := new(EnvironmentEntry)
 	newEntry.Pair = new(EnvironmentPair)
@@ -45,6 +40,7 @@ var GlobalEnv = make(map[string]Cell)
 func initGlobalEnv() {
 	// necessary
 	GlobalEnv["id"], _ = Parse("(lambda (x) x)")
+	GlobalEnv["null"], _ = Parse("(lambda (x) (eq x nil))")
 	GlobalEnv["ncpu"], _ = Parse(fmt.Sprintf("%v", runtime.NumCPU()))
 	GlobalEnv["t"], _ = Parse("t")
 

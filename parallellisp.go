@@ -37,7 +37,7 @@ func printError(e error) {
 
 func evalAndPrint(sexpr Cell) {
 	ansChan := make(chan EvalResult)
-	EvalService <- NewEvalRequest(sexpr, SimpleEnv(), ansChan)
+	EvalService <- NewEvalRequest(sexpr, EmptyEnv(), ansChan)
 	result := <-ansChan
 	if result.Err != nil {
 		printError(result.Err)

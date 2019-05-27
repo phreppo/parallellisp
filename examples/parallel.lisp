@@ -5,7 +5,7 @@
 
 (defun divide-et-impera-ric (partitions sequential-algorithm combinator lst)
     (cond
-        ((eq lst nil) (sequential-algorithm lst))
+        ((eq lst nil)        (sequential-algorithm lst))
         ((eq (length lst) 1) (sequential-algorithm lst))
         ((< partitions ncpu)
             (let ((new-partitions (* partitions 2)))

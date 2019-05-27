@@ -1,13 +1,5 @@
 (load "lists.lisp")
-
-(defun take (lst n) 
-    (cond 
-        ((eq n 0) nil) 
-        (t (cons (car lst) (take (cdr lst) (- n 1))))))
-        
-(defun drop (lst n) 
-    (cond ((eq n 0) lst) 
-    (t (drop (cdr lst) (- n 1)))))
+(load "list-functions.lisp")
     
 (defun merge (firstList secondList)
   (cond ((not firstList) secondList)
@@ -23,6 +15,4 @@
     (t (merge 
             (mergesort (take lst (/ (length lst) 2)))
             (mergesort (drop lst (/ (length lst) 2)))))))
-            
-(write "Merge sorting...")
-(time (mergesort llist))
+        

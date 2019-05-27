@@ -91,15 +91,14 @@ func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
 		case *BuiltinMacroCell:
 			return car.Macro(c.Cdr, env)
 		default:
-			var argsResult EvalResult
-			argsResult = c.Evlis(c.Cdr, env)
+			argsResult := c.Evlis(c.Cdr, env)
 			if argsResult.Err != nil {
 				return newEvalErrorResult(argsResult.Err)
 			} else {
 				return apply(car, argsResult.Cell, env)
 			}
 		}
-	// symbols autoquote
+	// builtin symbols autoquote: allows higer order functions
 	case *BuiltinMacroCell:
 		return newEvalPositiveResult(c)
 	case *BuiltinLambdaCell:

@@ -106,6 +106,7 @@ func buildCons(tokens []token, openParToken, closeParToken tokenType, tokensInde
 		return nil, err
 	}
 	if nextToken.typ == closeParToken {
+		extractNextToken(tokens, tokensIndex)
 		return nil, nil
 	}
 	left, err := ricParse(tokens, tokensIndex)

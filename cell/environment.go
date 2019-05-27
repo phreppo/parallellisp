@@ -51,9 +51,8 @@ func initGlobalEnv() {
 	GlobalEnv["search"], _ = Parse("\"psearch.lisp\"")
 	GlobalEnv["sum"], _ = Parse("\"psum.lisp\"")
 	GlobalEnv["t"], _ = Parse("t")
-	GlobalEnv["fib"], _ = Parse("(lambda (n) (cond ((eq n 0) 0) ((eq n 1) 1) (t (+ (fib (- n 1)) (fib (- n 2)))))) ")
-	GlobalEnv["f"], _ = Parse("\"pfib.lisp\"")
-	GlobalEnv["m"], _ = Parse("\"pmergesort.lisp\"")
+	GlobalEnv["fib"], _ = Parse("\"pfib.lisp\"")
+	GlobalEnv["ms"], _ = Parse("\"pmergesort.lisp\"")
 	GlobalEnv["b"], _ = Parse("(lambda (n) (time {+ (fib n) (fib n) (fib n) (fib n) (fib n) (fib n) (fib n) (fib n)}))")
 	GlobalEnv["toz"], _ = Parse("(lambda (n) (cond ((eq n 0) 0) (t (toz (- n 1))) ))")
 }

@@ -60,31 +60,34 @@
 (write "library fib 32")
 (time (
     parallelize 
-        32 
+        fib
         (lambda (n) (or (eq n 0) (eq n 1)))
         (lambda (n) (- n 1))
         (lambda (n) (- n 2))
         +
-        fib
+        32 
 ))
 
 (write "inverted library fib 32")
 (time (
     parallelize 
-        32 
+        fib
         (lambda (n) (or (eq n 0) (eq n 1)))
         (lambda (n) (- n 2))
         (lambda (n) (- n 1))
         +
-        fib
+        32 
 ))
 
-;; quando avrai le closure pfib diventera 
-;; (setq pfib ((
-;;     parallelize 
-;;         (lambda (n) (or (eq n 0) (eq n 1)))
-;;         (lambda (n) (- n 2))
-;;         (lambda (n) (- n 1))
-;;         +
-;;         fib
-;; )))
+;; questa cosa e completamente folle
+(setq pfib 
+    (parallelize 
+        fib
+        (lambda (n) (or (eq n 0) (eq n 1)))
+        (lambda (n) (- n 2))
+        (lambda (n) (- n 1))
+        +
+    ))
+
+(write "closed fib 32")
+(time (pfib 32))

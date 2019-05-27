@@ -43,16 +43,15 @@ type EnvironmentPair struct {
 var GlobalEnv = make(map[string]Cell)
 
 func initGlobalEnv() {
-
+	// necessary
 	GlobalEnv["id"], _ = Parse("(lambda (x) x)")
 	GlobalEnv["ncpu"], _ = Parse(fmt.Sprintf("%v", runtime.NumCPU()))
+	GlobalEnv["t"], _ = Parse("t")
+
+	// shortcuts
 	GlobalEnv["tests"], _ = Parse("\"test.lisp\"")
-	GlobalEnv["bench"], _ = Parse("\"bench.lisp\"")
 	GlobalEnv["search"], _ = Parse("\"psearch.lisp\"")
 	GlobalEnv["sum"], _ = Parse("\"psum.lisp\"")
-	GlobalEnv["t"], _ = Parse("t")
 	GlobalEnv["fib"], _ = Parse("\"pfib.lisp\"")
 	GlobalEnv["ms"], _ = Parse("\"pmergesort.lisp\"")
-	GlobalEnv["b"], _ = Parse("(lambda (n) (time {+ (fib n) (fib n) (fib n) (fib n) (fib n) (fib n) (fib n) (fib n)}))")
-	GlobalEnv["toz"], _ = Parse("(lambda (n) (cond ((eq n 0) 0) (t (toz (- n 1))) ))")
 }

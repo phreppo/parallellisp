@@ -32,4 +32,4 @@
 (time (smart-sumlist llist))
 
 (write "[PAR] library divide sum")
-(time (divide-et-impera llist + sumlist))
+(time (divide-et-impera sumlist + llist))

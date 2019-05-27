@@ -54,12 +54,28 @@
 (write "fib 32")
 (time (fib 32))
 
+;; it is crazy how keeping the biggest computation on the main thread could change performances
+;; ... or maybe no
+
 (write "library fib 32")
-(time (parallelize 
-    32 
-    (lambda (n) (or (eq n 0) (eq n 1)))
-    (lambda (n) (- n 1))
-    (lambda (n) (- n 2))
-    +
-    fib
+(time (
+    parallelize 
+        32 
+        (lambda (n) (or (eq n 0) (eq n 1)))
+        (lambda (n) (- n 1))
+        (lambda (n) (- n 2))
+        +
+        fib
 ))
+
+(write "inverted library fib 32")
+(time (
+    parallelize 
+        32 
+        (lambda (n) (or (eq n 0) (eq n 1)))
+        (lambda (n) (- n 2))
+        (lambda (n) (- n 1))
+        +
+        fib
+))
+

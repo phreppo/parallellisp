@@ -1,17 +1,17 @@
 (load "list-functions.lisp")
 
-(defun go (lst combinator sequential-algorithm)
-    (go-ric lst 1 combinator sequential-algorithm))
+(defun divide-et-impera (sequential-algorithm combinator lst)
+    (divide-et-impera-ric 1 sequential-algorithm combinator lst))
 
-(defun go-ric (lst partitions combinator sequential-algorithm)
+(defun divide-et-impera-ric (partitions sequential-algorithm combinator lst)
     (cond
         ((eq lst nil) (sequential-algorithm lst))
         ((eq (length lst) 1) (sequential-algorithm lst))
         ((< partitions ncpu)
             (let ((new-partitions (* partitions 2)))
             {combinator 
-                (go-ric (first-half  lst) new-partitions combinator sequential-algorithm)
-                (go-ric (second-half lst) new-partitions combinator sequential-algorithm)
+                (divide-et-impera-ric new-partitions sequential-algorithm combinator (first-half  lst))
+                (divide-et-impera-ric new-partitions sequential-algorithm combinator (second-half lst))
             }))
         (t (combinator 
                 (sequential-algorithm (first-half  lst))

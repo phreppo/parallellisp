@@ -267,7 +267,7 @@ func buildClosure(lambdaBody, formalParameters, actualParameters Cell) Cell {
 
 	for actFormal != nil && !found {
 		if actActual == nil {
-			// fatto
+			// found
 			found = true
 		} else {
 			closureEnv = NewEnvironmentEntry((car(actFormal)).(*SymbolCell), car(actActual), closureEnv)
@@ -279,6 +279,7 @@ func buildClosure(lambdaBody, formalParameters, actualParameters Cell) Cell {
 
 	closedBody := copyAndSubstituteSymbols(lambdaBody, closureEnv)
 	appendCellToArgs(&top, &act, &closedBody)
+
 	return top
 }
 
@@ -346,7 +347,6 @@ func cadar(c Cell) Cell {
 	return cadr(car(c.(*ConsCell)))
 }
 
-// Pre: symbol != nil, env. pair != nil
 func assoc(symbol *SymbolCell, env *EnvironmentEntry) EvalResult {
 	if res, isInGlobalEnv := GlobalEnv[symbol.Sym]; isInGlobalEnv {
 		return newEvalPositiveResult(res)

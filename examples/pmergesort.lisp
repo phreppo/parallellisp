@@ -13,6 +13,6 @@
 (time (pmergesort llist))
 
 (write "Library merge sorting...")
-(time (go llist merge mergesort))
+(time (divide-et-impera mergesort merge llist))
 
 t

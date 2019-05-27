@@ -54,4 +54,5 @@ func initGlobalEnv() {
 	GlobalEnv["sum"], _ = Parse("\"psum.lisp\"")
 	GlobalEnv["fib"], _ = Parse("\"pfib.lisp\"")
 	GlobalEnv["ms"], _ = Parse("\"pmergesort.lisp\"")
+	GlobalEnv["sorted"], _ = Parse("\"psorted.lisp\"")
 }

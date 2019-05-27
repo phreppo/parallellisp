@@ -10,6 +10,3 @@
                 (sumlist (first-half  lst))
                 (sumlist (second-half lst))
             ))))
-
-(write "[SEQ] sumlist")
-(time (sumlist llist))

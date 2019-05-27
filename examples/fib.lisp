@@ -9,6 +9,3 @@
 (defun bench (n) 
     ; applies fun to n 8 times and then sums these results, sequential
     (+ (fib n) (fib n) (fib n) (fib n) (fib n) (fib n) (fib n) (fib n))) 
-
-(write "Sequential fib")
-(time (bench 25))

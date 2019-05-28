@@ -1,5 +1,13 @@
 package cell
 
+import (
+	"bufio"
+	"fmt"
+	"os"
+
+	"github.com/logrusorgru/aurora"
+)
+
 // Cell is the generic interface for every value in Lisp
 type Cell interface {
 	Eq(Cell) bool
@@ -48,4 +56,41 @@ func (e *SemanticError) Error() string {
 func Init() {
 	initLanguage()
 	initglobalEnv()
+}
+
+// Repl performs the read-eval-printline loop
+func Repl() {
+	Init()
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		// READ
+		fmt.Print(aurora.BrightBlue("λ "))
+		source, _ := reader.ReadString('\n')
+		if source == "\n" {
+			fmt.Println("  Bye!")
+			return
+		}
+		// PARSE
+		sexpr, err := Parse(source)
+		if err != nil {
+			printError(err)
+		} else {
+			// SEMANTIC ANALYSIS
+			if ok, err := SemanticAnalysis(sexpr); !ok {
+				printError(err)
+			} else {
+				// EVAL
+				result := Eval(sexpr)
+				if result.Err != nil {
+					printError(result.Err)
+				} else {
+					fmt.Println(" ", result.Cell, aurora.BrightGreen("✓"))
+				}
+			}
+		}
+	}
+}
+
+func printError(e error) {
+	fmt.Println(" ", aurora.BrightRed(e), aurora.BrightRed("✗"))
 }

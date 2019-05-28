@@ -396,13 +396,7 @@ func nthLambda(args Cell, env *EnvironmentEntry) EvalResult {
 }
 
 func lengthLambda(args Cell, env *EnvironmentEntry) EvalResult {
-	n := 0
-	act := car(args)
-	for act != nil {
-		n++
-		act = cdr(act)
-	}
-	return newEvalPositiveResult(MakeInt(n))
+	return newEvalPositiveResult(MakeInt(listLengt(car(args))))
 }
 
 func setLambda(args Cell, env *EnvironmentEntry) EvalResult {
@@ -412,15 +406,6 @@ func setLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	return newEvalPositiveResult(val)
 }
 
-func integerpLambda(args Cell, env *EnvironmentEntry) EvalResult {
-	switch car(args).(type) {
-	case *IntCell:
-		return newEvalPositiveResult(Lisp.GetTrueSymbol())
-	default:
-		return newEvalPositiveResult(nil)
-	}
-}
-
 func onePlusLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	num := car(args).(*IntCell)
 	return newEvalPositiveResult(MakeInt(num.Val + 1))
@@ -428,6 +413,15 @@ func onePlusLambda(args Cell, env *EnvironmentEntry) EvalResult {
 func oneMinusLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	num := car(args).(*IntCell)
 	return newEvalPositiveResult(MakeInt(num.Val - 1))
+}
+
+func integerpLambda(args Cell, env *EnvironmentEntry) EvalResult {
+	switch car(args).(type) {
+	case *IntCell:
+		return newEvalPositiveResult(Lisp.GetTrueSymbol())
+	default:
+		return newEvalPositiveResult(nil)
+	}
 }
 
 func symbolpLambda(args Cell, env *EnvironmentEntry) EvalResult {

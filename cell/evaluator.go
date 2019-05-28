@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+func Eval(c Cell) EvalResult {
+	return eval(c, EmptyEnv())
+}
+
 var EvalService = startEvalService()
 
 type EvalError struct {
@@ -238,113 +242,6 @@ func apply(function Cell, args Cell, env *EnvironmentEntry) EvalResult {
 	default:
 		return newEvalErrorResult(newEvalError("[apply] trying to apply non-builtin, non-lambda, non-symbol"))
 	}
-}
-
-func isClosure(formalParameters, actualParameters Cell) bool {
-	return listLengt(formalParameters) > listLengt(actualParameters)
-}
-
-func listLengt(c Cell) int {
-	n := 0
-	for c != nil {
-		n++
-		c = cdr(c)
-	}
-	return n
-}
-
-func buildClosure(lambdaBody, formalParameters, actualParameters Cell) Cell {
-	// ((lambda (x y) (+ x y)) 1)
-	// head
-	top := MakeCons(MakeSymbol("lambda"), nil)
-	act := top
-
-	// unmatched parameters
-	actFormal := formalParameters
-	actActual := actualParameters
-	found := false
-	closureEnv := EmptyEnv()
-
-	for actFormal != nil && !found {
-		if actActual == nil {
-			// found
-			found = true
-		} else {
-			closureEnv = NewEnvironmentEntry((car(actFormal)).(*SymbolCell), car(actActual), closureEnv)
-			actFormal = cdr(actFormal)
-			actActual = cdr(actActual)
-		}
-	}
-	appendCellToArgs(&top, &act, &actFormal)
-
-	closedBody := copyAndSubstituteSymbols(lambdaBody, closureEnv)
-	appendCellToArgs(&top, &act, &closedBody)
-
-	return top
-}
-
-func copyAndSubstituteSymbols(c Cell, env *EnvironmentEntry) Cell {
-	switch cell := c.(type) {
-	case *IntCell:
-		return cell
-	case *StringCell:
-		return cell
-	case *BuiltinLambdaCell:
-		return cell
-	case *BuiltinMacroCell:
-		return cell
-	case *SymbolCell:
-		if symbolIsInEnv(cell, env) {
-			return assoc(cell, env).Cell
-		}
-		return cell
-	case *ConsCell:
-		return MakeCons(copyAndSubstituteSymbols(cell.Car, env), copyAndSubstituteSymbols(cell.Cdr, env))
-	default:
-		return nil
-	}
-}
-
-func symbolIsInEnv(c *SymbolCell, env *EnvironmentEntry) bool {
-	if env == nil {
-		return false
-	}
-	act := env
-	for act != nil {
-		if (act.Pair.Symbol.Sym) == c.Sym {
-			return true
-		}
-		act = act.Next
-	}
-	return false
-}
-
-func car(c Cell) Cell {
-	return (c.(*ConsCell)).Car
-}
-
-func cdr(c Cell) Cell {
-	return (c.(*ConsCell)).Cdr
-}
-
-func caar(c Cell) Cell {
-	return car(car(c))
-}
-
-func cadr(c Cell) Cell {
-	return car(cdr(c.(*ConsCell)))
-}
-
-func cdar(c Cell) Cell {
-	return cdr(car(c.(*ConsCell)))
-}
-
-func caddr(c Cell) Cell {
-	return cadr(cdr(c.(*ConsCell)))
-}
-
-func cadar(c Cell) Cell {
-	return cadr(car(c.(*ConsCell)))
 }
 
 func assoc(symbol *SymbolCell, env *EnvironmentEntry) EvalResult {

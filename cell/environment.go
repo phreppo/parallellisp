@@ -23,16 +23,30 @@ type EnvironmentEntry struct {
 	Next *EnvironmentEntry
 }
 
-func (e *EnvironmentEntry) String() string {
-	if e == nil {
-		return ""
+func symbolIsInEnv(c *SymbolCell, env *EnvironmentEntry) bool {
+	if env == nil {
+		return false
 	}
-	return fmt.Sprintf("%v -> %v\n", e.Pair.Symbol, e.Pair.Value) + fmt.Sprintf("%v", e.Next)
+	act := env
+	for act != nil {
+		if (act.Pair.Symbol.Sym) == c.Sym {
+			return true
+		}
+		act = act.Next
+	}
+	return false
 }
 
 type EnvironmentPair struct {
 	Symbol *SymbolCell
 	Value  Cell
+}
+
+func (e *EnvironmentEntry) String() string {
+	if e == nil {
+		return ""
+	}
+	return fmt.Sprintf("%v -> %v\n", e.Pair.Symbol, e.Pair.Value) + fmt.Sprintf("%v", e.Next)
 }
 
 var GlobalEnv = make(map[string]Cell)

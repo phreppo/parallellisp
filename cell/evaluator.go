@@ -4,7 +4,11 @@ import (
 	"fmt"
 )
 
-var evalService = startevalService()
+func initEvalService() {
+	evalService = startEvalService()
+}
+
+var evalService chan evalRequest
 
 func newEvalError(e string) EvalError {
 	r := EvalError{
@@ -44,7 +48,7 @@ func newEvalRequest(c Cell, env *environmentEntry, replChan chan EvalResult) eva
 	return r
 }
 
-func startevalService() chan evalRequest {
+func startEvalService() chan evalRequest {
 	service := make(chan evalRequest)
 	go server(service)
 	return service

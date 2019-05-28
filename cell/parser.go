@@ -182,12 +182,3 @@ func buildCons(tokens []token, openParToken, closeParToken tokenType, tokensInde
 		}
 	}
 }
-
-// ParseError
-type ParseError struct {
-	err string
-}
-
-func (e ParseError) Error() string {
-	return e.err
-}

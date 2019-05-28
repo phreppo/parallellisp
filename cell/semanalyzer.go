@@ -2,14 +2,6 @@ package cell
 
 import "fmt"
 
-type SemanticError struct {
-	errorString string
-}
-
-func (e *SemanticError) Error() string {
-	return e.errorString
-}
-
 func SemanticAnalysis(c Cell) (bool, error) {
 	switch cell := c.(type) {
 	case *ConsCell:

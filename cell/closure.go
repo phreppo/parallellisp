@@ -21,7 +21,7 @@ func buildClosure(lambdaBody, formalParameters, actualParameters Cell) Cell {
 			// found
 			found = true
 		} else {
-			closureEnv = newenvironmentEntry((car(actFormal)).(*SymbolCell), car(actActual), closureEnv)
+			closureEnv = newenvironmentEntry((car(actFormal)).(*symbolCell), car(actActual), closureEnv)
 			actFormal = cdr(actFormal)
 			actActual = cdr(actActual)
 		}

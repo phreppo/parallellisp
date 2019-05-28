@@ -1,11 +1,11 @@
 package cell
 
 func car(c Cell) Cell {
-	return (c.(*ConsCell)).Car
+	return (c.(*consCell)).Car
 }
 
 func cdr(c Cell) Cell {
-	return (c.(*ConsCell)).Cdr
+	return (c.(*consCell)).Cdr
 }
 
 func caar(c Cell) Cell {
@@ -13,19 +13,19 @@ func caar(c Cell) Cell {
 }
 
 func cadr(c Cell) Cell {
-	return car(cdr(c.(*ConsCell)))
+	return car(cdr(c.(*consCell)))
 }
 
 func cdar(c Cell) Cell {
-	return cdr(car(c.(*ConsCell)))
+	return cdr(car(c.(*consCell)))
 }
 
 func caddr(c Cell) Cell {
-	return cadr(cdr(c.(*ConsCell)))
+	return cadr(cdr(c.(*consCell)))
 }
 
 func cadar(c Cell) Cell {
-	return cadr(car(c.(*ConsCell)))
+	return cadr(car(c.(*consCell)))
 }
 
 func listLengt(c Cell) int {
@@ -49,20 +49,20 @@ func eq(c1, c2 Cell) bool {
 
 func copyAndSubstituteSymbols(c Cell, env *environmentEntry) Cell {
 	switch cell := c.(type) {
-	case *IntCell:
+	case *intCell:
 		return cell
-	case *StringCell:
+	case *stringCell:
 		return cell
-	case *BuiltinLambdaCell:
+	case *builtinLambdaCell:
 		return cell
-	case *BuiltinMacroCell:
+	case *builtinMacroCell:
 		return cell
-	case *SymbolCell:
+	case *symbolCell:
 		if symbolIsInEnv(cell, env) {
 			return assoc(cell, env).Cell
 		}
 		return cell
-	case *ConsCell:
+	case *consCell:
 		return makeCons(copyAndSubstituteSymbols(cell.Car, env), copyAndSubstituteSymbols(cell.Cdr, env))
 	default:
 		return nil

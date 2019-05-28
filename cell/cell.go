@@ -5,25 +5,21 @@ import (
 	"strconv"
 )
 
-type Cell interface {
-	Eq(Cell) bool
-}
-
 /*******************************************************************************
  Int cell
 *******************************************************************************/
 
-type IntCell struct {
+type intCell struct {
 	Val int
 }
 
-func (i IntCell) String() string {
+func (i intCell) String() string {
 	return strconv.Itoa(i.Val)
 }
 
-func (i IntCell) Eq(c Cell) bool {
+func (i intCell) Eq(c Cell) bool {
 	switch castedC := c.(type) {
-	case *IntCell:
+	case *intCell:
 		return castedC.Val == i.Val
 	default:
 		return false
@@ -34,17 +30,17 @@ func (i IntCell) Eq(c Cell) bool {
  String cell
 *******************************************************************************/
 
-type StringCell struct {
+type stringCell struct {
 	Str string
 }
 
-func (s StringCell) String() string {
+func (s stringCell) String() string {
 	return ("\"" + s.Str + "\"")
 }
 
-func (s StringCell) Eq(c Cell) bool {
+func (s stringCell) Eq(c Cell) bool {
 	switch castedC := c.(type) {
-	case *StringCell:
+	case *stringCell:
 		return castedC.Str == s.Str
 	default:
 		return false
@@ -55,17 +51,17 @@ func (s StringCell) Eq(c Cell) bool {
  Symbol cell
 *******************************************************************************/
 
-type SymbolCell struct {
+type symbolCell struct {
 	Sym string
 }
 
-func (s SymbolCell) String() string {
+func (s symbolCell) String() string {
 	return s.Sym
 }
 
-func (s SymbolCell) Eq(c Cell) bool {
+func (s symbolCell) Eq(c Cell) bool {
 	switch castedC := c.(type) {
-	case *SymbolCell:
+	case *symbolCell:
 		return castedC.Sym == s.Sym
 	default:
 		return false
@@ -76,18 +72,18 @@ func (s SymbolCell) Eq(c Cell) bool {
  Builtin lambda cell
 *******************************************************************************/
 
-type BuiltinLambdaCell struct {
+type builtinLambdaCell struct {
 	Sym    string
 	Lambda func(Cell, *environmentEntry) EvalResult
 }
 
-func (l BuiltinLambdaCell) String() string {
+func (l builtinLambdaCell) String() string {
 	return l.Sym
 }
 
-func (l BuiltinLambdaCell) Eq(c Cell) bool {
+func (l builtinLambdaCell) Eq(c Cell) bool {
 	switch castedC := c.(type) {
-	case *BuiltinLambdaCell:
+	case *builtinLambdaCell:
 		return castedC.Sym == l.Sym
 	default:
 		return false
@@ -98,22 +94,22 @@ func (l BuiltinLambdaCell) Eq(c Cell) bool {
  Builtin macro cell
 *******************************************************************************/
 
-type BuiltinMacroCell struct {
+type builtinMacroCell struct {
 	Sym   string
 	Macro func(Cell, *environmentEntry) EvalResult
 }
 
-func (m BuiltinMacroCell) String() string {
+func (m builtinMacroCell) String() string {
 	if m.Sym == "quote" {
 		return "'"
 	}
 	return m.Sym
 }
 
-func (l BuiltinMacroCell) Eq(c Cell) bool {
+func (m builtinMacroCell) Eq(c Cell) bool {
 	switch castedC := c.(type) {
-	case *BuiltinMacroCell:
-		return castedC.Sym == l.Sym
+	case *builtinMacroCell:
+		return castedC.Sym == m.Sym
 	default:
 		return false
 	}
@@ -123,19 +119,19 @@ func (l BuiltinMacroCell) Eq(c Cell) bool {
  Cons cell
 *******************************************************************************/
 
-type ConsCell struct {
+type consCell struct {
 	Car   Cell
 	Cdr   Cell
 	Evlis func(args Cell, env *environmentEntry) EvalResult
 }
 
-func (c ConsCell) String() string {
+func (c consCell) String() string {
 	left := fmt.Sprintf("%v", c.Car)
 	rest := ""
 	act := c.Cdr
 	for act != nil {
 		switch cell := act.(type) {
-		case *ConsCell:
+		case *consCell:
 			rest += fmt.Sprintf(" %v", cell.Car)
 			act = cell.Cdr
 		default:
@@ -149,10 +145,10 @@ func (c ConsCell) String() string {
 	return "(" + left + rest + ")"
 }
 
-func (cons1 ConsCell) Eq(cons2 Cell) bool {
+func (c consCell) Eq(cons2 Cell) bool {
 	switch castedCons2 := cons2.(type) {
-	case *ConsCell:
-		return eq(cons1.Car, castedCons2.Car) && eq(cons1.Cdr, castedCons2.Cdr)
+	case *consCell:
+		return eq(c.Car, castedCons2.Car) && eq(c.Cdr, castedCons2.Cdr)
 	default:
 		return false
 	}

@@ -16,7 +16,7 @@ func Parse(source string) (Cell, error) {
 	return sexpressions[0], nil
 }
 
-// parseMultipleSexpressions resturns the array of parser sexpressions
+// parseMultipleSexpressions resturns the array of parsed sexpressions
 func parseMultipleSexpressions(source string) ([]Cell, error) {
 	tokens := tokenize(source)
 	if len(tokens) == 1 && tokens[0].typ == tokNone {
@@ -61,7 +61,7 @@ func ricParse(tokens []token, tokensIndex *int) (Cell, error) {
 		if err != nil {
 			return nil, err
 		}
-		(*(cons.(*ConsCell))).Evlis = evlisParallel
+		(*(cons.(*consCell))).Evlis = evlisParallel
 		return cons, nil
 	default:
 		return nil, ParseError{"parse error near token " + fmt.Sprintf("%v", actualToken)}
@@ -147,38 +147,37 @@ func buildCons(tokens []token, openParToken, closeParToken tokenType, tokensInde
 				return nil, ParseError{"parenthesis not closed near " + fmt.Sprintf("%v", right)}
 			}
 			switch cons := actCons.(type) {
-			case *ConsCell:
+			case *consCell:
 				(*cons).Cdr = right
 			}
 			return top, nil
-		} else {
-			right, err := ricParse(tokens, tokensIndex)
-			if err != nil {
-				return nil, err
-			}
-			tmp := makeCons(right, nil)
-			if top == actCons {
-				// must init the top
-				switch cons := top.(type) {
-				case *ConsCell:
-					(*cons).Cdr = tmp
-				}
-			}
-			switch cons := actCons.(type) {
-			case *ConsCell:
+		}
+		right, err := ricParse(tokens, tokensIndex)
+		if err != nil {
+			return nil, err
+		}
+		tmp := makeCons(right, nil)
+		if top == actCons {
+			// must init the top
+			switch cons := top.(type) {
+			case *consCell:
 				(*cons).Cdr = tmp
-				actCons = (*cons).Cdr
 			}
+		}
+		switch cons := actCons.(type) {
+		case *consCell:
+			(*cons).Cdr = tmp
+			actCons = (*cons).Cdr
+		}
 
-			maybeClosePar, err := readNextToken(tokens, tokensIndex)
-			if err != nil {
-				return nil, err
-			}
+		maybeClosePar, err := readNextToken(tokens, tokensIndex)
+		if err != nil {
+			return nil, err
+		}
 
-			if maybeClosePar.typ == closeParToken {
-				extractNextToken(tokens, tokensIndex)
-				return top, nil
-			}
+		if maybeClosePar.typ == closeParToken {
+			extractNextToken(tokens, tokensIndex)
+			return top, nil
 		}
 	}
 }

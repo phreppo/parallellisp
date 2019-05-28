@@ -29,7 +29,7 @@ func condMacro(args Cell, env *environmentEntry) EvalResult {
 
 func quoteMacro(args Cell, env *environmentEntry) EvalResult {
 	switch cons := args.(type) {
-	case *ConsCell:
+	case *consCell:
 		return newEvalPositiveResult(cons.Car)
 	default:
 		return newEvalErrorResult(newEvalError("[quote] Can't quote" + fmt.Sprint(cons)))
@@ -73,7 +73,7 @@ func defunMacro(args Cell, env *environmentEntry) EvalResult {
 	argsAndBodyCons := makeCons(formalParameters, bodyCons)
 	ret := makeCons(makeSymbol("lambda"), argsAndBodyCons)
 	switch nameSymbolCell := name.(type) {
-	case *SymbolCell:
+	case *symbolCell:
 		globalEnv[nameSymbolCell.Sym] = ret
 	default:
 		return newEvalErrorResult(newEvalError("[defun] the name of the lambda must be a symbol"))
@@ -90,7 +90,7 @@ func setqMacro(args Cell, env *environmentEntry) EvalResult {
 	value := argsSlice[1]
 
 	switch name.(type) {
-	case (*SymbolCell):
+	case (*symbolCell):
 		evaluedVal := eval(value, env)
 		if evaluedVal.Err != nil {
 			return evaluedVal
@@ -110,7 +110,7 @@ func letMacro(args Cell, env *environmentEntry) EvalResult {
 		if evaluedValue.Err != nil {
 			return evaluedValue
 		}
-		newEnv = newenvironmentEntry(caar(pairs).(*SymbolCell), evaluedValue.Cell, newEnv)
+		newEnv = newenvironmentEntry(caar(pairs).(*symbolCell), evaluedValue.Cell, newEnv)
 		pairs = cdr(pairs)
 	}
 	return eval(cadr(args), newEnv)
@@ -121,8 +121,8 @@ func dotimesMacro(args Cell, env *environmentEntry) EvalResult {
 	body := cadr(args)
 	varName := car(firstArg)
 	varValue := cadr(firstArg)
-	for i := 0; i < (varValue.(*IntCell)).Val; i++ {
-		newEnv := newenvironmentEntry(varName.(*SymbolCell), makeInt(i), env)
+	for i := 0; i < (varValue.(*intCell)).Val; i++ {
+		newEnv := newenvironmentEntry(varName.(*symbolCell), makeInt(i), env)
 		eval(body, newEnv)
 	}
 	return newEvalPositiveResult(nil)
@@ -130,9 +130,9 @@ func dotimesMacro(args Cell, env *environmentEntry) EvalResult {
 
 func carLambda(args Cell, env *environmentEntry) EvalResult {
 	switch topCons := args.(type) {
-	case *ConsCell:
+	case *consCell:
 		switch cons := topCons.Car.(type) {
-		case *ConsCell:
+		case *consCell:
 			return newEvalResult(cons.Car, nil)
 		default:
 			return newEvalResult(nil, newEvalError("[car] car applied to atom"))
@@ -144,9 +144,9 @@ func carLambda(args Cell, env *environmentEntry) EvalResult {
 
 func cdrLambda(args Cell, env *environmentEntry) EvalResult {
 	switch topCons := args.(type) {
-	case *ConsCell:
+	case *consCell:
 		switch cons := topCons.Car.(type) {
-		case *ConsCell:
+		case *consCell:
 			return newEvalResult(cons.Cdr, nil)
 		default:
 			return newEvalResult(nil, newEvalError("[cdr] cdr applied to atom"))
@@ -158,9 +158,9 @@ func cdrLambda(args Cell, env *environmentEntry) EvalResult {
 
 func consLambda(args Cell, env *environmentEntry) EvalResult {
 	switch firstCons := args.(type) {
-	case *ConsCell:
+	case *consCell:
 		switch cons := firstCons.Cdr.(type) {
-		case *ConsCell:
+		case *consCell:
 			return newEvalPositiveResult(makeCons(firstCons.Car, cons.Car))
 		default:
 			return newEvalErrorResult(newEvalError("[cons] not enough arguments"))
@@ -172,9 +172,9 @@ func consLambda(args Cell, env *environmentEntry) EvalResult {
 
 func eqLambda(args Cell, env *environmentEntry) EvalResult {
 	switch firstArg := args.(type) {
-	case *ConsCell:
+	case *consCell:
 		switch secondArg := firstArg.Cdr.(type) {
-		case *ConsCell:
+		case *consCell:
 			if eq(firstArg.Car, secondArg.Car) {
 				return newEvalPositiveResult(lisp.getTrueSymbol())
 			}
@@ -189,9 +189,9 @@ func eqLambda(args Cell, env *environmentEntry) EvalResult {
 
 func atomLambda(args Cell, env *environmentEntry) EvalResult {
 	switch firstCons := args.(type) {
-	case *ConsCell:
+	case *consCell:
 		switch firstCons.Car.(type) {
-		case *ConsCell:
+		case *consCell:
 			return newEvalPositiveResult(nil)
 		default:
 			return newEvalPositiveResult(lisp.getTrueSymbol())
@@ -205,7 +205,7 @@ func plusLambda(args Cell, env *environmentEntry) EvalResult {
 	tot := 0
 	act := args
 	for act != nil {
-		tot += (car(act).(*IntCell)).Val
+		tot += (car(act).(*intCell)).Val
 		act = cdr(act)
 	}
 	return newEvalPositiveResult(makeInt(tot))
@@ -215,7 +215,7 @@ func multLambda(args Cell, env *environmentEntry) EvalResult {
 	tot := 1
 	act := args
 	for act != nil {
-		tot *= (car(act).(*IntCell)).Val
+		tot *= (car(act).(*intCell)).Val
 		act = cdr(act)
 	}
 	return newEvalPositiveResult(makeInt(tot))
@@ -225,10 +225,10 @@ func minusLambda(args Cell, env *environmentEntry) EvalResult {
 	if args == nil {
 		return newEvalErrorResult(newEvalError("[-] too few arguments"))
 	}
-	tot := (car(args).(*IntCell)).Val
+	tot := (car(args).(*intCell)).Val
 	act := cdr(args)
 	for act != nil {
-		tot -= (car(act).(*IntCell)).Val
+		tot -= (car(act).(*intCell)).Val
 		act = cdr(act)
 	}
 	return newEvalPositiveResult(makeInt(tot))
@@ -286,7 +286,7 @@ func listRelationalComparison(args Cell, env *environmentEntry, operator func(in
 	act := cdr(args)
 	last := car(args)
 	for act != nil {
-		if !(operator((last.(*IntCell)).Val, (car(act).(*IntCell)).Val)) {
+		if !(operator((last.(*intCell)).Val, (car(act).(*intCell)).Val)) {
 			return newEvalPositiveResult(nil)
 		}
 		last = car(act)
@@ -299,11 +299,11 @@ func divLambda(args Cell, env *environmentEntry) EvalResult {
 	if args == nil {
 		return newEvalErrorResult(newEvalError("[/] too few arguments"))
 	}
-	tot := (car(args).(*IntCell)).Val
+	tot := (car(args).(*intCell)).Val
 	act := cdr(args)
 	div := 0
 	for act != nil {
-		div = (car(act).(*IntCell)).Val
+		div = (car(act).(*intCell)).Val
 		if div == 0 {
 			return newEvalErrorResult(newEvalError("[/] division by zero"))
 		}
@@ -318,7 +318,7 @@ func loadLambda(args Cell, env *environmentEntry) EvalResult {
 	if len(files) != 1 {
 		return newEvalErrorResult(newEvalError("[load] load needs exaclty one argument"))
 	}
-	fileName := (files[0].(*StringCell)).Str
+	fileName := (files[0].(*stringCell)).Str
 	dat, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		return newEvalErrorResult(newEvalError("[load] error opening file " + fileName))
@@ -346,7 +346,7 @@ func writeLambda(args Cell, env *environmentEntry) EvalResult {
 	} else if len(phrases) > 1 {
 		return newEvalErrorResult(newEvalError("[write] write needs at least one string argument"))
 	}
-	fmt.Println((phrases[0].(*StringCell)).Str)
+	fmt.Println((phrases[0].(*stringCell)).Str)
 	return newEvalPositiveResult(phrases[0])
 }
 
@@ -386,7 +386,7 @@ func memberLambda(args Cell, env *environmentEntry) EvalResult {
 }
 
 func nthLambda(args Cell, env *environmentEntry) EvalResult {
-	n := (car(args).(*IntCell)).Val
+	n := (car(args).(*intCell)).Val
 	act := cadr(args)
 	for n > 0 {
 		n--
@@ -402,22 +402,22 @@ func lengthLambda(args Cell, env *environmentEntry) EvalResult {
 func setLambda(args Cell, env *environmentEntry) EvalResult {
 	id := car(args)
 	val := cadr(args)
-	globalEnv[(id.(*SymbolCell)).Sym] = val
+	globalEnv[(id.(*symbolCell)).Sym] = val
 	return newEvalPositiveResult(val)
 }
 
 func onePlusLambda(args Cell, env *environmentEntry) EvalResult {
-	num := car(args).(*IntCell)
+	num := car(args).(*intCell)
 	return newEvalPositiveResult(makeInt(num.Val + 1))
 }
 func oneMinusLambda(args Cell, env *environmentEntry) EvalResult {
-	num := car(args).(*IntCell)
+	num := car(args).(*intCell)
 	return newEvalPositiveResult(makeInt(num.Val - 1))
 }
 
 func integerpLambda(args Cell, env *environmentEntry) EvalResult {
 	switch car(args).(type) {
-	case *IntCell:
+	case *intCell:
 		return newEvalPositiveResult(lisp.getTrueSymbol())
 	default:
 		return newEvalPositiveResult(nil)
@@ -426,11 +426,11 @@ func integerpLambda(args Cell, env *environmentEntry) EvalResult {
 
 func symbolpLambda(args Cell, env *environmentEntry) EvalResult {
 	switch car(args).(type) {
-	case *BuiltinLambdaCell:
+	case *builtinLambdaCell:
 		return newEvalPositiveResult(lisp.getTrueSymbol())
-	case *BuiltinMacroCell:
+	case *builtinMacroCell:
 		return newEvalPositiveResult(lisp.getTrueSymbol())
-	case *SymbolCell:
+	case *symbolCell:
 		return newEvalPositiveResult(lisp.getTrueSymbol())
 	default:
 		return newEvalPositiveResult(nil)

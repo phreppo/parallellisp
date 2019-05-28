@@ -8,10 +8,10 @@ func initLanguage() {
 }
 
 type language struct {
-	builtinLambdas        map[string]BuiltinLambdaCell
-	builtinMacros         map[string]BuiltinMacroCell
-	builtinSpecialSymbols map[string]SymbolCell
-	trueSymbol            SymbolCell
+	builtinLambdas        map[string]builtinLambdaCell
+	builtinMacros         map[string]builtinMacroCell
+	builtinSpecialSymbols map[string]symbolCell
+	trueSymbol            symbolCell
 }
 
 func (lang *language) isBuiltinSymbol(s string) (bool, Cell) {
@@ -56,9 +56,9 @@ func (lang *language) isBuiltinSpecialSymbol(s string) (bool, Cell) {
 
 func (lang *language) hasSideEffect(c Cell) bool {
 	switch cell := c.(type) {
-	case *BuiltinLambdaCell:
+	case *builtinLambdaCell:
 		return cell.Sym == "write" || cell.Sym == "load" || cell.Sym == "set"
-	case *BuiltinMacroCell:
+	case *builtinMacroCell:
 		return cell.Sym == "defun" || cell.Sym == "setq"
 	default:
 		return false
@@ -71,7 +71,7 @@ func (lang *language) getTrueSymbol() Cell {
 
 func (lang *language) isLambdaSymbol(c Cell) bool {
 	switch sym := c.(type) {
-	case *BuiltinMacroCell:
+	case *builtinMacroCell:
 		return sym.Sym == "lambda"
 	default:
 		return false
@@ -80,165 +80,165 @@ func (lang *language) isLambdaSymbol(c Cell) bool {
 
 func newLanguage() *language {
 	lisp := language{
-		builtinLambdas: map[string]BuiltinLambdaCell{
+		builtinLambdas: map[string]builtinLambdaCell{
 
-			"car": BuiltinLambdaCell{
+			"car": builtinLambdaCell{
 				Sym:    "car",
 				Lambda: carLambda},
 
-			"cdr": BuiltinLambdaCell{
+			"cdr": builtinLambdaCell{
 				Sym:    "cdr",
 				Lambda: cdrLambda},
 
-			"cons": BuiltinLambdaCell{
+			"cons": builtinLambdaCell{
 				Sym:    "cons",
 				Lambda: consLambda},
 
-			"eq": BuiltinLambdaCell{
+			"eq": builtinLambdaCell{
 				Sym:    "eq",
 				Lambda: eqLambda},
 
-			"atom": BuiltinLambdaCell{
+			"atom": builtinLambdaCell{
 				Sym:    "atom",
 				Lambda: atomLambda},
 
-			"+": BuiltinLambdaCell{
+			"+": builtinLambdaCell{
 				Sym:    "+",
 				Lambda: plusLambda},
 
-			"-": BuiltinLambdaCell{
+			"-": builtinLambdaCell{
 				Sym:    "-",
 				Lambda: minusLambda},
 
-			"*": BuiltinLambdaCell{
+			"*": builtinLambdaCell{
 				Sym:    "*",
 				Lambda: multLambda},
 
-			"/": BuiltinLambdaCell{
+			"/": builtinLambdaCell{
 				Sym:    "/",
 				Lambda: divLambda},
 
-			">": BuiltinLambdaCell{
+			">": builtinLambdaCell{
 				Sym:    ">",
 				Lambda: greaterLambda},
 
-			">=": BuiltinLambdaCell{
+			">=": builtinLambdaCell{
 				Sym:    ">=",
 				Lambda: greaterEqLambda},
 
-			"<": BuiltinLambdaCell{
+			"<": builtinLambdaCell{
 				Sym:    "<",
 				Lambda: lessLambda},
 
-			"<=": BuiltinLambdaCell{
+			"<=": builtinLambdaCell{
 				Sym:    "<=",
 				Lambda: lessEqLambda},
 
-			"or": BuiltinLambdaCell{
+			"or": builtinLambdaCell{
 				Sym:    "or",
 				Lambda: orLambda},
 
-			"and": BuiltinLambdaCell{
+			"and": builtinLambdaCell{
 				Sym:    "and",
 				Lambda: andLambda},
 
-			"not": BuiltinLambdaCell{
+			"not": builtinLambdaCell{
 				Sym:    "not",
 				Lambda: notLambda},
 
-			"list": BuiltinLambdaCell{
+			"list": builtinLambdaCell{
 				Sym:    "list",
 				Lambda: listLambda},
 
-			"reverse": BuiltinLambdaCell{
+			"reverse": builtinLambdaCell{
 				Sym:    "reverse",
 				Lambda: reverseLambda},
 
-			"member": BuiltinLambdaCell{
+			"member": builtinLambdaCell{
 				Sym:    "member",
 				Lambda: memberLambda},
 
-			"nth": BuiltinLambdaCell{
+			"nth": builtinLambdaCell{
 				Sym:    "nth",
 				Lambda: nthLambda},
 
-			"length": BuiltinLambdaCell{
+			"length": builtinLambdaCell{
 				Sym:    "length",
 				Lambda: lengthLambda},
 
-			"set": BuiltinLambdaCell{
+			"set": builtinLambdaCell{
 				Sym:    "set",
 				Lambda: setLambda},
 
-			"load": BuiltinLambdaCell{
+			"load": builtinLambdaCell{
 				Sym:    "load",
 				Lambda: loadLambda},
 
-			"write": BuiltinLambdaCell{
+			"write": builtinLambdaCell{
 				Sym:    "write",
 				Lambda: writeLambda},
 
-			"integerp": BuiltinLambdaCell{
+			"integerp": builtinLambdaCell{
 				Sym:    "integerp",
 				Lambda: integerpLambda},
 
-			"symbolp": BuiltinLambdaCell{
+			"symbolp": builtinLambdaCell{
 				Sym:    "symbolp",
 				Lambda: symbolpLambda},
 
-			"1+": BuiltinLambdaCell{
+			"1+": builtinLambdaCell{
 				Sym:    "1+",
 				Lambda: onePlusLambda},
 
-			"1-": BuiltinLambdaCell{
+			"1-": builtinLambdaCell{
 				Sym:    "1-",
 				Lambda: oneMinusLambda},
 
 			// "label",
 		},
 
-		builtinMacros: map[string]BuiltinMacroCell{
+		builtinMacros: map[string]builtinMacroCell{
 
-			"quote": BuiltinMacroCell{
+			"quote": builtinMacroCell{
 				Sym:   "quote",
 				Macro: quoteMacro},
 
-			"time": BuiltinMacroCell{
+			"time": builtinMacroCell{
 				Sym:   "time",
 				Macro: timeMacro},
 
-			"cond": BuiltinMacroCell{
+			"cond": builtinMacroCell{
 				Sym:   "cond",
 				Macro: condMacro},
 
-			"lambda": BuiltinMacroCell{
+			"lambda": builtinMacroCell{
 				Sym:   "lambda",
 				Macro: lambdaMacro},
 
-			"defun": BuiltinMacroCell{
+			"defun": builtinMacroCell{
 				Sym:   "defun",
 				Macro: defunMacro},
 
-			"setq": BuiltinMacroCell{
+			"setq": builtinMacroCell{
 				Sym:   "setq",
 				Macro: setqMacro},
 
-			"let": BuiltinMacroCell{
+			"let": builtinMacroCell{
 				Sym:   "let",
 				Macro: letMacro},
 
-			"dotimes": BuiltinMacroCell{
+			"dotimes": builtinMacroCell{
 				Sym:   "dotimes",
 				Macro: dotimesMacro},
 		},
 
-		builtinSpecialSymbols: map[string]SymbolCell{
-			"t": SymbolCell{
+		builtinSpecialSymbols: map[string]symbolCell{
+			"t": symbolCell{
 				Sym: "t",
 			},
 		},
 
-		trueSymbol: SymbolCell{Sym: "t"},
+		trueSymbol: symbolCell{Sym: "t"},
 	}
 	return &lisp
 }

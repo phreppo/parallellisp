@@ -71,28 +71,27 @@ func eval(toEval Cell, env *environmentEntry) EvalResult {
 		return newEvalPositiveResult(nil)
 	}
 	switch c := toEval.(type) {
-	case *IntCell:
+	case *intCell:
 		return newEvalPositiveResult(c)
-	case *StringCell:
+	case *stringCell:
 		return newEvalPositiveResult(c)
-	case *SymbolCell:
+	case *symbolCell:
 		return assoc(c, env)
-	case *ConsCell:
+	case *consCell:
 		switch car := c.Car.(type) {
-		case *BuiltinMacroCell:
+		case *builtinMacroCell:
 			return car.Macro(c.Cdr, env)
 		default:
 			argsResult := c.Evlis(c.Cdr, env)
 			if argsResult.Err != nil {
 				return newEvalErrorResult(argsResult.Err)
-			} else {
-				return apply(car, argsResult.Cell, env)
 			}
+			return apply(car, argsResult.Cell, env)
 		}
 	// builtin symbols autoquote: allows higer order functions
-	case *BuiltinMacroCell:
+	case *builtinMacroCell:
 		return newEvalPositiveResult(c)
-	case *BuiltinLambdaCell:
+	case *builtinLambdaCell:
 		return newEvalPositiveResult(c)
 	default:
 		return newEvalErrorResult(newEvalError("[eval] Unknown cell type: " + fmt.Sprintf("%v", toEval)))
@@ -158,12 +157,12 @@ func evlisSequential(args Cell, env *environmentEntry) EvalResult {
 	var evaluedArg EvalResult
 
 	for actArg != nil {
-		evaluedArg = eval(actArg.(*ConsCell).Car, env)
+		evaluedArg = eval(actArg.(*consCell).Car, env)
 		if evaluedArg.Err != nil {
 			return evaluedArg
 		}
 		appendCellToArgs(&top, &actCons, &(evaluedArg.Cell))
-		actArg = (actArg.(*ConsCell)).Cdr
+		actArg = (actArg.(*consCell)).Cdr
 	}
 	return newEvalResult(top, nil)
 }
@@ -174,9 +173,9 @@ func extractCars(args Cell) []Cell {
 	if args == nil {
 		return argsArray
 	}
-	var actCons *ConsCell
+	var actCons *consCell
 	for act != nil {
-		actCons = act.(*ConsCell)
+		actCons = act.(*consCell)
 		argsArray = append(argsArray, actCons.Car)
 		act = actCons.Cdr
 	}
@@ -190,7 +189,7 @@ func appendCellToArgs(top, actCell, toAppend *Cell) {
 		*actCell = *top
 	} else {
 		tmp := makeCons((*toAppend), nil)
-		actConsCasted := (*actCell).(*ConsCell)
+		actConsCasted := (*actCell).(*consCell)
 		actConsCasted.Cdr = tmp
 		*actCell = actConsCasted.Cdr
 	}
@@ -198,9 +197,9 @@ func appendCellToArgs(top, actCell, toAppend *Cell) {
 
 func apply(function Cell, args Cell, env *environmentEntry) EvalResult {
 	switch functionCasted := function.(type) {
-	case *BuiltinLambdaCell:
+	case *builtinLambdaCell:
 		return functionCasted.Lambda(args, env)
-	case *ConsCell:
+	case *consCell:
 		if lisp.isLambdaSymbol(functionCasted.Car) {
 			formalParameters := cadr(function)
 			lambdaBody := caddr(function)
@@ -212,15 +211,14 @@ func apply(function Cell, args Cell, env *environmentEntry) EvalResult {
 				return newEvalErrorResult(err)
 			}
 			return eval(lambdaBody, newEnv)
-		} else {
-			// partial apply
-			partiallyAppliedFunction := eval(function, env)
-			if partiallyAppliedFunction.Err != nil {
-				return partiallyAppliedFunction
-			}
-			return apply(partiallyAppliedFunction.Cell, args, env)
 		}
-	case *SymbolCell:
+		// partial apply
+		partiallyAppliedFunction := eval(function, env)
+		if partiallyAppliedFunction.Err != nil {
+			return partiallyAppliedFunction
+		}
+		return apply(partiallyAppliedFunction.Cell, args, env)
+	case *symbolCell:
 		evaluedFunction := eval(function, env)
 		if evaluedFunction.Err != nil {
 			return newEvalErrorResult(evaluedFunction.Err)
@@ -231,7 +229,7 @@ func apply(function Cell, args Cell, env *environmentEntry) EvalResult {
 	}
 }
 
-func assoc(symbol *SymbolCell, env *environmentEntry) EvalResult {
+func assoc(symbol *symbolCell, env *environmentEntry) EvalResult {
 	if res, isInglobalEnv := globalEnv[symbol.Sym]; isInglobalEnv {
 		return newEvalPositiveResult(res)
 	}
@@ -256,9 +254,9 @@ func pairlis(formalParameters, actualParameters Cell, oldEnv *environmentEntry) 
 		if actActual == nil {
 			return nil, newEvalError("[parilis] not enough actual parameters")
 		}
-		newEntry = newenvironmentEntry((car(actFormal)).(*SymbolCell), car(actActual), newEntry)
-		actFormal = (actFormal.(*ConsCell)).Cdr
-		actActual = (actActual.(*ConsCell)).Cdr
+		newEntry = newenvironmentEntry((car(actFormal)).(*symbolCell), car(actActual), newEntry)
+		actFormal = (actFormal.(*consCell)).Cdr
+		actActual = (actActual.(*consCell)).Cdr
 	}
 	return newEntry, nil
 }

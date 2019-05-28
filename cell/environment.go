@@ -9,7 +9,7 @@ func emptyEnv() *environmentEntry {
 	return nil
 }
 
-func newenvironmentEntry(sym *SymbolCell, value Cell, next *environmentEntry) *environmentEntry {
+func newenvironmentEntry(sym *symbolCell, value Cell, next *environmentEntry) *environmentEntry {
 	newEntry := new(environmentEntry)
 	newEntry.Pair = new(environmentPair)
 	newEntry.Pair.Symbol = sym
@@ -23,7 +23,7 @@ type environmentEntry struct {
 	Next *environmentEntry
 }
 
-func symbolIsInEnv(c *SymbolCell, env *environmentEntry) bool {
+func symbolIsInEnv(c *symbolCell, env *environmentEntry) bool {
 	if env == nil {
 		return false
 	}
@@ -38,7 +38,7 @@ func symbolIsInEnv(c *SymbolCell, env *environmentEntry) bool {
 }
 
 type environmentPair struct {
-	Symbol *SymbolCell
+	Symbol *symbolCell
 	Value  Cell
 }
 

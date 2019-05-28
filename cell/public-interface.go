@@ -1,5 +1,10 @@
 package cell
 
+// Cell is the generic interface for every value in Lisp
+type Cell interface {
+	Eq(Cell) bool
+}
+
 // Eval evaluates one sexpression in the empty environment
 func Eval(c Cell) EvalResult {
 	return eval(c, emptyEnv())

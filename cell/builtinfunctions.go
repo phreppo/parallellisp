@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func condMacro(args Cell, env *EnvironmentEntry) EvalResult {
+func condMacro(args Cell, env *environmentEntry) EvalResult {
 	actBranch := args
 	var condAndBody Cell
 	var cond Cell
@@ -27,7 +27,7 @@ func condMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	return newEvalErrorResult(newEvalError("[cond] none condition was verified"))
 }
 
-func quoteMacro(args Cell, env *EnvironmentEntry) EvalResult {
+func quoteMacro(args Cell, env *environmentEntry) EvalResult {
 	switch cons := args.(type) {
 	case *ConsCell:
 		return newEvalPositiveResult(cons.Car)
@@ -36,7 +36,7 @@ func quoteMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	}
 }
 
-func timeMacro(args Cell, env *EnvironmentEntry) EvalResult {
+func timeMacro(args Cell, env *environmentEntry) EvalResult {
 	if args == nil {
 		return newEvalErrorResult(newEvalError("[time] too few arguments"))
 	}
@@ -56,12 +56,12 @@ func timeMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	return result
 }
 
-func lambdaMacro(args Cell, env *EnvironmentEntry) EvalResult {
+func lambdaMacro(args Cell, env *environmentEntry) EvalResult {
 	// lambda autoquote
-	return newEvalPositiveResult(MakeCons(MakeSymbol("lambda"), args))
+	return newEvalPositiveResult(makeCons(makeSymbol("lambda"), args))
 }
 
-func defunMacro(args Cell, env *EnvironmentEntry) EvalResult {
+func defunMacro(args Cell, env *environmentEntry) EvalResult {
 	argsSlice := extractCars(args)
 	if len(argsSlice) != 3 {
 		return newEvalErrorResult(newEvalError("[defun] wrong number of arguments"))
@@ -69,19 +69,19 @@ func defunMacro(args Cell, env *EnvironmentEntry) EvalResult {
 	name := argsSlice[0]
 	formalParameters := argsSlice[1]
 	lambdaBody := argsSlice[2]
-	bodyCons := MakeCons(lambdaBody, nil)
-	argsAndBodyCons := MakeCons(formalParameters, bodyCons)
-	ret := MakeCons(MakeSymbol("lambda"), argsAndBodyCons)
+	bodyCons := makeCons(lambdaBody, nil)
+	argsAndBodyCons := makeCons(formalParameters, bodyCons)
+	ret := makeCons(makeSymbol("lambda"), argsAndBodyCons)
 	switch nameSymbolCell := name.(type) {
 	case *SymbolCell:
-		GlobalEnv[nameSymbolCell.Sym] = ret
+		globalEnv[nameSymbolCell.Sym] = ret
 	default:
 		return newEvalErrorResult(newEvalError("[defun] the name of the lambda must be a symbol"))
 	}
 	return newEvalPositiveResult(ret)
 }
 
-func setqMacro(args Cell, env *EnvironmentEntry) EvalResult {
+func setqMacro(args Cell, env *environmentEntry) EvalResult {
 	argsSlice := extractCars(args)
 	if len(argsSlice) != 2 {
 		return newEvalErrorResult(newEvalError("[setq] wrong number of arguments"))
@@ -95,14 +95,14 @@ func setqMacro(args Cell, env *EnvironmentEntry) EvalResult {
 		if evaluedVal.Err != nil {
 			return evaluedVal
 		}
-		newArgs := MakeCons(name, MakeCons(evaluedVal.Cell, nil))
+		newArgs := makeCons(name, makeCons(evaluedVal.Cell, nil))
 		return setLambda(newArgs, env)
 	default:
 		return newEvalErrorResult(newEvalError("[setq] first argument must be a symbol"))
 	}
 }
 
-func letMacro(args Cell, env *EnvironmentEntry) EvalResult {
+func letMacro(args Cell, env *environmentEntry) EvalResult {
 	pairs := car(args)
 	newEnv := env
 	for pairs != nil {
@@ -110,25 +110,25 @@ func letMacro(args Cell, env *EnvironmentEntry) EvalResult {
 		if evaluedValue.Err != nil {
 			return evaluedValue
 		}
-		newEnv = NewEnvironmentEntry(caar(pairs).(*SymbolCell), evaluedValue.Cell, newEnv)
+		newEnv = newenvironmentEntry(caar(pairs).(*SymbolCell), evaluedValue.Cell, newEnv)
 		pairs = cdr(pairs)
 	}
 	return eval(cadr(args), newEnv)
 }
 
-func dotimesMacro(args Cell, env *EnvironmentEntry) EvalResult {
+func dotimesMacro(args Cell, env *environmentEntry) EvalResult {
 	firstArg := car(args)
 	body := cadr(args)
 	varName := car(firstArg)
 	varValue := cadr(firstArg)
 	for i := 0; i < (varValue.(*IntCell)).Val; i++ {
-		newEnv := NewEnvironmentEntry(varName.(*SymbolCell), MakeInt(i), env)
+		newEnv := newenvironmentEntry(varName.(*SymbolCell), makeInt(i), env)
 		eval(body, newEnv)
 	}
 	return newEvalPositiveResult(nil)
 }
 
-func carLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func carLambda(args Cell, env *environmentEntry) EvalResult {
 	switch topCons := args.(type) {
 	case *ConsCell:
 		switch cons := topCons.Car.(type) {
@@ -142,7 +142,7 @@ func carLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	}
 }
 
-func cdrLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func cdrLambda(args Cell, env *environmentEntry) EvalResult {
 	switch topCons := args.(type) {
 	case *ConsCell:
 		switch cons := topCons.Car.(type) {
@@ -156,12 +156,12 @@ func cdrLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	}
 }
 
-func consLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func consLambda(args Cell, env *environmentEntry) EvalResult {
 	switch firstCons := args.(type) {
 	case *ConsCell:
 		switch cons := firstCons.Cdr.(type) {
 		case *ConsCell:
-			return newEvalPositiveResult(MakeCons(firstCons.Car, cons.Car))
+			return newEvalPositiveResult(makeCons(firstCons.Car, cons.Car))
 		default:
 			return newEvalErrorResult(newEvalError("[cons] not enough arguments"))
 		}
@@ -170,13 +170,13 @@ func consLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	}
 }
 
-func eqLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func eqLambda(args Cell, env *environmentEntry) EvalResult {
 	switch firstArg := args.(type) {
 	case *ConsCell:
 		switch secondArg := firstArg.Cdr.(type) {
 		case *ConsCell:
 			if eq(firstArg.Car, secondArg.Car) {
-				return newEvalPositiveResult(Lisp.GetTrueSymbol())
+				return newEvalPositiveResult(lisp.getTrueSymbol())
 			}
 			return newEvalPositiveResult(nil)
 		default:
@@ -187,41 +187,41 @@ func eqLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	}
 }
 
-func atomLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func atomLambda(args Cell, env *environmentEntry) EvalResult {
 	switch firstCons := args.(type) {
 	case *ConsCell:
 		switch firstCons.Car.(type) {
 		case *ConsCell:
 			return newEvalPositiveResult(nil)
 		default:
-			return newEvalPositiveResult(Lisp.GetTrueSymbol())
+			return newEvalPositiveResult(lisp.getTrueSymbol())
 		}
 	default:
 		return newEvalErrorResult(newEvalError("[atom] not enough arguments"))
 	}
 }
 
-func plusLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func plusLambda(args Cell, env *environmentEntry) EvalResult {
 	tot := 0
 	act := args
 	for act != nil {
 		tot += (car(act).(*IntCell)).Val
 		act = cdr(act)
 	}
-	return newEvalPositiveResult(MakeInt(tot))
+	return newEvalPositiveResult(makeInt(tot))
 }
 
-func multLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func multLambda(args Cell, env *environmentEntry) EvalResult {
 	tot := 1
 	act := args
 	for act != nil {
 		tot *= (car(act).(*IntCell)).Val
 		act = cdr(act)
 	}
-	return newEvalPositiveResult(MakeInt(tot))
+	return newEvalPositiveResult(makeInt(tot))
 }
 
-func minusLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func minusLambda(args Cell, env *environmentEntry) EvalResult {
 	if args == nil {
 		return newEvalErrorResult(newEvalError("[-] too few arguments"))
 	}
@@ -231,10 +231,10 @@ func minusLambda(args Cell, env *EnvironmentEntry) EvalResult {
 		tot -= (car(act).(*IntCell)).Val
 		act = cdr(act)
 	}
-	return newEvalPositiveResult(MakeInt(tot))
+	return newEvalPositiveResult(makeInt(tot))
 }
 
-func orLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func orLambda(args Cell, env *environmentEntry) EvalResult {
 	act := args
 	for act != nil {
 		if car(act) != nil {
@@ -245,7 +245,7 @@ func orLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	return newEvalPositiveResult(nil)
 }
 
-func andLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func andLambda(args Cell, env *environmentEntry) EvalResult {
 	act := args
 	var last Cell
 	for act != nil {
@@ -258,31 +258,31 @@ func andLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	return newEvalPositiveResult(last)
 }
 
-func notLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func notLambda(args Cell, env *environmentEntry) EvalResult {
 	toNegate := car(args)
 	if toNegate == nil {
-		return newEvalPositiveResult(Lisp.GetTrueSymbol())
+		return newEvalPositiveResult(lisp.getTrueSymbol())
 	}
 	return newEvalPositiveResult(nil)
 }
 
-func greaterLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func greaterLambda(args Cell, env *environmentEntry) EvalResult {
 	return listRelationalComparison(args, env, func(left, right int) bool { return left > right })
 }
 
-func greaterEqLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func greaterEqLambda(args Cell, env *environmentEntry) EvalResult {
 	return listRelationalComparison(args, env, func(left, right int) bool { return left >= right })
 }
 
-func lessLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func lessLambda(args Cell, env *environmentEntry) EvalResult {
 	return listRelationalComparison(args, env, func(left, right int) bool { return left < right })
 }
 
-func lessEqLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func lessEqLambda(args Cell, env *environmentEntry) EvalResult {
 	return listRelationalComparison(args, env, func(left, right int) bool { return left <= right })
 }
 
-func listRelationalComparison(args Cell, env *EnvironmentEntry, operator func(int, int) bool) EvalResult {
+func listRelationalComparison(args Cell, env *environmentEntry, operator func(int, int) bool) EvalResult {
 	act := cdr(args)
 	last := car(args)
 	for act != nil {
@@ -292,10 +292,10 @@ func listRelationalComparison(args Cell, env *EnvironmentEntry, operator func(in
 		last = car(act)
 		act = cdr(act)
 	}
-	return newEvalPositiveResult(Lisp.GetTrueSymbol())
+	return newEvalPositiveResult(lisp.getTrueSymbol())
 }
 
-func divLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func divLambda(args Cell, env *environmentEntry) EvalResult {
 	if args == nil {
 		return newEvalErrorResult(newEvalError("[/] too few arguments"))
 	}
@@ -310,10 +310,10 @@ func divLambda(args Cell, env *EnvironmentEntry) EvalResult {
 		tot /= div
 		act = cdr(act)
 	}
-	return newEvalPositiveResult(MakeInt(tot))
+	return newEvalPositiveResult(makeInt(tot))
 }
 
-func loadLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func loadLambda(args Cell, env *environmentEntry) EvalResult {
 	files := extractCars(args)
 	if len(files) != 1 {
 		return newEvalErrorResult(newEvalError("[load] load needs exaclty one argument"))
@@ -324,7 +324,7 @@ func loadLambda(args Cell, env *EnvironmentEntry) EvalResult {
 		return newEvalErrorResult(newEvalError("[load] error opening file " + fileName))
 	}
 	source := string(dat)
-	sexpressions, err := ParseMultipleSexpressions(source)
+	sexpressions, err := parseMultipleSexpressions(source)
 	if err != nil {
 		return newEvalErrorResult(err)
 	}
@@ -338,11 +338,11 @@ func loadLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	return lastEvalued
 }
 
-func writeLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func writeLambda(args Cell, env *environmentEntry) EvalResult {
 	phrases := extractCars(args)
 	if len(phrases) == 0 {
 		fmt.Println()
-		return newEvalPositiveResult(MakeString(""))
+		return newEvalPositiveResult(makeString(""))
 	} else if len(phrases) > 1 {
 		return newEvalErrorResult(newEvalError("[write] write needs at least one string argument"))
 	}
@@ -350,7 +350,7 @@ func writeLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	return newEvalPositiveResult(phrases[0])
 }
 
-func listLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func listLambda(args Cell, env *environmentEntry) EvalResult {
 	var top Cell
 	var actLast Cell
 	var newVal Cell
@@ -363,17 +363,17 @@ func listLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	return newEvalPositiveResult(top)
 }
 
-func reverseLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func reverseLambda(args Cell, env *environmentEntry) EvalResult {
 	var top Cell
 	act := car(args)
 	for act != nil {
-		top = MakeCons(car(act), top)
+		top = makeCons(car(act), top)
 		act = cdr(act)
 	}
 	return newEvalPositiveResult(top)
 }
 
-func memberLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func memberLambda(args Cell, env *environmentEntry) EvalResult {
 	toFind := car(args)
 	act := cadr(args)
 	for act != nil {
@@ -385,7 +385,7 @@ func memberLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	return newEvalPositiveResult(nil)
 }
 
-func nthLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func nthLambda(args Cell, env *environmentEntry) EvalResult {
 	n := (car(args).(*IntCell)).Val
 	act := cadr(args)
 	for n > 0 {
@@ -395,52 +395,52 @@ func nthLambda(args Cell, env *EnvironmentEntry) EvalResult {
 	return newEvalPositiveResult(car(act))
 }
 
-func lengthLambda(args Cell, env *EnvironmentEntry) EvalResult {
-	return newEvalPositiveResult(MakeInt(listLengt(car(args))))
+func lengthLambda(args Cell, env *environmentEntry) EvalResult {
+	return newEvalPositiveResult(makeInt(listLengt(car(args))))
 }
 
-func setLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func setLambda(args Cell, env *environmentEntry) EvalResult {
 	id := car(args)
 	val := cadr(args)
-	GlobalEnv[(id.(*SymbolCell)).Sym] = val
+	globalEnv[(id.(*SymbolCell)).Sym] = val
 	return newEvalPositiveResult(val)
 }
 
-func onePlusLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func onePlusLambda(args Cell, env *environmentEntry) EvalResult {
 	num := car(args).(*IntCell)
-	return newEvalPositiveResult(MakeInt(num.Val + 1))
+	return newEvalPositiveResult(makeInt(num.Val + 1))
 }
-func oneMinusLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func oneMinusLambda(args Cell, env *environmentEntry) EvalResult {
 	num := car(args).(*IntCell)
-	return newEvalPositiveResult(MakeInt(num.Val - 1))
+	return newEvalPositiveResult(makeInt(num.Val - 1))
 }
 
-func integerpLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func integerpLambda(args Cell, env *environmentEntry) EvalResult {
 	switch car(args).(type) {
 	case *IntCell:
-		return newEvalPositiveResult(Lisp.GetTrueSymbol())
+		return newEvalPositiveResult(lisp.getTrueSymbol())
 	default:
 		return newEvalPositiveResult(nil)
 	}
 }
 
-func symbolpLambda(args Cell, env *EnvironmentEntry) EvalResult {
+func symbolpLambda(args Cell, env *environmentEntry) EvalResult {
 	switch car(args).(type) {
 	case *BuiltinLambdaCell:
-		return newEvalPositiveResult(Lisp.GetTrueSymbol())
+		return newEvalPositiveResult(lisp.getTrueSymbol())
 	case *BuiltinMacroCell:
-		return newEvalPositiveResult(Lisp.GetTrueSymbol())
+		return newEvalPositiveResult(lisp.getTrueSymbol())
 	case *SymbolCell:
-		return newEvalPositiveResult(Lisp.GetTrueSymbol())
+		return newEvalPositiveResult(lisp.getTrueSymbol())
 	default:
 		return newEvalPositiveResult(nil)
 	}
 }
 
-func unimplementedMacro(c Cell, env *EnvironmentEntry) EvalResult {
+func unimplementedMacro(c Cell, env *environmentEntry) EvalResult {
 	panic("unimplemented macro")
 }
 
-func unimplementedLambda(c Cell, env *EnvironmentEntry) EvalResult {
+func unimplementedLambda(c Cell, env *environmentEntry) EvalResult {
 	panic("unimplemented lambda")
 }

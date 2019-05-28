@@ -1,10 +1,10 @@
 package cell
 
-// Lisp is the global variable for the language
-var Lisp *language
+// lisp is the global variable for the language
+var lisp *language
 
 func initLanguage() {
-	Lisp = newLanguage()
+	lisp = newLanguage()
 }
 
 type language struct {
@@ -14,47 +14,47 @@ type language struct {
 	trueSymbol            SymbolCell
 }
 
-func (lang *language) IsBuiltinSymbol(s string) (bool, Cell) {
+func (lang *language) isBuiltinSymbol(s string) (bool, Cell) {
 	if s == "NIL" || s == "nil" {
 		return true, nil
 	}
-	isBuiltinLambda, builtinLambda := lang.IsBuiltinLambdaSymbol(s)
+	isBuiltinLambda, builtinLambda := lang.isBuiltinLambdaSymbol(s)
 	if isBuiltinLambda {
 		return true, builtinLambda
 	}
-	isBuiltinMacro, builtinMacro := lang.IsBuiltinMacroSymbol(s)
+	isBuiltinMacro, builtinMacro := lang.isBuiltinMacroSymbol(s)
 	if isBuiltinMacro {
 		return true, builtinMacro
 	}
-	isBuiltinSpecialSymbol, builtinSpecialSymbol := lang.IsBuiltinSpecialSymbol(s)
+	isBuiltinSpecialSymbol, builtinSpecialSymbol := lang.isBuiltinSpecialSymbol(s)
 	if isBuiltinSpecialSymbol {
 		return true, builtinSpecialSymbol
 	}
 	return false, nil
 }
 
-// IsBuiltinLambdaSymbol returns the pointer to the concrete cell and if the symbol is a lambda.
+// isBuiltinLambdaSymbol returns the pointer to the concrete cell and if the symbol is a lambda.
 // This is because in this manner one has not to perform two searches
-func (lang *language) IsBuiltinLambdaSymbol(s string) (bool, Cell) {
+func (lang *language) isBuiltinLambdaSymbol(s string) (bool, Cell) {
 	builtinLambda, isBuiltinLambda := (*lang).builtinLambdas[s]
 	return isBuiltinLambda, &builtinLambda
 }
 
-// IsBuiltinMacroSymbol returns the pointer to the concrete cell and if the symbol is a macro.
+// isBuiltinMacroSymbol returns the pointer to the concrete cell and if the symbol is a macro.
 // This is because in this manner one has not to perform two searches
-func (lang *language) IsBuiltinMacroSymbol(s string) (bool, Cell) {
+func (lang *language) isBuiltinMacroSymbol(s string) (bool, Cell) {
 	builtinMacro, isBuiltinMacro := (*lang).builtinMacros[s]
 	return isBuiltinMacro, &builtinMacro
 }
 
-// IsBuiltinSpecialSymbol returns the pointer to the concrete cell and if the symbol is a special symbol(eg: t).
+// isBuiltinSpecialSymbol returns the pointer to the concrete cell and if the symbol is a special symbol(eg: t).
 // This is because in this manner one has not to perform two searches
-func (lang *language) IsBuiltinSpecialSymbol(s string) (bool, Cell) {
+func (lang *language) isBuiltinSpecialSymbol(s string) (bool, Cell) {
 	builtinSpecialSymbol, isBuiltinSpecialSymbol := (*lang).builtinSpecialSymbols[s]
 	return isBuiltinSpecialSymbol, &builtinSpecialSymbol
 }
 
-func (lang *language) HasSideEffect(c Cell) bool {
+func (lang *language) hasSideEffect(c Cell) bool {
 	switch cell := c.(type) {
 	case *BuiltinLambdaCell:
 		return cell.Sym == "write" || cell.Sym == "load" || cell.Sym == "set"
@@ -65,11 +65,11 @@ func (lang *language) HasSideEffect(c Cell) bool {
 	}
 }
 
-func (lang *language) GetTrueSymbol() Cell {
+func (lang *language) getTrueSymbol() Cell {
 	return &(lang.trueSymbol)
 }
 
-func (lang *language) IsLambdaSymbol(c Cell) bool {
+func (lang *language) isLambdaSymbol(c Cell) bool {
 	switch sym := c.(type) {
 	case *BuiltinMacroCell:
 		return sym.Sym == "lambda"

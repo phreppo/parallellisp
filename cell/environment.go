@@ -5,25 +5,25 @@ import (
 	"runtime"
 )
 
-func EmptyEnv() *EnvironmentEntry {
+func emptyEnv() *environmentEntry {
 	return nil
 }
 
-func NewEnvironmentEntry(sym *SymbolCell, value Cell, next *EnvironmentEntry) *EnvironmentEntry {
-	newEntry := new(EnvironmentEntry)
-	newEntry.Pair = new(EnvironmentPair)
+func newenvironmentEntry(sym *SymbolCell, value Cell, next *environmentEntry) *environmentEntry {
+	newEntry := new(environmentEntry)
+	newEntry.Pair = new(environmentPair)
 	newEntry.Pair.Symbol = sym
 	newEntry.Pair.Value = value
 	newEntry.Next = next
 	return newEntry
 }
 
-type EnvironmentEntry struct {
-	Pair *EnvironmentPair
-	Next *EnvironmentEntry
+type environmentEntry struct {
+	Pair *environmentPair
+	Next *environmentEntry
 }
 
-func symbolIsInEnv(c *SymbolCell, env *EnvironmentEntry) bool {
+func symbolIsInEnv(c *SymbolCell, env *environmentEntry) bool {
 	if env == nil {
 		return false
 	}
@@ -37,32 +37,32 @@ func symbolIsInEnv(c *SymbolCell, env *EnvironmentEntry) bool {
 	return false
 }
 
-type EnvironmentPair struct {
+type environmentPair struct {
 	Symbol *SymbolCell
 	Value  Cell
 }
 
-func (e *EnvironmentEntry) String() string {
+func (e *environmentEntry) String() string {
 	if e == nil {
 		return ""
 	}
 	return fmt.Sprintf("%v -> %v\n", e.Pair.Symbol, e.Pair.Value) + fmt.Sprintf("%v", e.Next)
 }
 
-var GlobalEnv = make(map[string]Cell)
+var globalEnv = make(map[string]Cell)
 
-func initGlobalEnv() {
+func initglobalEnv() {
 	// necessary
-	GlobalEnv["id"], _ = Parse("(lambda (x) x)")
-	GlobalEnv["null"], _ = Parse("(lambda (x) (eq x nil))")
-	GlobalEnv["ncpu"], _ = Parse(fmt.Sprintf("%v", runtime.NumCPU()))
-	GlobalEnv["t"], _ = Parse("t")
+	globalEnv["id"], _ = Parse("(lambda (x) x)")
+	globalEnv["null"], _ = Parse("(lambda (x) (eq x nil))")
+	globalEnv["ncpu"], _ = Parse(fmt.Sprintf("%v", runtime.NumCPU()))
+	globalEnv["t"], _ = Parse("t")
 
 	// shortcuts
-	GlobalEnv["tests"], _ = Parse("\"test.lisp\"")
-	GlobalEnv["search"], _ = Parse("\"run-search.lisp\"")
-	GlobalEnv["sum"], _ = Parse("\"run-sum.lisp\"")
-	GlobalEnv["fib"], _ = Parse("\"run-fib.lisp\"")
-	GlobalEnv["ms"], _ = Parse("\"run-mergesort.lisp\"")
-	GlobalEnv["sorted"], _ = Parse("\"run-sorted.lisp\"")
+	globalEnv["tests"], _ = Parse("\"test.lisp\"")
+	globalEnv["search"], _ = Parse("\"run-search.lisp\"")
+	globalEnv["sum"], _ = Parse("\"run-sum.lisp\"")
+	globalEnv["fib"], _ = Parse("\"run-fib.lisp\"")
+	globalEnv["ms"], _ = Parse("\"run-mergesort.lisp\"")
+	globalEnv["sorted"], _ = Parse("\"run-sorted.lisp\"")
 }

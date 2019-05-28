@@ -6,7 +6,7 @@ import (
 
 // Parse returns the result, if there were errors parsing and eventually one error message
 func Parse(source string) (Cell, error) {
-	sexpressions, err := ParseMultipleSexpressions(source)
+	sexpressions, err := parseMultipleSexpressions(source)
 	if len(sexpressions) > 1 {
 		return nil, ParseError{"[parser] too many sexpressions"}
 	}
@@ -16,8 +16,8 @@ func Parse(source string) (Cell, error) {
 	return sexpressions[0], nil
 }
 
-// ParseMultipleSexpressions resturns the array of parser sexpressions
-func ParseMultipleSexpressions(source string) ([]Cell, error) {
+// parseMultipleSexpressions resturns the array of parser sexpressions
+func parseMultipleSexpressions(source string) ([]Cell, error) {
 	tokens := tokenize(source)
 	if len(tokens) == 1 && tokens[0].typ == tokNone {
 		return nil, ParseError{"empty source"}
@@ -44,13 +44,13 @@ func ricParse(tokens []token, tokensIndex *int) (Cell, error) {
 
 	switch actualToken.typ {
 	case tokNum:
-		newInt := MakeInt(actualToken.val)
+		newInt := makeInt(actualToken.val)
 		return newInt, nil
 	case tokStr:
-		newStr := MakeString(actualToken.str)
+		newStr := makeString(actualToken.str)
 		return newStr, nil
 	case tokSym:
-		newSym := MakeSymbol(actualToken.str)
+		newSym := makeSymbol(actualToken.str)
 		return newSym, nil
 	case tokQuote:
 		return buildQuote(tokens, tokensIndex)
@@ -89,14 +89,14 @@ func enoughTokens(tokens []token, tokensIndex *int) bool {
 }
 
 func buildQuote(tokens []token, tokensIndex *int) (Cell, error) {
-	quoteSym := MakeSymbol("quote")
+	quoteSym := makeSymbol("quote")
 	quotedSexpression, err := ricParse(tokens, tokensIndex)
 	if err != nil {
 		return nil, err
 	}
 
-	firstConsArg := MakeCons(quotedSexpression, nil)
-	topCons := MakeCons(quoteSym, firstConsArg)
+	firstConsArg := makeCons(quotedSexpression, nil)
+	topCons := makeCons(quoteSym, firstConsArg)
 	return topCons, nil
 }
 
@@ -113,7 +113,7 @@ func buildCons(tokens []token, openParToken, closeParToken tokenType, tokensInde
 	if err != nil {
 		return nil, err
 	}
-	top := MakeCons(left, nil)
+	top := makeCons(left, nil)
 	actCons := top
 
 	nextToken, err = readNextToken(tokens, tokensIndex)
@@ -156,7 +156,7 @@ func buildCons(tokens []token, openParToken, closeParToken tokenType, tokensInde
 			if err != nil {
 				return nil, err
 			}
-			tmp := MakeCons(right, nil)
+			tmp := makeCons(right, nil)
 			if top == actCons {
 				// must init the top
 				switch cons := top.(type) {
@@ -183,6 +183,7 @@ func buildCons(tokens []token, openParToken, closeParToken tokenType, tokensInde
 	}
 }
 
+// ParseError
 type ParseError struct {
 	err string
 }

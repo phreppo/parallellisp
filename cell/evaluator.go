@@ -4,26 +4,13 @@ import (
 	"fmt"
 )
 
-func Eval(c Cell) EvalResult {
-	return eval(c, EmptyEnv())
-}
-
-var EvalService = startEvalService()
-
-type EvalError struct {
-	Err string
-}
+var evalService = startevalService()
 
 func newEvalError(e string) EvalError {
 	r := EvalError{
 		Err: e,
 	}
 	return r
-}
-
-type EvalResult struct {
-	Cell Cell
-	Err  error
 }
 
 func newEvalResult(c Cell, e error) EvalResult {
@@ -42,14 +29,14 @@ func newEvalErrorResult(e error) EvalResult {
 	return newEvalResult(nil, e)
 }
 
-type EvalRequest struct {
+type evalRequest struct {
 	Cell      Cell
-	Env       *EnvironmentEntry
+	Env       *environmentEntry
 	ReplyChan chan EvalResult
 }
 
-func NewEvalRequest(c Cell, env *EnvironmentEntry, replChan chan EvalResult) EvalRequest {
-	r := EvalRequest{
+func newEvalRequest(c Cell, env *environmentEntry, replChan chan EvalResult) evalRequest {
+	r := evalRequest{
 		Cell:      c,
 		Env:       env,
 		ReplyChan: replChan,
@@ -57,29 +44,25 @@ func NewEvalRequest(c Cell, env *EnvironmentEntry, replChan chan EvalResult) Eva
 	return r
 }
 
-func (e EvalError) Error() string {
-	return e.Err
-}
-
-func startEvalService() chan EvalRequest {
-	service := make(chan EvalRequest)
+func startevalService() chan evalRequest {
+	service := make(chan evalRequest)
 	go server(service)
 	return service
 }
 
-func server(service <-chan EvalRequest) {
+func server(service <-chan evalRequest) {
 	for {
 		req := <-service
 		go serve(req)
 	}
 }
 
-func serve(req EvalRequest) {
+func serve(req evalRequest) {
 	result := eval(req.Cell, req.Env)
 	req.ReplyChan <- result
 }
 
-func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
+func eval(toEval Cell, env *environmentEntry) EvalResult {
 	if toEval == nil {
 		return newEvalPositiveResult(nil)
 	}
@@ -112,7 +95,7 @@ func eval(toEval Cell, env *EnvironmentEntry) EvalResult {
 	}
 }
 
-func evlisParallel(args Cell, env *EnvironmentEntry) EvalResult {
+func evlisParallel(args Cell, env *environmentEntry) EvalResult {
 	n := getNumberOfArgs(args)
 
 	if n == 0 {
@@ -124,7 +107,7 @@ func evlisParallel(args Cell, env *EnvironmentEntry) EvalResult {
 	for act != nil && cdr(act) != nil {
 		newChan := make(chan EvalResult)
 		replyChans = append(replyChans, newChan)
-		go serve(NewEvalRequest(car(act), env, newChan))
+		go serve(newEvalRequest(car(act), env, newChan))
 		act = cdr(act)
 	}
 
@@ -164,7 +147,7 @@ func getNumberOfArgs(c Cell) int {
 	return count
 }
 
-func evlisSequential(args Cell, env *EnvironmentEntry) EvalResult {
+func evlisSequential(args Cell, env *environmentEntry) EvalResult {
 	actArg := args
 	var top Cell
 	var actCons Cell
@@ -199,22 +182,22 @@ func extractCars(args Cell) []Cell {
 // appends to append after actCell, maybe initializing top. Has side effects
 func appendCellToArgs(top, actCell, toAppend *Cell) {
 	if *top == nil {
-		*top = MakeCons((*toAppend), nil)
+		*top = makeCons((*toAppend), nil)
 		*actCell = *top
 	} else {
-		tmp := MakeCons((*toAppend), nil)
+		tmp := makeCons((*toAppend), nil)
 		actConsCasted := (*actCell).(*ConsCell)
 		actConsCasted.Cdr = tmp
 		*actCell = actConsCasted.Cdr
 	}
 }
 
-func apply(function Cell, args Cell, env *EnvironmentEntry) EvalResult {
+func apply(function Cell, args Cell, env *environmentEntry) EvalResult {
 	switch functionCasted := function.(type) {
 	case *BuiltinLambdaCell:
 		return functionCasted.Lambda(args, env)
 	case *ConsCell:
-		if Lisp.IsLambdaSymbol(functionCasted.Car) {
+		if lisp.isLambdaSymbol(functionCasted.Car) {
 			formalParameters := cadr(function)
 			lambdaBody := caddr(function)
 			if isClosure(formalParameters, args) {
@@ -244,8 +227,8 @@ func apply(function Cell, args Cell, env *EnvironmentEntry) EvalResult {
 	}
 }
 
-func assoc(symbol *SymbolCell, env *EnvironmentEntry) EvalResult {
-	if res, isInGlobalEnv := GlobalEnv[symbol.Sym]; isInGlobalEnv {
+func assoc(symbol *SymbolCell, env *environmentEntry) EvalResult {
+	if res, isInglobalEnv := globalEnv[symbol.Sym]; isInglobalEnv {
 		return newEvalPositiveResult(res)
 	}
 	if env == nil {
@@ -261,7 +244,7 @@ func assoc(symbol *SymbolCell, env *EnvironmentEntry) EvalResult {
 	return newEvalErrorResult(newEvalError("[assoc] symbol " + symbol.Sym + " not in env"))
 }
 
-func pairlis(formalParameters, actualParameters Cell, oldEnv *EnvironmentEntry) (*EnvironmentEntry, error) {
+func pairlis(formalParameters, actualParameters Cell, oldEnv *environmentEntry) (*environmentEntry, error) {
 	actFormal := formalParameters
 	actActual := actualParameters
 	newEntry := oldEnv
@@ -269,7 +252,7 @@ func pairlis(formalParameters, actualParameters Cell, oldEnv *EnvironmentEntry) 
 		if actActual == nil {
 			return nil, newEvalError("[parilis] not enough actual parameters")
 		}
-		newEntry = NewEnvironmentEntry((car(actFormal)).(*SymbolCell), car(actActual), newEntry)
+		newEntry = newenvironmentEntry((car(actFormal)).(*SymbolCell), car(actActual), newEntry)
 		actFormal = (actFormal.(*ConsCell)).Cdr
 		actActual = (actActual.(*ConsCell)).Cdr
 	}

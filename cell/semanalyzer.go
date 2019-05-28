@@ -35,7 +35,7 @@ func containsSideEffects(c Cell) error {
 		}
 		return nil
 	default:
-		if Lisp.HasSideEffect(cell) {
+		if lisp.hasSideEffect(cell) {
 			return &SemanticError{fmt.Sprintf("%v", cell)}
 		}
 		return nil

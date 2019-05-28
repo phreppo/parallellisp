@@ -47,7 +47,7 @@ func eq(c1, c2 Cell) bool {
 	return c1.Eq(c2)
 }
 
-func copyAndSubstituteSymbols(c Cell, env *EnvironmentEntry) Cell {
+func copyAndSubstituteSymbols(c Cell, env *environmentEntry) Cell {
 	switch cell := c.(type) {
 	case *IntCell:
 		return cell
@@ -63,7 +63,7 @@ func copyAndSubstituteSymbols(c Cell, env *EnvironmentEntry) Cell {
 		}
 		return cell
 	case *ConsCell:
-		return MakeCons(copyAndSubstituteSymbols(cell.Car, env), copyAndSubstituteSymbols(cell.Cdr, env))
+		return makeCons(copyAndSubstituteSymbols(cell.Car, env), copyAndSubstituteSymbols(cell.Cdr, env))
 	default:
 		return nil
 	}

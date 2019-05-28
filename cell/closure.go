@@ -7,21 +7,21 @@ func isClosure(formalParameters, actualParameters Cell) bool {
 func buildClosure(lambdaBody, formalParameters, actualParameters Cell) Cell {
 	// ((lambda (x y) (+ x y)) 1)
 	// head
-	top := MakeCons(MakeSymbol("lambda"), nil)
+	top := makeCons(makeSymbol("lambda"), nil)
 	act := top
 
 	// unmatched parameters
 	actFormal := formalParameters
 	actActual := actualParameters
 	found := false
-	closureEnv := EmptyEnv()
+	closureEnv := emptyEnv()
 
 	for actFormal != nil && !found {
 		if actActual == nil {
 			// found
 			found = true
 		} else {
-			closureEnv = NewEnvironmentEntry((car(actFormal)).(*SymbolCell), car(actActual), closureEnv)
+			closureEnv = newenvironmentEntry((car(actFormal)).(*SymbolCell), car(actActual), closureEnv)
 			actFormal = cdr(actFormal)
 			actActual = cdr(actActual)
 		}

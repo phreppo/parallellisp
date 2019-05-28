@@ -1,24 +1,24 @@
 package cell
 
-// MakeInt supplies a Int Cell. Blocking: use only in sequential code
-func MakeInt(i int) Cell {
+// makeInt supplies a Int Cell. Blocking: use only in sequential code
+func makeInt(i int) Cell {
 	return &IntCell{i}
 }
 
-// MakeString supplies a String Cell. Blocking: use only in sequential code
-func MakeString(s string) Cell {
+// makeString supplies a String Cell. Blocking: use only in sequential code
+func makeString(s string) Cell {
 	return &StringCell{s}
 }
 
-// MakeSymbol supplies a Symbol Cell. Blocking: use only in sequential code
-func MakeSymbol(s string) Cell {
-	if isBuiltin, builtinSymbol := Lisp.IsBuiltinSymbol(s); isBuiltin {
+// makeSymbol supplies a Symbol Cell. Blocking: use only in sequential code
+func makeSymbol(s string) Cell {
+	if isBuiltin, builtinSymbol := lisp.isBuiltinSymbol(s); isBuiltin {
 		return builtinSymbol
 	}
 	return &SymbolCell{s}
 }
 
-// MakeCons supplies a Cons Cell. Blocking: use only in sequential code
-func MakeCons(car Cell, cdr Cell) Cell {
+// makeCons supplies a Cons Cell. Blocking: use only in sequential code
+func makeCons(car Cell, cdr Cell) Cell {
 	return &ConsCell{car, cdr, evlisSequential}
 }

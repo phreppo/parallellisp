@@ -78,7 +78,7 @@ func (s SymbolCell) Eq(c Cell) bool {
 
 type BuiltinLambdaCell struct {
 	Sym    string
-	Lambda func(Cell, *EnvironmentEntry) EvalResult
+	Lambda func(Cell, *environmentEntry) EvalResult
 }
 
 func (l BuiltinLambdaCell) String() string {
@@ -100,7 +100,7 @@ func (l BuiltinLambdaCell) Eq(c Cell) bool {
 
 type BuiltinMacroCell struct {
 	Sym   string
-	Macro func(Cell, *EnvironmentEntry) EvalResult
+	Macro func(Cell, *environmentEntry) EvalResult
 }
 
 func (m BuiltinMacroCell) String() string {
@@ -126,7 +126,7 @@ func (l BuiltinMacroCell) Eq(c Cell) bool {
 type ConsCell struct {
 	Car   Cell
 	Cdr   Cell
-	Evlis func(args Cell, env *EnvironmentEntry) EvalResult
+	Evlis func(args Cell, env *environmentEntry) EvalResult
 }
 
 func (c ConsCell) String() string {

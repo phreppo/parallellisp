@@ -70,3 +70,31 @@ func copyAndSubstituteSymbols(c Cell, env *environmentEntry) Cell {
 		return nil
 	}
 }
+
+func extractCars(args Cell) []Cell {
+	act := args
+	var argsArray []Cell
+	if args == nil {
+		return argsArray
+	}
+	var actCons *consCell
+	for act != nil {
+		actCons = act.(*consCell)
+		argsArray = append(argsArray, actCons.Car)
+		act = actCons.Cdr
+	}
+	return argsArray
+}
+
+// appends to append after actCell, maybe initializing top. Has side effects
+func appendCellToArgs(top, actCell, toAppend *Cell) {
+	if *top == nil {
+		*top = makeCons((*toAppend), nil)
+		*actCell = *top
+	} else {
+		tmp := makeCons((*toAppend), nil)
+		actConsCasted := (*actCell).(*consCell)
+		actConsCasted.Cdr = tmp
+		*actCell = actConsCasted.Cdr
+	}
+}

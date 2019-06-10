@@ -1,5 +1,3 @@
-[possima] cambiare il modo di avere parallelismo: modello serviroti (consapevoli) e server
 [se necessario] mandare un nuovo thread solo valuto qualcosa che non e un atomo
 [alla fine] mettere le freccie per canali di input e di output
-[alla fine] se non usi lo scheduler droppalo pure
 [fare la defer di chiusura file nella load]

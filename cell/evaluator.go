@@ -1,14 +1,38 @@
 package cell
 
-import (
-	"fmt"
-)
+import "fmt"
 
-func initEvalService() {
-	evalService = startEvalService()
+func eval(toEval Cell, env *environmentEntry) EvalResult {
+	if toEval == nil {
+		return newEvalPositiveResult(nil)
+	}
+	switch c := toEval.(type) {
+	case *intCell:
+		return newEvalPositiveResult(c)
+	case *stringCell:
+		return newEvalPositiveResult(c)
+	case *symbolCell:
+		return assoc(c, env)
+	case *consCell:
+		switch car := c.Car.(type) {
+		case *builtinMacroCell:
+			return car.Macro(c.Cdr, env)
+		default:
+			argsResult := c.Evlis(c.Cdr, env)
+			if argsResult.Err != nil {
+				return newEvalErrorResult(argsResult.Err)
+			}
+			return apply(car, argsResult.Cell, env)
+		}
+	// builtin symbols autoquote: allows higer order functions
+	case *builtinMacroCell:
+		return newEvalPositiveResult(c)
+	case *builtinLambdaCell:
+		return newEvalPositiveResult(c)
+	default:
+		return newEvalErrorResult(newEvalError("[eval] Unknown cell type: " + fmt.Sprintf("%v", toEval)))
+	}
 }
-
-var evalService chan evalRequest
 
 func newEvalError(e string) EvalError {
 	r := EvalError{
@@ -48,58 +72,12 @@ func newEvalRequest(c Cell, env *environmentEntry, replChan chan EvalResult) eva
 	return r
 }
 
-func startEvalService() chan evalRequest {
-	service := make(chan evalRequest)
-	go server(service)
-	return service
-}
-
-func server(service <-chan evalRequest) {
-	for {
-		req := <-service
-		go serve(req)
-	}
-}
-
-func serve(req evalRequest) {
-	result := eval(req.Cell, req.Env)
-	req.ReplyChan <- result
-}
-
-func eval(toEval Cell, env *environmentEntry) EvalResult {
-	if toEval == nil {
-		return newEvalPositiveResult(nil)
-	}
-	switch c := toEval.(type) {
-	case *intCell:
-		return newEvalPositiveResult(c)
-	case *stringCell:
-		return newEvalPositiveResult(c)
-	case *symbolCell:
-		return assoc(c, env)
-	case *consCell:
-		switch car := c.Car.(type) {
-		case *builtinMacroCell:
-			return car.Macro(c.Cdr, env)
-		default:
-			argsResult := c.Evlis(c.Cdr, env)
-			if argsResult.Err != nil {
-				return newEvalErrorResult(argsResult.Err)
-			}
-			return apply(car, argsResult.Cell, env)
-		}
-	// builtin symbols autoquote: allows higer order functions
-	case *builtinMacroCell:
-		return newEvalPositiveResult(c)
-	case *builtinLambdaCell:
-		return newEvalPositiveResult(c)
-	default:
-		return newEvalErrorResult(newEvalError("[eval] Unknown cell type: " + fmt.Sprintf("%v", toEval)))
-	}
+func evalWithChan(req evalRequest) {
+	req.ReplyChan <- eval(req.Cell, req.Env)
 }
 
 func evlisParallel(args Cell, env *environmentEntry) EvalResult {
-	n := getNumberOfArgs(args)
+	n := listLengt(args)
 
 	if n == 0 {
 		return newEvalPositiveResult(nil)
@@ -110,7 +88,7 @@ func evlisParallel(args Cell, env *environmentEntry) EvalResult {
 	for act != nil && cdr(act) != nil {
 		newChan := make(chan EvalResult)
 		replyChans = append(replyChans, newChan)
-		go serve(newEvalRequest(car(act), env, newChan))
+		go evalWithChan(newEvalRequest(car(act), env, newChan))
 		act = cdr(act)
 	}
 
@@ -121,33 +99,20 @@ func evlisParallel(args Cell, env *environmentEntry) EvalResult {
 
 	var top Cell
 	var actCons Cell
+	var evaluedArg EvalResult
 	for i := 0; i < n; i++ {
-		if i == n-1 {
-			appendCellToArgs(&top, &actCons, &(lastArgResult.Cell))
-		} else {
-			evaluedArg := <-replyChans[i]
+		if i < n-1 {
+			evaluedArg = <-replyChans[i]
 			if evaluedArg.Err != nil {
 				return newEvalErrorResult(evaluedArg.Err)
 			}
 			appendCellToArgs(&top, &actCons, &(evaluedArg.Cell))
+		} else {
+			appendCellToArgs(&top, &actCons, &(lastArgResult.Cell))
 		}
 	}
 
 	return newEvalPositiveResult(top)
-}
-
-func getNumberOfArgs(c Cell) int {
-	count := 0
-	act := c
-	actNotNil := (act != nil)
-	for actNotNil {
-		count++
-		if cdr(act) == nil {
-			actNotNil = false
-		}
-		act = cdr(act)
-	}
-	return count
 }
 
 func evlisSequential(args Cell, env *environmentEntry) EvalResult {
@@ -165,34 +130,6 @@ func evlisSequential(args Cell, env *environmentEntry) EvalResult {
 		actArg = (actArg.(*consCell)).Cdr
 	}
 	return newEvalResult(top, nil)
-}
-
-func extractCars(args Cell) []Cell {
-	act := args
-	var argsArray []Cell
-	if args == nil {
-		return argsArray
-	}
-	var actCons *consCell
-	for act != nil {
-		actCons = act.(*consCell)
-		argsArray = append(argsArray, actCons.Car)
-		act = actCons.Cdr
-	}
-	return argsArray
-}
-
-// appends to append after actCell, maybe initializing top. Has side effects
-func appendCellToArgs(top, actCell, toAppend *Cell) {
-	if *top == nil {
-		*top = makeCons((*toAppend), nil)
-		*actCell = *top
-	} else {
-		tmp := makeCons((*toAppend), nil)
-		actConsCasted := (*actCell).(*consCell)
-		actConsCasted.Cdr = tmp
-		*actCell = actConsCasted.Cdr
-	}
 }
 
 func apply(function Cell, args Cell, env *environmentEntry) EvalResult {

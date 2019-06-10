@@ -1,4 +1,4 @@
-package cell
+package lisp
 
 func car(c Cell) Cell {
 	return (c.(*consCell)).Car

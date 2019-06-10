@@ -1,10 +1,8 @@
 package main
 
-import (
-	. "github.com/parof/parallellisp/cell"
-)
+import "github.com/parof/parallellisp/lisp"
 
 func main() {
 	// runtime.GOMAXPROCS(1)
-	Repl()
+	lisp.Repl()
 }

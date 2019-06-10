@@ -1,4 +1,4 @@
-package cell
+package lisp
 
 import (
 	"bufio"
@@ -55,7 +55,7 @@ func (e *SemanticError) Error() string {
 // Init initializes the needed variables. Must be called before using any lisp structure
 func Init() {
 	initLanguage()
-	initglobalEnv()
+	initGlobalEnv()
 }
 
 // Repl performs the read-eval-printline loop
@@ -63,23 +63,23 @@ func Repl() {
 	Init()
 	reader := bufio.NewReader(os.Stdin)
 	for {
-		// READ
+		// Read
 		fmt.Print(aurora.BrightBlue("≃ "))
 		source, _ := reader.ReadString('\n')
 		if source == "\n" {
 			fmt.Println("  Bye!")
 			return
 		}
-		// PARSE
+		// Parse
 		sexpr, err := Parse(source)
 		if err != nil {
 			printError(err)
 		} else {
-			// SEMANTIC ANALYSIS
+			// Semantic Analysis
 			if ok, err := SemanticAnalysis(sexpr); !ok {
 				printError(err)
 			} else {
-				// EVAL
+				// Eval
 				result := Eval(sexpr)
 				if result.Err != nil {
 					printError(result.Err)

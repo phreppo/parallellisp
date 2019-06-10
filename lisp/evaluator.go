@@ -1,4 +1,4 @@
-package cell
+package lisp
 
 import "fmt"
 
@@ -191,7 +191,7 @@ func pairlis(formalParameters, actualParameters Cell, oldEnv *environmentEntry) 
 		if actActual == nil {
 			return nil, newEvalError("[parilis] not enough actual parameters")
 		}
-		newEntry = newenvironmentEntry((car(actFormal)).(*symbolCell), car(actActual), newEntry)
+		newEntry = newEnvironmentEntry((car(actFormal)).(*symbolCell), car(actActual), newEntry)
 		actFormal = (actFormal.(*consCell)).Cdr
 		actActual = (actActual.(*consCell)).Cdr
 	}

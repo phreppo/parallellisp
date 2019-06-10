@@ -1,4 +1,4 @@
-package cell
+package lisp
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ func emptyEnv() *environmentEntry {
 	return nil
 }
 
-func newenvironmentEntry(sym *symbolCell, value Cell, next *environmentEntry) *environmentEntry {
+func newEnvironmentEntry(sym *symbolCell, value Cell, next *environmentEntry) *environmentEntry {
 	newEntry := new(environmentEntry)
 	newEntry.Pair = new(environmentPair)
 	newEntry.Pair.Symbol = sym
@@ -51,7 +51,7 @@ func (e *environmentEntry) String() string {
 
 var globalEnv = make(map[string]Cell)
 
-func initglobalEnv() {
+func initGlobalEnv() {
 	// necessary
 	globalEnv["id"], _ = Parse("(lambda (x) x)")
 	globalEnv["null"], _ = Parse("(lambda (x) (eq x nil))")

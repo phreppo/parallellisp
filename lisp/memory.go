@@ -1,4 +1,4 @@
-package cell
+package lisp
 
 func makeInt(i int) Cell {
 	return &intCell{i}

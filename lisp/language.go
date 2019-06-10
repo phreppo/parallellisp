@@ -1,4 +1,4 @@
-package cell
+package lisp
 
 // lisp is the global variable for the language
 var lisp *language

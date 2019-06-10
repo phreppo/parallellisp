@@ -1,4 +1,4 @@
-package cell
+package lisp
 
 func isClosure(formalParameters, actualParameters Cell) bool {
 	return listLengt(formalParameters) > listLengt(actualParameters)
@@ -21,7 +21,7 @@ func buildClosure(lambdaBody, formalParameters, actualParameters Cell) Cell {
 			// found
 			found = true
 		} else {
-			closureEnv = newenvironmentEntry((car(actFormal)).(*symbolCell), car(actActual), closureEnv)
+			closureEnv = newEnvironmentEntry((car(actFormal)).(*symbolCell), car(actActual), closureEnv)
 			actFormal = cdr(actFormal)
 			actActual = cdr(actActual)
 		}

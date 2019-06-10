@@ -1,4 +1,4 @@
-package cell
+package lisp
 
 import (
 	"fmt"
@@ -110,7 +110,7 @@ func letMacro(args Cell, env *environmentEntry) EvalResult {
 		if evaluedValue.Err != nil {
 			return evaluedValue
 		}
-		newEnv = newenvironmentEntry(caar(pairs).(*symbolCell), evaluedValue.Cell, newEnv)
+		newEnv = newEnvironmentEntry(caar(pairs).(*symbolCell), evaluedValue.Cell, newEnv)
 		pairs = cdr(pairs)
 	}
 	return eval(cadr(args), newEnv)
@@ -122,7 +122,7 @@ func dotimesMacro(args Cell, env *environmentEntry) EvalResult {
 	varName := car(firstArg)
 	varValue := cadr(firstArg)
 	for i := 0; i < (varValue.(*intCell)).Val; i++ {
-		newEnv := newenvironmentEntry(varName.(*symbolCell), makeInt(i), env)
+		newEnv := newEnvironmentEntry(varName.(*symbolCell), makeInt(i), env)
 		eval(body, newEnv)
 	}
 	return newEvalPositiveResult(nil)

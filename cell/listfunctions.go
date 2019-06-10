@@ -47,6 +47,8 @@ func eq(c1, c2 Cell) bool {
 	return c1.Eq(c2)
 }
 
+// copies the structure of the cell, substituting every symbol which is in the
+// environment with its value.
 func copyAndSubstituteSymbols(c Cell, env *environmentEntry) Cell {
 	switch cell := c.(type) {
 	case *intCell:

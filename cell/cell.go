@@ -103,6 +103,9 @@ func (m builtinMacroCell) String() string {
 	if m.Sym == "quote" {
 		return "'"
 	}
+	if m.Sym == "lambda" {
+		return "λ"
+	}
 	return m.Sym
 }
 

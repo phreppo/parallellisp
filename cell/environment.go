@@ -65,4 +65,5 @@ func initglobalEnv() {
 	globalEnv["fib"], _ = Parse("\"run-fib.lisp\"")
 	globalEnv["ms"], _ = Parse("\"run-mergesort.lisp\"")
 	globalEnv["sorted"], _ = Parse("\"run-sorted.lisp\"")
+	globalEnv["omega"], _ = Parse("(lambda (x) (x x))")
 }

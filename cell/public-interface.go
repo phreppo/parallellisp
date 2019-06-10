@@ -64,7 +64,7 @@ func Repl() {
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		// READ
-		fmt.Print(aurora.BrightBlue("λ "))
+		fmt.Print(aurora.BrightBlue("≃ "))
 		source, _ := reader.ReadString('\n')
 		if source == "\n" {
 			fmt.Println("  Bye!")

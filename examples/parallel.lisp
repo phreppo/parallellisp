@@ -19,6 +19,8 @@
             ))))
 
 (defun parallelize (sequential-algorithm is-base-case split-left split-right combinator  generic-data)
+    ;; contract: split left and split right must be interchangeable and must split
+    ;; the data in two parts of equal dimension  
     (parallelize-ric  1 sequential-algorithm is-base-case split-left split-right combinator  generic-data))
 
 (defun parallelize-ric (partitions sequential-algorithm is-base-case split-left split-right combinator generic-data)
@@ -27,8 +29,8 @@
         ((< partitions ncpu)
             (let ((new-partitions (* partitions 2)))
             {combinator 
-                (parallelize-ric new-partitions sequential-algorithm is-base-case split-left split-right combinator (split-left generic-data))
-                (parallelize-ric new-partitions sequential-algorithm is-base-case split-left split-right combinator (split-right generic-data))
+                (parallelize-ric new-partitions sequential-algorithm is-base-case split-right split-left combinator (split-left generic-data))
+                (parallelize-ric new-partitions sequential-algorithm is-base-case split-right split-left combinator (split-right generic-data))
             }))
         (t (combinator 
                 (sequential-algorithm (split-left generic-data))

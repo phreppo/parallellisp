@@ -34,44 +34,6 @@ func eval(toEval Cell, env *environmentEntry) EvalResult {
 	}
 }
 
-func newEvalError(e string) EvalError {
-	r := EvalError{
-		Err: e,
-	}
-	return r
-}
-
-func newEvalResult(c Cell, e error) EvalResult {
-	r := EvalResult{
-		Cell: c,
-		Err:  e,
-	}
-	return r
-}
-
-func newEvalPositiveResult(c Cell) EvalResult {
-	return newEvalResult(c, nil)
-}
-
-func newEvalErrorResult(e error) EvalResult {
-	return newEvalResult(nil, e)
-}
-
-type evalRequest struct {
-	Cell      Cell
-	Env       *environmentEntry
-	ReplyChan chan EvalResult
-}
-
-func newEvalRequest(c Cell, env *environmentEntry, replChan chan EvalResult) evalRequest {
-	r := evalRequest{
-		Cell:      c,
-		Env:       env,
-		ReplyChan: replChan,
-	}
-	return r
-}
-
 func evalWithChan(req evalRequest) {
 	req.ReplyChan <- eval(req.Cell, req.Env)
 }
@@ -196,4 +158,42 @@ func pairlis(formalParameters, actualParameters Cell, oldEnv *environmentEntry) 
 		actActual = (actActual.(*consCell)).Cdr
 	}
 	return newEntry, nil
+}
+
+func newEvalError(e string) EvalError {
+	r := EvalError{
+		Err: e,
+	}
+	return r
+}
+
+func newEvalResult(c Cell, e error) EvalResult {
+	r := EvalResult{
+		Cell: c,
+		Err:  e,
+	}
+	return r
+}
+
+func newEvalPositiveResult(c Cell) EvalResult {
+	return newEvalResult(c, nil)
+}
+
+func newEvalErrorResult(e error) EvalResult {
+	return newEvalResult(nil, e)
+}
+
+type evalRequest struct {
+	Cell      Cell
+	Env       *environmentEntry
+	ReplyChan chan EvalResult
+}
+
+func newEvalRequest(c Cell, env *environmentEntry, replChan chan EvalResult) evalRequest {
+	r := evalRequest{
+		Cell:      c,
+		Env:       env,
+		ReplyChan: replChan,
+	}
+	return r
 }

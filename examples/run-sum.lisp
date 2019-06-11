@@ -1,4 +1,4 @@
-(load "psum.l")
+(load "psum.lisp")
 
 (write "[SEQ] sumlist")
 (time (sumlist llist))

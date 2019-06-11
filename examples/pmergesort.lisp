@@ -1,4 +1,4 @@
-(load "mergesort.l")
+(load "mergesort.lisp")
             
 (defun pmergesort (lst)
   (cond 

@@ -1,4 +1,4 @@
-(load "search.l")
+(load "search.lisp")
 
 (defun ppresent (x lst)
     (cond 

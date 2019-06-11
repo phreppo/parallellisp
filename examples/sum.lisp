@@ -1,5 +1,5 @@
-(load "list-functions.l")
-(load "lists.l")
+(load "list-functions.lisp")
+(load "lists.lisp")
 
 (defun sumlist (lst)
     (cond

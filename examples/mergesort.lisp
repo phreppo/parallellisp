@@ -1,4 +1,4 @@
-(load "lists.l")
+(load "lists.lisp")
     
 (defun merge (firstList secondList)
   (cond ((not firstList) secondList)

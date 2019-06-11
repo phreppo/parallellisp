@@ -1,4 +1,4 @@
-(load "sum.l")
+(load "sum.lisp")
 
 (defun psumlist (lst)
     (cond

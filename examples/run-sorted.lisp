@@ -1,5 +1,5 @@
-(load "psorted.l")
-(load "pmergesort.l")
+(load "psorted.lisp")
+(load "pmergesort.lisp")
 
 (write "[SEQ] checking for llist sorted")
 (time (sorted llist))

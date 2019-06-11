@@ -1,4 +1,4 @@
-(load "pmergesort.l")
+(load "pmergesort.lisp")
 
 (write "Merge sorting...")
 (time (mergesort llist))

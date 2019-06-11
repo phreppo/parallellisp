@@ -1,5 +1,5 @@
-(load "lists.l")
-(load "sorted.l")
+(load "lists.lisp")
+(load "sorted.lisp")
 
 (setq psorted
     (parallelize

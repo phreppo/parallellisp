@@ -1,4 +1,4 @@
-(load "psearch.l")
+(load "psearch.lisp")
 
 (write "[SEQ] present first element...")
 (time (present 5900 llist)) ; on clisp: stack overflow!

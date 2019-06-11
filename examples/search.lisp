@@ -1,4 +1,4 @@
-(load "lists.l")
+(load "lists.lisp")
 
 (defun present (x lst)
     (cond 

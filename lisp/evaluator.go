@@ -77,6 +77,16 @@ func evlisParallel(args Cell, env *environmentEntry) EvalResult {
 	return newEvalPositiveResult(top)
 }
 
+type evalArgumentResult struct {
+	res      EvalResult
+	argIndex int
+}
+
+func evalArgumentWithChan(argument Cell, env *environmentEntry, argIndex int, replyChan chan evalArgumentResult) {
+	res := eval(argument, env)
+	replyChan <- evalArgumentResult{res, argIndex}
+}
+
 func evlisSequential(args Cell, env *environmentEntry) EvalResult {
 	actArg := args
 	var top Cell

@@ -34,10 +34,6 @@ func eval(toEval Cell, env *environmentEntry) EvalResult {
 	}
 }
 
-func evalWithChan(req evalRequest) {
-	req.ReplyChan <- eval(req.Cell, req.Env)
-}
-
 func evlisParallel(args Cell, env *environmentEntry) EvalResult {
 	n := listLengt(args)
 
@@ -45,34 +41,40 @@ func evlisParallel(args Cell, env *environmentEntry) EvalResult {
 		return newEvalPositiveResult(nil)
 	}
 
-	var replyChans []chan EvalResult
+	// send eval requests
+	evaluedArgsChan := make(chan evalArgumentResult, n)
 	act := args
+	i := 0
 	for act != nil && cdr(act) != nil {
-		newChan := make(chan EvalResult)
-		replyChans = append(replyChans, newChan)
-		go evalWithChan(newEvalRequest(car(act), env, newChan))
+		go evalArgumentWithChan(car(act), env, i, evaluedArgsChan)
 		act = cdr(act)
+		i++
 	}
 
+	// eval last arg
 	lastArgResult := eval(car(act), env)
 	if lastArgResult.Err != nil {
 		return lastArgResult
 	}
 
+	// receive args
+	valuedArgs := make([]Cell, n-1)
+	var evaluedArg evalArgumentResult
+	for i := 0; i < n-1; i++ {
+		evaluedArg = <-evaluedArgsChan
+		if evaluedArg.res.Err != nil {
+			return newEvalErrorResult(evaluedArg.res.Err)
+		}
+		valuedArgs[evaluedArg.argIndex] = evaluedArg.res.Cell
+	}
+
+	// append in order
 	var top Cell
 	var actCons Cell
-	var evaluedArg EvalResult
-	for i := 0; i < n; i++ {
-		if i < n-1 {
-			evaluedArg = <-replyChans[i]
-			if evaluedArg.Err != nil {
-				return newEvalErrorResult(evaluedArg.Err)
-			}
-			appendCellToArgs(&top, &actCons, &(evaluedArg.Cell))
-		} else {
-			appendCellToArgs(&top, &actCons, &(lastArgResult.Cell))
-		}
+	for i := range valuedArgs {
+		appendCellToArgs(&top, &actCons, &(valuedArgs[i]))
 	}
+	appendCellToArgs(&top, &actCons, &lastArgResult.Cell)
 
 	return newEvalPositiveResult(top)
 }
@@ -82,9 +84,8 @@ type evalArgumentResult struct {
 	argIndex int
 }
 
-func evalArgumentWithChan(argument Cell, env *environmentEntry, argIndex int, replyChan chan evalArgumentResult) {
-	res := eval(argument, env)
-	replyChan <- evalArgumentResult{res, argIndex}
+func evalArgumentWithChan(argument Cell, env *environmentEntry, argIndex int, replyChan chan<- evalArgumentResult) {
+	replyChan <- evalArgumentResult{eval(argument, env), argIndex}
 }
 
 func evlisSequential(args Cell, env *environmentEntry) EvalResult {

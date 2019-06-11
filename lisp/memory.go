@@ -16,5 +16,5 @@ func makeSymbol(s string) Cell {
 }
 
 func makeCons(car Cell, cdr Cell) Cell {
-	return &consCell{car, cdr, evlisSequential}
+	return &consCell{car, cdr, evlisSequential, false}
 }

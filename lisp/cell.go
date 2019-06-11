@@ -123,9 +123,10 @@ func (m builtinMacroCell) Eq(c Cell) bool {
 *******************************************************************************/
 
 type consCell struct {
-	Car   Cell
-	Cdr   Cell
-	Evlis func(args Cell, env *environmentEntry) EvalResult
+	Car      Cell
+	Cdr      Cell
+	Evlis    func(args Cell, env *environmentEntry) EvalResult
+	Parallel bool
 }
 
 func (c consCell) String() string {
@@ -144,6 +145,9 @@ func (c consCell) String() string {
 	}
 	if left == "'" {
 		return "'" + rest[1:] // skip first char
+	}
+	if c.Parallel {
+		return "{" + left + rest + "}"
 	}
 	return "(" + left + rest + ")"
 }

@@ -62,6 +62,7 @@ func ricParse(tokens []token, tokensIndex *int) (Cell, error) {
 			return nil, err
 		}
 		(*(cons.(*consCell))).Evlis = evlisParallel
+		(*(cons.(*consCell))).Parallel = true
 		return cons, nil
 	default:
 		return nil, ParseError{"parse error near token " + fmt.Sprintf("%v", actualToken)}

@@ -186,7 +186,7 @@ func newEvalErrorResult(e error) EvalResult {
 type evalRequest struct {
 	Cell      Cell
 	Env       *environmentEntry
-	ReplyChan chan EvalResult
+	ReplyChan chan<- EvalResult
 }
 
 func newEvalRequest(c Cell, env *environmentEntry, replChan chan EvalResult) evalRequest {

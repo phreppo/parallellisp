@@ -1,4 +1,4 @@
-(load "list-functions.lisp")
+(load "list-functions.l")
 
 (defun sorted (lst)
     (cond

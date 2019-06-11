@@ -1,5 +1,4 @@
-(load "search.lisp")
-(load "parallel.lisp")
+(load "search.l")
 
 (defun ppresent (x lst)
     (cond 

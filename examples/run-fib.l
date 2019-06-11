@@ -1,5 +1,4 @@
-(load "pfib.lisp")
-(load "parallel.lisp")
+(load "pfib.l")
 
 (write "seq bench, seq fib")
 (time (bench fib 25))

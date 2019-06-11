@@ -1,5 +1,4 @@
-(load "parallel.lisp")
-(load "sum.lisp")
+(load "sum.l")
 
 (defun psumlist (lst)
     (cond

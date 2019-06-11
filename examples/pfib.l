@@ -1,4 +1,3 @@
-
 (defun fib (n) 
     ; computes the fibonacci number of n in the sequential way
     (cond 

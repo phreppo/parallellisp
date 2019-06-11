@@ -1,4 +1,4 @@
-(load "list-functions.lisp")
+(load "list-functions.l")
 
 (defun divide-et-impera (sequential-algorithm combinator lst)
     (divide-et-impera-ric 1 sequential-algorithm combinator lst))

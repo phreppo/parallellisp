@@ -77,5 +77,5 @@ func initGlobalEnv() {
 	globalEnv["sorted"], _ = Parse("\"run-sorted.lisp\"")
 	globalEnv["diff"], _ = Parse("\"diff.lisp\"")
 	globalEnv["maze"], _ = Parse("\"maze.lisp\"")
-	globalEnv["omega"], _ = Parse("(lambda (x) (x x))")
+	globalEnv["omega"], _ = Parse("(lambda (x) (x x))") 
 }

@@ -7,7 +7,7 @@
             (eq (car lst) x))
         (t {or 
                 (ppresent x (first-half lst))
-                (ppresent x (second-half lst))} 
+                (ppresent x (second-half lst))}
         )))
 
 (defun smart-ppresent (x lst)

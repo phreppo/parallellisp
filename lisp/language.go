@@ -8,6 +8,7 @@ func initLanguage() {
 }
 
 type language struct {
+	// reading in concurrent maps: https://github.com/golang/go/issues/5179
 	builtinLambdas        map[string]builtinLambdaCell
 	builtinMacros         map[string]builtinMacroCell
 	builtinSpecialSymbols map[string]symbolCell

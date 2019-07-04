@@ -19,5 +19,5 @@
 (divide-et-impera present-closed or llist)
 
 ;; when you want another element...
-(setq closed-element 5900)
+(setq closed-element 11)
 (divide-et-impera present-closed or llist)

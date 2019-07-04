@@ -1,6 +1,9 @@
 (load "search.lisp")
 (load "lists.lisp")
 
+; what i would like to write: (divide-et-impera (ppresent 5900) or llist)
+; but (ppresent 5900) is not a value...
+
 ; hand-made closure
 (defun present-closed (lst)
     (cond 

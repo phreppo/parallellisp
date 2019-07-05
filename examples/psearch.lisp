@@ -10,6 +10,8 @@
                 (ppresent x (second-half lst))}
         )))
 
-(defun lib-ppresent (x myList) (divide-et-impera (present x) or myList))
+(defun lib-ppresent (x myList) 
+    (divide-et-impera (present x) or myList))
 
-(setq lib-ppresent-setq (divide-et-impera (ppresent 5900) or))
+(setq lib-ppresent-setq 
+    (divide-et-impera (ppresent 5900) or))

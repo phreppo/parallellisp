@@ -1,5 +1,7 @@
 # {parallellisp}
 
+![Alt](/lambda.png "parallellisp")
+
 Parallellisp is one *pure funcional* Lisp dialect with some primitives to support parallelism. In particular, parallel argument evaluation is easy handled.
 
 ## Features
@@ -128,3 +130,8 @@ And some **special parallellisp functions**:
 - `parallelize`: see section [Parallelism support](#Parallelism-support)
 
 ## Install
+
+Setup [Golang](https://golang.org/doc/install) and then run:
+```
+./install
+```

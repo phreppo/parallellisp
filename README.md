@@ -124,7 +124,7 @@ And some **special parallellisp functions**:
 - `drop`: drops n elements from one list 
 - `first-half`: takes the first half of one list
 - `second-half`: takes the second half of one list
-- `divide-et-impera`: see section [Parallelism support](parallelism-support)
-- `parallelize`: see section [Parallelism support](parallelism-support)
+- `divide-et-impera`: see section [Parallelism support](#Parallelism-support)
+- `parallelize`: see section [Parallelism support](#Parallelism-support)
 
 ## Install

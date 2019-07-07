@@ -1,12 +1,12 @@
 # {parallellisp}
 
-![Alt](/lambda.png "parallellisp")
+![](/lambda.png "parallellisp")
 
 Parallellisp is one *pure funcional* Lisp dialect with some primitives to support parallelism. In particular, parallel argument evaluation is easy handled.
 
 ## Features
 
-### Parallelism support: { }
+### Parallelism support: { \}
 
 To ask for parallel argument evaluation to the runtime system just use `{}` instead of normal brackets. For example, to calculate the Fibonacci number define:
 

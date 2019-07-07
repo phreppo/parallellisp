@@ -4,8 +4,8 @@
     (cond
         ((eq lst nil) 0)
         ((eq (length lst) 1) (car lst))
-        (t {+   (psumlist (first-half  lst))
-                (psumlist (second-half lst))
+        (t {+ (psumlist (first-half  lst))
+              (psumlist (second-half lst))
             })))
 
 (defun smart-sumlist (lst)

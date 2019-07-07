@@ -1,11 +1,11 @@
 (load "lists.lisp")
 
-(defun present (x lst)
+(defun search (x lst)
     (cond 
         ((eq lst nil) nil)
         ((eq (length lst) 1) 
             (eq (car lst) x))
         (t (or 
-                (present x (first-half lst))
-                (present x (second-half lst)))
+                (search x (first-half lst))
+                (search x (second-half lst)))
         )))

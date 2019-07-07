@@ -1,17 +1,17 @@
 (load "search.lisp")
 
-(defun ppresent (x lst)
+(defun psearch (x lst)
     (cond 
         ((eq lst nil) nil)
         ((eq (length lst) 1) 
             (eq (car lst) x))
         (t {or 
-                (ppresent x (first-half lst))
-                (ppresent x (second-half lst))}
+                (psearch x (first-half lst))
+                (psearch x (second-half lst))}
         )))
 
-(defun lib-ppresent (x myList) 
-    (divide-et-impera (present x) or myList))
+(defun lib-psearch (x myList) 
+    (divide-et-impera (search x) or myList))
 
-(setq lib-ppresent-setq 
-    (divide-et-impera (ppresent 5900) or))
+(setq lib-psearch-setq 
+    (divide-et-impera (psearch 5900) or))

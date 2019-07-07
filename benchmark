@@ -16,3 +16,5 @@ time ./fib
 ghci fib.hs
 :set +s
 fib 32
+
+time clojure fib.clj

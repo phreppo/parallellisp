@@ -68,14 +68,4 @@ func initGlobalEnv() {
 
 	globalEnv["divide-et-impera"], _ = Parse("(lambda (sequential-algorithm combinator lst) (divide-et-impera-ric 1 sequential-algorithm combinator lst))")
 	globalEnv["divide-et-impera-ric"], _ = Parse("(lambda (partitions sequential-algorithm combinator lst) (cond ((eq lst nil)        (sequential-algorithm lst)) ((eq (length lst) 1) (sequential-algorithm lst)) ((< partitions ncpu) (let ((new-partitions (* partitions 2))) {combinator (divide-et-impera-ric new-partitions sequential-algorithm combinator (first-half  lst)) (divide-et-impera-ric new-partitions sequential-algorithm combinator (second-half lst)) })) (t (combinator (sequential-algorithm (first-half  lst)) (sequential-algorithm (second-half lst)) ))))")
-
-	// shortcuts
-	globalEnv["search"], _ = Parse("\"run-search.lisp\"")
-	globalEnv["sum"], _ = Parse("\"run-sum.lisp\"")
-	globalEnv["fib"], _ = Parse("\"run-fib.lisp\"")
-	globalEnv["ms"], _ = Parse("\"run-mergesort.lisp\"")
-	globalEnv["sorted"], _ = Parse("\"run-sorted.lisp\"")
-	globalEnv["diff"], _ = Parse("\"diff.lisp\"")
-	globalEnv["maze"], _ = Parse("\"maze.lisp\"")
-	globalEnv["omega"], _ = Parse("(lambda (x) (x x))") 
 }

@@ -6,19 +6,7 @@ Parallellisp is one *pure funcional* Lisp dialect with some primitives to suppor
 
 ## Features
 
-### Pure functional programming
-
-Lisp is not a *pure* functional language: assignment and append for example are allowed. Parallellisp, to naturally offer support to parallelism, is *pure*. This means that no side effects are allowed. Also, it has one unique feature: **closures** and **partially applied functions**. For example
-
-```lisp
-(defun myAdd (x y)
-    (+ x y))
-
-(myAdd 1)
-```
-is allowed. Also, function are [first class citizens](https://en.wikipedia.org/wiki/First-class_citizen), and this means that they can be passed as arguments to other functions.
-
-### Parallelism support
+### Parallelism support: {}
 
 To ask for parallel argument evaluation to the runtime system just use `{}` instead of normal brackets. For example, to calculate the Fibonacci number define:
 
@@ -73,6 +61,18 @@ One can measure performances using the function `time`. Because splitting one da
 (pfib 32)
 ```
 In the last example, with 8 cpus usually one could obtain a speedup of 3x.
+
+### Pure functional programming
+
+Lisp is not a *pure* functional language: assignment and append for example are allowed. Parallellisp, to naturally offer support to parallelism, is *pure*. This means that no side effects are allowed. Also, it has one unique feature: **closures** and **partially applied functions**. For example
+
+```lisp
+(defun myAdd (x y)
+    (+ x y))
+
+(myAdd 1)
+```
+is allowed. Also, function are [first class citizens](https://en.wikipedia.org/wiki/First-class_citizen), and this means that they can be passed as arguments to other functions.
 
 ### Homoiconicity
 

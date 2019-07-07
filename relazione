@@ -10,7 +10,6 @@
 
 . come avviene la valutazione
 . non utto e parallel, solo quando richiesto
-. come ho scelto questo modello: a meta fra il numero infinito di gotoutine e un numero fisso
 
 . esempi
 . introduzione delle feature aggiuntive: ncpu

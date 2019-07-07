@@ -1,0 +1,18 @@
+./run
+(load fib)
+
+yoctolisp
+(load "fib.lisp")
+
+pilisp
+(load "fib.lisp")
+
+clisp
+(load "fib.lisp")
+
+ghc fib.hs
+time ./fib
+
+ghci fib.hs
+:set +s
+fib 32

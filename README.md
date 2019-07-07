@@ -78,4 +78,53 @@ Parallellisp is one [homoiconic language](https://en.wikipedia.org/wiki/Homoicon
 
 ## The language
 
+Here you can find one list of the supported CommonLisp-functions:
+- `-`
+- `*`
+- `/`
+- `\>`
+- `\>=`
+- `+`
+- `<`
+- `<=`
+- `and`
+- `atom`
+- `car`
+- `cdr`
+- `cons`
+- `eq`
+- `id`
+- `integerp`
+- `length`
+- `list`
+- `load`
+- `member`
+- `not`
+- `nth`
+- `null`
+- `or`
+- `reverse`
+- `set`
+- `symbolp`
+- `write`
+
+Some macros:
+- `cond` 
+- `defun` 
+- `dotimes` 
+- `lambda` 
+- `let` 
+- `quote` 
+- `setq` 
+- `time` 
+
+And some **special parallellisp functions**:
+- `ncpu`: return the number of vcpus on the machine
+- `take`: takes n elements from one list 
+- `drop`: drops n elements from one list 
+- `first-half`: takes the first half of one list
+- `second-half`: takes the second half of one list
+- `divide-et-impera`: see section [Parallelism support](parallelism-support)
+- `parallelize`: see section [Parallelism support](parallelism-support)
+
 ## Install

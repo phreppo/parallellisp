@@ -1,7 +1,7 @@
 (load "search.lisp")
 (load "lists.lisp")
 
-; what i would like to write: (divide-et-impera (ppsearch 5900) or llist)
+; what i would like to write: (divide-et-impera (search 5900) or llist)
 ; but (ppsearch 5900) is not a value...
 
 ; hand-made closure

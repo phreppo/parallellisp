@@ -27,7 +27,7 @@
     (cond
         ((is-base-case generic-data) (sequential-algorithm generic-data))
         ((< partitions ncpu)
-            (let ((new-partitions (* partitions 2)))
+            (let ((new-partitions (* partitions 2))) 
             {combinator 
                 (parallelize-ric new-partitions sequential-algorithm is-base-case split-right split-left combinator (split-left generic-data))
                 (parallelize-ric new-partitions sequential-algorithm is-base-case split-right split-left combinator (split-right generic-data))

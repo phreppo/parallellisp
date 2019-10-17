@@ -2,7 +2,7 @@
 
 ![](/lambda.png "parallellisp")
 
-Parallellisp is one *pure funcional* Lisp dialect with some primitives to support parallelism. In particular, parallel argument evaluation is easy handled.
+Parallellisp is one *pure funcional* Lisp dialect with some primitives to support parallelism. In particular, parallel argument evaluation is easily handled.
 
 ## Features
 

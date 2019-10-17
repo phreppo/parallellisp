@@ -8,7 +8,7 @@ Parallellisp is one *pure funcional* Lisp dialect with some primitives to suppor
 
 ### Parallelism support: { }
 
-To ask for parallel argument evaluation to the runtime system just use `{}` instead of normal brackets. For example, to calculate the Fibonacci number define:
+To ask for parallel argument evaluation to the runtime system just use `{}` instead of normal brackets. For example, to define the Fibonacci's function write:
 
 ```lisp
 (defun p-fib (n)
@@ -21,7 +21,7 @@ To ask for parallel argument evaluation to the runtime system just use `{}` inst
 (p-fib 32)
 ```
 
-This version is much faster than the implementation with normal brackets. More examples are: [pmergesort](https://github.com/parof/parallellisp/blob/master/examples/pmergesort.lisp), [psearch](https://github.com/parof/parallellisp/blob/master/examples/psearch.lisp), [psorted](https://github.com/parof/parallellisp/blob/master/examples/psorted.lisp) and [psum](https://github.com/parof/parallellisp/blob/master/examples/psum.lisp). Every time a new argument is asked to be evaluated one new [green thread](https://en.wikipedia.org/wiki/Green_threads) is spawned. Spawning too many of them could deteriorate performances, and for this reason one special builtin function is supported: `divide-et-impera`. It tries to optimally allocate the work one the cpus, if one provide the sequential algorithm that works on lists and one way to combine partial results. For example, optimal merge sort would become:
+This version is much faster than the implementation with normal brackets. More examples are: [pmergesort](https://github.com/parof/parallellisp/blob/master/examples/pmergesort.lisp), [psearch](https://github.com/parof/parallellisp/blob/master/examples/psearch.lisp), [psorted](https://github.com/parof/parallellisp/blob/master/examples/psorted.lisp) and [psum](https://github.com/parof/parallellisp/blob/master/examples/psum.lisp). Every time a new argument is asked to be evaluated one new [green thread](https://en.wikipedia.org/wiki/Green_threads) is spawned. Spawning too many of them could deteriorate performances, and for this reason one special builtin function is supported: `divide-et-impera`. It tries to optimally allocate the work one the cpus, if one provides the sequential algorithm that works on lists and one way to combine partial results. For example, optimal merge sort would become:
 
 ```lisp
 (defun merge (firstList secondList)
@@ -46,7 +46,7 @@ This version is much faster than the implementation with normal brackets. More e
 (optimal-mergesort oneLargeList) ;; this is fast
 ```
 
-One can measure performances using the function `time`. Because splitting one data in smaller parts and recombine it is a general pattern that does not apply just to the lists, another primitive has been added to the language: `parallelize`. It acts like `divide-et-impera`, but owrks on generic data. For this reason, one has to provide in addition how to split the data in two partitions and when one base case is faced. For example, the `fib` function would become:
+One can measure performances using the function `time`. Because splitting data in smaller parts and recombining it is a general pattern that does not apply just to the lists, another primitive has been added to the language: `parallelize`. It acts like `divide-et-impera`, but works on generic data. For this reason, one has to provide functions to split the data in two partitions and to recognize base cases. For example, the `fib` function would become:
 
 ```lisp
 (setq pfib 
